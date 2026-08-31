@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <form method="post">
+        {% csrf_token %}
+    
+        <div>
+            <label for="{{ form.username.id_for_label }}">
+                Kullanıcı Adı
+            </label>
+    
+            {{ form.username }}
+        </div>
+    
+        <div>
+            <label for="{{ form.password.id_for_label }}">
+                Şifre
+            </label>
+    
+            {{ form.password }}
+        </div>
+    
+        {% if form.errors %}
+            <div>
+                Kullanıcı adı veya şifre hatalı.
+            </div>
+        {% endif %}
+    
+        <button type="submit">
+            Giriş Yap
+        </button>
+    </form>
+</body>
+</html>
