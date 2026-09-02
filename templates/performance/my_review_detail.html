@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>
+    Performans Değerlendirmesi
+</h1>
+
+<div>
+
+    <strong>
+        {{ review.evaluation.employee.full_name }}
+    </strong>
+
+    <div>
+        {{ review.evaluation.period }}
+    </div>
+
+    <div>
+        Değerlendirici Rolü:
+        {{ review.reviewer_role }}
+    </div>
+
+</div>
+
+
+<form method="post">
+
+    {% csrf_token %}
+
+    {% for field in form %}
+
+        <div>
+
+            <label>
+                {{ field.label }}
+            </label>
+
+            {% if field.help_text %}
+                <p>
+                    {{ field.help_text }}
+                </p>
+            {% endif %}
+
+            {{ field }}
+
+            {% if field.errors %}
+                {{ field.errors }}
+            {% endif %}
+
+        </div>
+
+    {% endfor %}
+
+
+    <button type="submit">
+        Taslak Kaydet
+    </button>
+
+</form>
+
+{% endblock %}

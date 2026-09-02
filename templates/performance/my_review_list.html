@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>Değerlendirmelerim</h1>
+
+<table>
+
+    <thead>
+        <tr>
+            <th>Dönem</th>
+            <th>Personel</th>
+            <th>Rolüm</th>
+            <th>Puan</th>
+            <th>Durum</th>
+            <th></th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+        {% for review in reviews %}
+
+            <tr>
+
+                <td>
+                    {{ review.evaluation.period }}
+                </td>
+
+                <td>
+                    {{ review.evaluation.employee.full_name }}
+                </td>
+
+                <td>
+                    {{ review.reviewer_role }}
+                </td>
+
+                <td>
+                    {% if review.raw_score %}
+                        {{ review.raw_score|floatformat:2 }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+
+                <td>
+
+                    {% if review.submitted_at %}
+                        Tamamlandı
+                    {% else %}
+                        Bekliyor
+                    {% endif %}
+
+                </td>
+
+                <td>
+                    <a href="{% url 'performance:my_review_detail' review.pk %}">
+                        {% if review.submitted_at %}
+                            Görüntüle
+                        {% else %}
+                            Değerlendir
+                        {% endif %}
+                    </a>
+                </td>
+
+            </tr>
+
+        {% empty %}
+
+            <tr>
+                <td colspan="6">
+                    Değerlendirmeniz gereken personel bulunmuyor.
+                </td>
+            </tr>
+
+        {% endfor %}
+
+    </tbody>
+
+</table>
+
+{% endblock %}

@@ -37,7 +37,9 @@ DJANGO_APPS = [
     'django.contrib.staticfiles',
 ]
 
-THIRD_PARTY_APPS = []
+THIRD_PARTY_APPS = [
+    'jazzmin',
+]
 
 LOCAL_APPS = [
     'apps.web.apps.WebConfig',
@@ -87,7 +89,7 @@ WSGI_APPLICATION = 'BTMPersonelYonetim.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': BASE_DIR / 'db_new.sqlite3',
     }
 }
 

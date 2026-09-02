@@ -1,7 +1,6 @@
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
-
 from apps.core.models import TimeStampedModel
 from apps.organization.models import (CareerLevel, Department, EmploymentType, JobRole, JobTitle, Unit,)
 
@@ -21,6 +20,7 @@ class Employee(TimeStampedModel):
     is_active = models.BooleanField(default=True)
 
     class Meta:
+        verbose_name_plural = "Personeller"
         ordering = ["first_name", "last_name"]
         indexes = [
             models.Index(fields=["personnel_no"]),
@@ -30,6 +30,88 @@ class Employee(TimeStampedModel):
     @property
     def full_name(self):
         return f"{self.first_name} {self.last_name}"
+
+    @property
+    def current_assignment(self):
+        today = timezone.localdate()
+
+        return (
+            self.assignments
+            .filter(
+                start_date__lte=today,
+                end_date__isnull=True,
+            )
+            .select_related("job_role")
+            .first()
+        )
+
+    @property
+    def current_job_role(self):
+        assignment = self.current_assignment
+
+        return (
+            assignment.job_role
+            if assignment
+            else None
+        )
+
+    @property
+    def current_title_record(self):
+        today = timezone.localdate()
+
+        return (
+            self.title_history
+            .filter(
+                start_date__lte=today,
+                end_date__isnull=True,
+            )
+            .select_related("job_title")
+            .first()
+        )
+
+    @property
+    def current_title(self):
+        record = self.current_title_record
+
+        return (
+            record.job_title
+            if record
+            else None
+        )
+
+    @property
+    def current_department_record(self):
+        today = timezone.localdate()
+
+        return (
+            self.department_history
+            .filter(
+                start_date__lte=today,
+                end_date__isnull=True,
+            )
+            .select_related(
+                "department",
+                "unit",
+            )
+            .first()
+        )
+
+    @property
+    def current_level_record(self):
+        today = timezone.localdate()
+
+        return (
+            self.level_history
+            .filter(
+                start_date__lte=today,
+                end_date__isnull=True,
+            )
+            .select_related(
+                "level",
+                "job_role",
+            )
+            .first()
+        )
 
     def __str__(self):
         return f"{self.personnel_no} - {self.full_name}"
@@ -42,6 +124,7 @@ class EducationLevel(TimeStampedModel):
     active = models.BooleanField(default=True)
 
     class Meta:
+        verbose_name_plural = "Eğitim Seviyeleri"
         ordering = ["order"]
 
     def __str__(self):

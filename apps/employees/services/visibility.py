@@ -1,33 +1,42 @@
 from django.db.models import Q
 from django.utils import timezone
-from apps.employees.models import (Employee, EmployeeReportingLine)
+
+from apps.employees.models import Employee, EmployeeReportingLine
 
 
 class EmployeeVisibilityService:
-
     def __init__(self, user):
         self.user = user
         self.employee = getattr(user, "employee", None)
 
-    def get_visible_employees(self):
-        """
-        Kullanıcının görebileceği tüm personelleri döndürür.
-        """
-
+    def get_visible_employees(self, include_self=False):
         if self.user.is_superuser:
             return Employee.objects.filter(is_active=True)
 
         if not self.employee:
             return Employee.objects.none()
 
-        employee_ids = self._get_descendant_ids(self.employee.id)
+        ids = self._get_descendant_ids(self.employee.pk)
+
+        if include_self:
+            ids.add(self.employee.pk)
 
         return (
             Employee.objects
-            .filter(Q(id__in=employee_ids) | Q(id=self.employee.id))
-            .filter(is_active=True)
+            .filter(
+                pk__in=ids,
+                is_active=True,
+            )
             .distinct()
         )
+
+    def can_view(self, employee):
+        if self.user.is_superuser:
+            return True
+
+        return self.get_visible_employees(
+            include_self=True
+        ).filter(pk=employee.pk).exists()
 
     def _get_descendant_ids(self, manager_id):
         today = timezone.localdate()
@@ -48,10 +57,7 @@ class EmployeeVisibilityService:
                     Q(end_date__isnull=True)
                     | Q(end_date__gte=today)
                 )
-                .values_list(
-                    "employee_id",
-                    flat=True,
-                )
+                .values_list("employee_id", flat=True)
             )
 
             for child_id in child_ids:
