@@ -11,15 +11,16 @@ class EducationScoreRule(EffectiveDatedModel, TimeStampedModel):
     """
     Mezuniyet Puanı
     """
-    name = models.CharField(max_length=200)
-    education_level = models.ForeignKey(EducationLevel, null=True, blank=True, on_delete=models.PROTECT)
+    name = models.CharField(max_length=200, verbose_name="İsim")
+    education_level = models.ForeignKey(EducationLevel, null=True, blank=True, on_delete=models.PROTECT, verbose_name="Mezuniyet")
     is_it_related = models.BooleanField(null=True, blank=True)
-    is_engineering = models.BooleanField(null=True, blank=True)
-    is_open_education = models.BooleanField(null=True, blank=True)
-    score = models.DecimalField(max_digits=6, decimal_places=2)
+    is_engineering = models.BooleanField(null=True, blank=True, )
+    is_open_education = models.BooleanField(null=True, blank=True, verbose_name="Açık Öğretim mi?")
+    score = models.DecimalField(max_digits=6, decimal_places=2, verbose_name="Puan")
     priority = models.PositiveIntegerField(default=100)
 
     class Meta:
+        verbose_name_plural = "Mezuniyet Puanları"
         ordering = ["priority"]
 
     def clean(self):
