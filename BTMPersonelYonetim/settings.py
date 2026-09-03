@@ -178,6 +178,10 @@ JAZZMIN_SETTINGS = {
         "employees": "fas fa-users",
         "employees.employeeupgrade": "fas fa-level-up",
         "employees.employeereportingline": "fas fa-line-chart",
-        "employees.educationlevel": "fas fa-fa-graduation-cap",
+        "employees.educationlevel": "fas fa-graduation-cap",
+        "scoring": "fas  fa-sort-numeric-asc",
+        "scoring.educationscorerule": "fas fa-graduation-cap",
+        "scoring.jobrolescorerule": "fas fa-briefcase",
+        "scoring.joblevelrate": "fas fa-money-bills",
     },
 }

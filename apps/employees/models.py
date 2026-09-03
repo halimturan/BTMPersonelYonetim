@@ -124,7 +124,7 @@ class EducationLevel(TimeStampedModel):
     active = models.BooleanField(default=True)
 
     class Meta:
-        verbose_name_plural = "Eğitim Seviyeleri"
+        verbose_name_plural = "Mezuniyetler"
         ordering = ["order"]
 
     def __str__(self):

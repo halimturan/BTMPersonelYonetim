@@ -91,6 +91,7 @@ class JobLevelRate(EffectiveDatedModel, TimeStampedModel):
     amount = models.DecimalField(max_digits=14, decimal_places=2)
 
     class Meta:
+        verbose_name_plural = "İş Kolu Ücretleri"
         constraints = [
             models.UniqueConstraint(
                 fields=[
