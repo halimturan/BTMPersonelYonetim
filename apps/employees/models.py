@@ -410,40 +410,18 @@ class EmployeeUpgrade(TimeStampedModel):
     """
     Upgrade işlemleri
     """
-    employee = models.ForeignKey(
-        Employee,
-        on_delete=models.CASCADE,
-        related_name="upgrades",
-    )
-
-    job_role = models.ForeignKey(
-        JobRole,
-        on_delete=models.PROTECT,
-    )
-
-    from_level = models.ForeignKey(
-        CareerLevel,
-        on_delete=models.PROTECT,
-        related_name="upgrades_from",
-    )
-
-    to_level = models.ForeignKey(
-        CareerLevel,
-        on_delete=models.PROTECT,
-        related_name="upgrades_to",
-    )
-
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name="upgrades")
+    job_role = models.ForeignKey(JobRole, on_delete=models.PROTECT)
+    from_level = models.ForeignKey(CareerLevel, on_delete=models.PROTECT, related_name="upgrades_from")
+    to_level = models.ForeignKey(CareerLevel, on_delete=models.PROTECT, related_name="upgrades_to")
     effective_date = models.DateField()
-
     reason = models.TextField(blank=True)
-
     period_score = models.ForeignKey(
-        "scoring.EmployeePeriodScore",
-        null=True,
-        blank=True,
-        on_delete=models.PROTECT,
-        related_name="upgrades",
+        "scoring.EmployeePeriodScore", null=True, blank=True, on_delete=models.PROTECT, related_name="upgrades"
     )
+
+    class Meta:
+        verbose_name_plural = "Terfiler"
 
     def clean(self):
         if self.from_level_id == self.to_level_id:
@@ -462,30 +440,14 @@ class EmployeeUpgrade(TimeStampedModel):
 
 
 class EmployeeReportingLine(TimeStampedModel):
-    employee = models.ForeignKey(
-        Employee,
-        on_delete=models.CASCADE,
-        related_name="reporting_lines",
-    )
-
-    manager = models.ForeignKey(
-        Employee,
-        on_delete=models.PROTECT,
-        related_name="managed_employees",
-    )
-
-    relation_type = models.ForeignKey(
-        "ReportingRelationType",
-        on_delete=models.PROTECT,
-    )
-
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name="reporting_lines")
+    manager = models.ForeignKey(Employee, on_delete=models.PROTECT, related_name="managed_employees")
+    relation_type = models.ForeignKey("ReportingRelationType", on_delete=models.PROTECT)
     start_date = models.DateField()
-    end_date = models.DateField(
-        null=True,
-        blank=True,
-    )
+    end_date = models.DateField(null=True, blank=True)
 
     class Meta:
+        verbose_name_plural = "Personel Raporları"
         ordering = ["employee", "-start_date"]
 
     def clean(self):

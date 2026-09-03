@@ -155,3 +155,29 @@ LOGIN_URL = "accounts:login"
 LOGIN_REDIRECT_URL = "dashboard:index"
 
 LOGOUT_REDIRECT_URL = "accounts:login"
+
+JAZZMIN_SETTINGS = {
+    "copyright": "Bilgi Teknolojileri Müdürlüğü",
+    "site_title": "BTM Yönetim",
+    "site_header": "BTM Yönetim Admin",
+    "site_brand": "BTM Yönetim",
+    "site_logo": "/img/logo.png",
+    "login_logo": "/img/logo.png",
+    "navigation_expanded": False,
+    "icons": {
+        "auth": "fas fa-users-cog",
+        "auth.user": "fas fa-user",
+        "auth.Group": "fas fa-users",
+        "organization": "fas fa-building",
+        "organization.unit": "fas fa-list",
+        "organization.department": "fas fa-bars",
+        "organization.careerlevel": "fas fa-line-chart",
+        "organization.employmenttype": "fas fa-users",
+        "organization.jobtitle": "fas fa-tags",
+        "organization.jobrole": "fas fa-briefcase",
+        "employees": "fas fa-users",
+        "employees.employeeupgrade": "fas fa-level-up",
+        "employees.employeereportingline": "fas fa-line-chart",
+        "employees.educationlevel": "fas fa-fa-graduation-cap",
+    },
+}

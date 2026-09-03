@@ -46,8 +46,8 @@ class Unit(TimeStampedModel):
 
     class Meta:
         ordering = ["department__name", "name"]
-        verbose_name = "Birim"
-        verbose_name_plural = "Birimler"
+        verbose_name = "Şeflik"
+        verbose_name_plural = "Şeflikler"
 
     def clean(self):
         if self.parent and self.parent.department_id != self.department_id:
@@ -73,6 +73,8 @@ class EmploymentType(TimeStampedModel):
     active = models.BooleanField(default=True)
 
     class Meta:
+        verbose_name = "Personel Tipi"
+        verbose_name_plural = "Personel Tipleri"
         ordering = ["name"]
 
     def __str__(self):
@@ -90,6 +92,8 @@ class JobTitle(TimeStampedModel):
     active = models.BooleanField(default=True)
 
     class Meta:
+        verbose_name = "Resmi Ünvan"
+        verbose_name_plural = "Resmi Ünvanlar"
         ordering = ["name"]
 
     def __str__(self):
@@ -103,7 +107,6 @@ class JobRole(TimeStampedModel):
     DevOps Yöneticisi,
     Sistem Yöneticisi vb.
     """
-
     name = models.CharField(max_length=150)
     code = models.CharField(max_length=50, unique=True)
 
@@ -111,6 +114,7 @@ class JobRole(TimeStampedModel):
     active = models.BooleanField(default=True)
 
     class Meta:
+        verbose_name_plural = "İş Kolları"
         ordering = ["name"]
 
     def __str__(self):
@@ -120,15 +124,14 @@ class JobRole(TimeStampedModel):
 class CareerLevel(TimeStampedModel):
     """
     Başlangıç / Orta / İleri gibi seviyeler.
-    Sabit choice kullanılmıyor.
     """
-
     name = models.CharField(max_length=100)
     code = models.CharField(max_length=50, unique=True)
     order = models.PositiveIntegerField()
     active = models.BooleanField(default=True)
 
     class Meta:
+        verbose_name_plural = "Kariyer Seviyeleri"
         ordering = ["order"]
 
     def __str__(self):
