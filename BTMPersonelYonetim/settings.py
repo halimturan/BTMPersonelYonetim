@@ -183,5 +183,10 @@ JAZZMIN_SETTINGS = {
         "scoring.educationscorerule": "fas fa-graduation-cap",
         "scoring.jobrolescorerule": "fas fa-briefcase",
         "scoring.joblevelrate": "fas fa-money-bills",
+        "scoring.scorecomponent": "fas fa-puzzle-piece",
+        "scoring.scoreformula": "fas fa-calculator",
+        "scoring.experiencescorerule": "fas fa-business-time",
+        "scoring.experiencesource": "fas fa-circle-dot",
+        "scoring.employeeperiodscore": "fas fa-clock-rotate-left",
     },
 }

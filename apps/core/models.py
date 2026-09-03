@@ -10,9 +10,9 @@ class TimeStampedModel(models.Model):
 
 
 class EffectiveDatedModel(models.Model):
-    valid_from = models.DateField()
-    valid_to = models.DateField(null=True, blank=True)
-    active = models.BooleanField(default=True)
+    valid_from = models.DateField(verbose_name="Şu tarihten itibaren geçerli")
+    valid_to = models.DateField(null=True, blank=True, verbose_name="Şu tarihe kadar geçerli")
+    active = models.BooleanField(default=True, verbose_name="Aktif mi?")
 
     class Meta:
         abstract = True

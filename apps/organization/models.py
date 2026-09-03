@@ -26,19 +26,8 @@ class Unit(TimeStampedModel):
     Şefliklerin veya alt birimlerin tutulduğu modeldir.
     PHP, .NET, JAVA, FRONT END, SİSTEM, VERİTABANI vb.
     """
-    department = models.ForeignKey(
-        Department,
-        on_delete=models.PROTECT,
-        related_name="units",
-    )
-
-    parent = models.ForeignKey(
-        "self",
-        null=True,
-        blank=True,
-        on_delete=models.PROTECT,
-        related_name="children",
-    )
+    department = models.ForeignKey(Department, on_delete=models.PROTECT, related_name="units")
+    parent = models.ForeignKey("self", null=True, blank=True, on_delete=models.PROTECT, related_name="children")
 
     name = models.CharField(max_length=150)
     code = models.CharField(max_length=50, unique=True)

@@ -44,26 +44,31 @@ class ExperienceSource(TimeStampedModel):
     """
     name = models.CharField(max_length=150)
     code = models.CharField(max_length=60, unique=True)
-
     field_name = models.CharField(
         max_length=100,
         help_text=(
-            "Employee modelinde kullanılacak tarih alanı. "
+            "Personel modelinde kullanılacak tarih alanı. "
             "Örn: it_start_date"
         ),
     )
-
     active = models.BooleanField(default=True)
 
     def __str__(self):
         return self.name
 
+    class Meta:
+        verbose_name_plural = "Deneyim Kaynağı"
+
 
 class ExperienceScoreRule(EffectiveDatedModel, TimeStampedModel):
     name = models.CharField(max_length=150)
-    experience_source = models.ForeignKey(ExperienceSource, on_delete=models.PROTECT)
+    experience_source = models.ForeignKey(ExperienceSource, on_delete=models.PROTECT, verbose_name="Deneyim Kaynağı",
+                                          help_text="Hangi alan baz alınacak? Örn: IT Tecrübesi")
     max_score = models.DecimalField(max_digits=6, decimal_places=2, default=100)
     decay_factor = models.DecimalField(max_digits=10, decimal_places=4)
+
+    class Meta:
+        verbose_name_plural = "Deneyim Puan Hesabı"
 
     def clean(self):
         if self.max_score <= 0:
@@ -81,19 +86,15 @@ class JobLevelRate(EffectiveDatedModel, TimeStampedModel):
     """
     Seviye tutarları
     """
-    job_role = models.ForeignKey(JobRole, on_delete=models.CASCADE, related_name="level_rates")
-    level = models.ForeignKey(CareerLevel, on_delete=models.PROTECT)
-    amount = models.DecimalField(max_digits=14, decimal_places=2)
+    job_role = models.ForeignKey(JobRole, on_delete=models.CASCADE, related_name="level_rates", verbose_name="İş Kolu")
+    level = models.ForeignKey(CareerLevel, on_delete=models.PROTECT, verbose_name="Seviye")
+    amount = models.DecimalField(max_digits=14, decimal_places=2, verbose_name="Tutar")
 
     class Meta:
         verbose_name_plural = "İş Kolu Ücretleri"
         constraints = [
             models.UniqueConstraint(
-                fields=[
-                    "job_role",
-                    "level",
-                    "valid_from",
-                ],
+                fields=["job_role", "level", "valid_from",],
                 name="unique_job_level_rate_date",
             ),
         ]
@@ -105,11 +106,13 @@ class ScoreComponent(TimeStampedModel):
     """
     name = models.CharField(max_length=150)
     code = models.CharField(max_length=60, unique=True)
-
     active = models.BooleanField(default=True)
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        verbose_name_plural = "Puanlama Bileşenleri"
 
 
 class ScoreFormula(EffectiveDatedModel, TimeStampedModel):
@@ -122,6 +125,9 @@ class ScoreFormula(EffectiveDatedModel, TimeStampedModel):
     def __str__(self):
         return self.name
 
+    class Meta:
+        verbose_name_plural = "Puan Formülü"
+
 
 class ScoreFormulaComponent(TimeStampedModel):
     """
@@ -131,14 +137,14 @@ class ScoreFormulaComponent(TimeStampedModel):
     Tecrübe        15
     Performans     45
     """
-    formula = models.ForeignKey(ScoreFormula, on_delete=models.CASCADE, related_name="components")
-    component = models.ForeignKey(ScoreComponent, on_delete=models.PROTECT)
-    weight = models.DecimalField(max_digits=6, decimal_places=2)
-
-    order = models.PositiveIntegerField(default=0)
+    formula = models.ForeignKey(ScoreFormula, on_delete=models.CASCADE, related_name="components", verbose_name="Formül")
+    component = models.ForeignKey(ScoreComponent, on_delete=models.PROTECT, verbose_name="Bileşenler")
+    weight = models.DecimalField(max_digits=6, decimal_places=2, verbose_name="Ağırlık")
+    order = models.PositiveIntegerField(default=0, verbose_name="Sıra")
 
     class Meta:
         ordering = ["order"]
+        verbose_name_plural = "Puan Formül Bileşenleri"
         constraints = [
             models.UniqueConstraint(
                 fields=["formula", "component"],
@@ -167,6 +173,7 @@ class EmployeePeriodScore(TimeStampedModel):
     calculated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
+        verbose_name_plural = "Personel Dönem Skorları"
         constraints = [
             models.UniqueConstraint(
                 fields=["employee", "period"],
