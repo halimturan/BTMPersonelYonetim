@@ -123,40 +123,10 @@ class ScoreFormulaAdmin(admin.ModelAdmin):
 
 @admin.register(EducationScoreRule)
 class EducationScoreRuleAdmin(admin.ModelAdmin):
-
-    list_display = (
-        "name",
-        "education_level",
-        "is_it_related",
-        "is_engineering",
-        "is_open_education",
-        "score",
-        "priority",
-        "valid_from",
-        "valid_to",
-        "active",
-    )
-
-    list_filter = (
-        "active",
-        "education_level",
-        "is_it_related",
-        "is_engineering",
-        "is_open_education",
-    )
-
-    search_fields = (
-        "name",
-        "education_level__name",
-    )
-
-    autocomplete_fields = (
-        "education_level",
-    )
-
-    ordering = (
-        "priority",
-    )
+    list_display = ("education_level", "score", "valid_from", "valid_to", "active")
+    list_filter = ("active", "education_level")
+    search_fields = ("education_level__name",)
+    autocomplete_fields = ("education_level",)
 
 
 @admin.register(JobRoleScoreRule)
