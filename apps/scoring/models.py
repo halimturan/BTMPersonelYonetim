@@ -28,8 +28,11 @@ class JobRoleScoreRule(EffectiveDatedModel, TimeStampedModel):
     """
     İş kolu puanı
     """
-    job_role = models.ForeignKey(JobRole, on_delete=models.CASCADE, related_name="score_rules")
-    score = models.DecimalField(max_digits=6, decimal_places=2)
+    job_role = models.ForeignKey(JobRole, on_delete=models.CASCADE, related_name="score_rules", verbose_name="İş Kolu")
+    score = models.DecimalField(max_digits=6, decimal_places=2, verbose_name="Puan")
+
+    class Meta:
+        verbose_name_plural = "İş Kolu Puanları"
 
     def clean(self):
         if not 0 <= self.score <= 100:
@@ -42,10 +45,10 @@ class ExperienceSource(TimeStampedModel):
     """
     Tecrübe kaynağı
     """
-    name = models.CharField(max_length=150)
-    code = models.CharField(max_length=60, unique=True)
+    name = models.CharField(max_length=150, verbose_name="İsim")
+    code = models.CharField(max_length=60, unique=True, verbose_name="Kod")
     field_name = models.CharField(
-        max_length=100,
+        max_length=100, verbose_name="Kolon Adı",
         help_text=(
             "Personel modelinde kullanılacak tarih alanı. "
             "Örn: it_start_date"
@@ -57,15 +60,16 @@ class ExperienceSource(TimeStampedModel):
         return self.name
 
     class Meta:
-        verbose_name_plural = "Deneyim Kaynağı"
+        verbose_name_plural = "Deneyim Kaynakları"
 
 
 class ExperienceScoreRule(EffectiveDatedModel, TimeStampedModel):
-    name = models.CharField(max_length=150)
+    name = models.CharField(max_length=150, verbose_name="İsim")
     experience_source = models.ForeignKey(ExperienceSource, on_delete=models.PROTECT, verbose_name="Deneyim Kaynağı",
                                           help_text="Hangi alan baz alınacak? Örn: IT Tecrübesi")
-    max_score = models.DecimalField(max_digits=6, decimal_places=2, default=100)
-    decay_factor = models.DecimalField(max_digits=10, decimal_places=4)
+    max_score = models.DecimalField(max_digits=6, decimal_places=2, default=100, verbose_name="Maximum Skor")
+    decay_factor = models.DecimalField(max_digits=10, decimal_places=4, verbose_name="Yıpranma Faktörü",
+                                       help_text="Tecrübe formülündeki blüöü ifade eder. 100 × (1 - e^(-Yıl / yıpranma faktörü))")
 
     class Meta:
         verbose_name_plural = "Deneyim Puan Hesabı"
@@ -104,9 +108,9 @@ class ScoreComponent(TimeStampedModel):
     """
     Nihai skor bileşenleri. (İş Kolu,Mezuniyet,Tecrübe,Performans)
     """
-    name = models.CharField(max_length=150)
-    code = models.CharField(max_length=60, unique=True)
-    active = models.BooleanField(default=True)
+    name = models.CharField(max_length=150, verbose_name="İsim")
+    code = models.CharField(max_length=60, unique=True, verbose_name="Kod")
+    active = models.BooleanField(default=True, verbose_name="Aktif mi?")
 
     def __str__(self):
         return self.name
@@ -119,8 +123,8 @@ class ScoreFormula(EffectiveDatedModel, TimeStampedModel):
     """
     Skor formülü
     """
-    name = models.CharField(max_length=150)
-    description = models.TextField(blank=True)
+    name = models.CharField(max_length=150, verbose_name="İsim")
+    description = models.TextField(blank=True, verbose_name="Açıklama")
 
     def __str__(self):
         return self.name

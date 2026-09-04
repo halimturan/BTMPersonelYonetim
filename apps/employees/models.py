@@ -9,7 +9,7 @@ class Employee(TimeStampedModel):
     personnel_no = models.CharField(max_length=50, unique=True, db_index=True, verbose_name="Sicil No")
     first_name = models.CharField(max_length=100, verbose_name="Ad")
     last_name = models.CharField(max_length=100, verbose_name="Soyad")
-    employment_type = models.ForeignKey(EmploymentType, on_delete=models.PROTECT, related_name="employees")
+    employment_type = models.ForeignKey(EmploymentType, on_delete=models.PROTECT, related_name="employees", verbose_name="Personel Tipi")
 
     institution_start_date = models.DateField(null=True, blank=True, verbose_name="Kuruma Başlangıç Tarihi")
     professional_start_date = models.DateField(null=True, blank=True, verbose_name="Profesyonel Çalışma Tarihi")
@@ -17,7 +17,7 @@ class Employee(TimeStampedModel):
 
     ikys_reference = models.CharField(max_length=150, null=True, blank=True, unique=True, verbose_name="IKYS Referans Kodu")
 
-    is_active = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=True, verbose_name="Aktif mi?")
 
     class Meta:
         verbose_name_plural = "Personeller"

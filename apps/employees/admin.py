@@ -9,18 +9,10 @@ from apps.employees.models import (EducationLevel, Employee, EmployeeAssignmentH
 class EmployeeEducationInline(admin.TabularInline):
     model = EmployeeEducation
     extra = 0
-
     autocomplete_fields = ("education_level",)
-
     fields = (
-        "education_level",
-        "school_name",
-        "department_name",
-        "graduation_date",
-        "is_it_related",
-        "is_engineering",
-        "is_open_education",
-        "is_primary_for_scoring",
+        "education_level", "school_name", "department_name", "graduation_date", "is_it_related", "is_engineering",
+        "is_open_education", "is_primary_for_scoring",
     )
 
 
@@ -112,80 +104,38 @@ class EmployeeReportingLineInline(admin.TabularInline):
 
 @admin.register(Employee)
 class EmployeeAdmin(admin.ModelAdmin):
-
     list_display = (
-        "personnel_no",
-        "first_name",
-        "last_name",
-        "employment_type",
-        "institution_start_date",
-        "it_start_date",
-        "is_active",
+        "personnel_no", "first_name", "last_name", "employment_type", "institution_start_date",
+        "it_start_date", "is_active",
     )
-
-    list_filter = (
-        "is_active",
-        "employment_type",
-    )
-
-    search_fields = (
-        "personnel_no",
-        "first_name",
-        "last_name",
-        "ikys_reference",
-    )
-
-    autocomplete_fields = (
-        "employment_type",
-    )
-
-    list_select_related = (
-        "employment_type",
-    )
-
-    ordering = (
-        "first_name",
-        "last_name",
-    )
+    list_filter = ("is_active", "employment_type",)
+    search_fields = ("personnel_no", "first_name", "last_name", "ikys_reference",)
+    autocomplete_fields = ("employment_type",)
+    list_select_related = ("employment_type",)
+    ordering = ("first_name", "last_name",)
 
     inlines = (
-        EmployeeEducationInline,
-        EmployeeAssignmentHistoryInline,
-        EmployeeTitleHistoryInline,
-        EmployeeDepartmentHistoryInline,
-        EmployeeLevelHistoryInline,
-        EmployeeReportingLineInline,
+        EmployeeEducationInline, EmployeeAssignmentHistoryInline, EmployeeTitleHistoryInline,
+        EmployeeDepartmentHistoryInline, EmployeeLevelHistoryInline, EmployeeReportingLineInline,
     )
 
     fieldsets = (
         (
             "Personel Bilgileri",
             {
-                "fields": (
-                    "personnel_no",
-                    "first_name",
-                    "last_name",
-                    "employment_type",
-                    "is_active",
-                )
+                "fields": ("personnel_no", "first_name", "last_name", "employment_type", "is_active",)
             },
         ),
         (
             "Tecrübe Tarihleri",
             {
-                "fields": (
-                    "institution_start_date",
-                    "professional_start_date",
-                    "it_start_date",
-                )
+                "fields": ("institution_start_date", "professional_start_date", "it_start_date",)
             },
         ),
         (
             "Entegrasyon",
             {
-                "fields": (
-                    "ikys_reference",
-                )
+                "fields": ("ikys_reference",)
             },
         ),
     )

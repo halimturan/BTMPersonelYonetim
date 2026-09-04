@@ -74,6 +74,7 @@ class JobRoleScoreRuleAdmin(admin.ModelAdmin):
     list_filter = ("active", "job_role",)
     search_fields = ("job_role__name",)
     autocomplete_fields = ("job_role",)
+    list_editable = ("score", "active",)
 
 
 @admin.register(ExperienceSource)
@@ -97,6 +98,8 @@ class JobLevelRateAdmin(admin.ModelAdmin):
     list_filter = ("active", "job_role", "level",)
     search_fields = ("job_role__name", "level__name",)
     autocomplete_fields = ("job_role", "level",)
+    list_editable = ("amount",)
+    list_per_page = 10
 
 
 class EmployeePeriodScoreComponentInline(admin.TabularInline):
