@@ -15,10 +15,9 @@ class DepartmentAdmin(ActiveAdminMixin, admin.ModelAdmin):
 
 @admin.register(Unit)
 class UnitAdmin(ActiveAdminMixin, admin.ModelAdmin):
-    list_display = ("name", "department", "parent", "code", "active")
+    list_display = ("name", "department", "code", "active")
     list_filter = ("active", "department",)
     search_fields = ("name", "code", "department__name",)
-    autocomplete_fields = ("department", "parent",)
 
 
 @admin.register(EmploymentType)
@@ -35,10 +34,9 @@ class JobTitleAdmin(ActiveAdminMixin, admin.ModelAdmin,):
 
 @admin.register(JobRole)
 class JobRoleAdmin(ActiveAdminMixin, admin.ModelAdmin,):
-    list_display = ("name", "code", "department", "active",)
-    list_filter = ("active", "department",)
-    search_fields = ("name", "code", "department__name",)
-    autocomplete_fields = ("department",)
+    list_display = ("name", "code", "active",)
+    list_filter = ("active",)
+    search_fields = ("name", "code",)
 
 
 @admin.register(CareerLevel)

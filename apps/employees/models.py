@@ -2,7 +2,8 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 from apps.core.models import TimeStampedModel
-from apps.organization.models import (CareerLevel, Department, EmploymentType, JobRole, JobTitle, Unit,)
+from apps.organization.models import (CareerLevel, Department, EmploymentType, JobRole, JobTitle, Unit,
+                                      OrganizationPosition)
 
 
 class Employee(TimeStampedModel):
@@ -132,32 +133,11 @@ class EducationLevel(TimeStampedModel):
 
 
 class EmployeeEducation(TimeStampedModel):
-    employee = models.ForeignKey(
-        Employee,
-        on_delete=models.CASCADE,
-        related_name="educations",
-    )
-
-    education_level = models.ForeignKey(
-        EducationLevel,
-        on_delete=models.PROTECT,
-    )
-
-    school_name = models.CharField(
-        max_length=250,
-        blank=True,
-    )
-
-    department_name = models.CharField(
-        max_length=250,
-        blank=True,
-    )
-
-    graduation_date = models.DateField(
-        null=True,
-        blank=True,
-    )
-
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name="educations")
+    education_level = models.ForeignKey(EducationLevel, on_delete=models.PROTECT)
+    school_name = models.CharField(max_length=250, blank=True)
+    department_name = models.CharField(max_length=250, blank=True)
+    graduation_date = models.DateField(null=True, blank=True)
     is_it_related = models.BooleanField(default=False)
     is_engineering = models.BooleanField(default=False)
     is_open_education = models.BooleanField(default=False)
@@ -271,24 +251,13 @@ class EmployeeTitleHistory(TimeStampedModel):
     """
     Ünvan (title) geçmişi
     """
-    employee = models.ForeignKey(
-        Employee,
-        on_delete=models.CASCADE,
-        related_name="title_history",
-    )
-
-    job_title = models.ForeignKey(
-        JobTitle,
-        on_delete=models.PROTECT,
-    )
-
-    start_date = models.DateField()
-    end_date = models.DateField(
-        null=True,
-        blank=True,
-    )
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name="title_history", verbose_name="Personel")
+    job_title = models.ForeignKey(JobTitle, on_delete=models.PROTECT, verbose_name="Resmi Ünvan")
+    start_date = models.DateField(verbose_name="Başlangıç Tarihi")
+    end_date = models.DateField(null=True, blank=True, verbose_name="Bitiş Tarihi")
 
     class Meta:
+        verbose_name_plural = "Ünvan Geçmişleri"
         ordering = ["employee", "-start_date"]
 
     def clean(self):
@@ -477,3 +446,19 @@ class ReportingRelationType(TimeStampedModel):
 
     def __str__(self):
         return self.name
+
+
+class EmployeePositionHistory(TimeStampedModel):
+    """
+    Personel Pozisyon Geçmişi,
+    Personel --> Şef,
+    Şef --> Müdür Yardımcısı gibi
+    """
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name="position_history", verbose_name="Personel")
+    position = models.ForeignKey(OrganizationPosition, on_delete=models.PROTECT, related_name="employee_history", verbose_name="Pozisyon")
+    start_date = models.DateField(verbose_name="Başlangıç Tarihi")
+    end_date = models.DateField(null=True, blank=True, verbose_name="Bitiş Tarihi")
+
+    class Meta:
+        verbose_name = "Pozisyon Geçmişi"
+        verbose_name_plural = "Pozisyon Geçmişleri"

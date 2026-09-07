@@ -26,28 +26,15 @@ class Unit(TimeStampedModel):
     Şefliklerin veya alt birimlerin tutulduğu modeldir.
     PHP, .NET, JAVA, FRONT END, SİSTEM, VERİTABANI vb.
     """
-    department = models.ForeignKey(Department, on_delete=models.PROTECT, related_name="units")
-    parent = models.ForeignKey("self", null=True, blank=True, on_delete=models.PROTECT, related_name="children")
-
-    name = models.CharField(max_length=150)
-    code = models.CharField(max_length=50, unique=True)
-    active = models.BooleanField(default=True)
+    department = models.ForeignKey(Department, on_delete=models.PROTECT, related_name="units", verbose_name="Müdür Yardımcılığı")
+    name = models.CharField(max_length=150, verbose_name="İsim")
+    code = models.CharField(max_length=50, unique=True, verbose_name="Kod")
+    active = models.BooleanField(default=True, verbose_name="Aktif mi?")
 
     class Meta:
         ordering = ["department__name", "name"]
         verbose_name = "Şeflik"
         verbose_name_plural = "Şeflikler"
-
-    def clean(self):
-        if self.parent and self.parent.department_id != self.department_id:
-            raise ValidationError(
-                "Üst birim ile alt birim aynı departmanda olmalıdır."
-            )
-
-        if self.parent_id == self.id:
-            raise ValidationError(
-                "Bir birim kendisinin üst birimi olamaz."
-            )
 
     def __str__(self):
         return self.name
@@ -98,13 +85,29 @@ class JobRole(TimeStampedModel):
     """
     name = models.CharField(max_length=150)
     code = models.CharField(max_length=50, unique=True)
-
-    department = models.ForeignKey(Department, null=True, blank=True, on_delete=models.PROTECT, related_name="job_roles")
     active = models.BooleanField(default=True)
 
     class Meta:
         verbose_name_plural = "İş Kolları"
         ordering = ["name"]
+
+    def __str__(self):
+        return self.name
+
+
+class PositionType(models.Model):
+    name = models.CharField(max_length=100)
+    code = models.CharField(max_length=50, unique=True)
+    level = models.PositiveIntegerField()
+    active = models.BooleanField(default=True)
+
+
+class OrganizationPosition(models.Model):
+    unit = models.ForeignKey(Unit, on_delete=models.PROTECT, related_name="positions")
+    position_type = models.ForeignKey(PositionType, on_delete=models.PROTECT, related_name="positions")
+    parent = models.ForeignKey("self", null=True, blank=True, on_delete=models.PROTECT, related_name="children")
+    name = models.CharField(max_length=200)
+    active = models.BooleanField(default=True)
 
     def __str__(self):
         return self.name

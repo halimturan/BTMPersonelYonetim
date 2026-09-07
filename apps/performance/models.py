@@ -12,18 +12,19 @@ class EvaluationPeriod(TimeStampedModel):
     """
     Performans Dönemi
     """
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, verbose_name="Ad")
+    start_date = models.DateField(verbose_name="Başlangıç Tarihi")
+    end_date = models.DateField(verbose_name="Bitiş Tarihi")
 
-    start_date = models.DateField()
-    end_date = models.DateField()
+    evaluation_start_date = models.DateField(null=True, blank=True, verbose_name="Değerlendirme Başlangıç Tarihi")
+    evaluation_end_date = models.DateField(null=True, blank=True, verbose_name="Değerlendirme Bitiş Tarihi")
 
-    evaluation_start_date = models.DateField(null=True, blank=True)
-    evaluation_end_date = models.DateField(null=True, blank=True)
-
-    is_active = models.BooleanField(default=False)
-    is_locked = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=False, verbose_name="Aktif mi?")
+    is_locked = models.BooleanField(default=False, verbose_name="Kilitli mi?")
 
     class Meta:
+        verbose_name = "Performans Dönemi"
+        verbose_name_plural = "Performans Dönemleri"
         ordering = ["-start_date"]
 
     def clean(self):
@@ -49,12 +50,14 @@ class PerformanceCriterion(TimeStampedModel):
     """
     Performans Kriterleri
     """
-    name = models.CharField(max_length=200)
-    description = models.TextField(blank=True)
-    code = models.CharField(max_length=60, unique=True)
-    active = models.BooleanField(default=True)
+    name = models.CharField(max_length=200, verbose_name="Ad")
+    description = models.TextField(blank=True, verbose_name="Açıklama")
+    code = models.CharField(max_length=60, unique=True, verbose_name="Kod")
+    active = models.BooleanField(default=True, verbose_name="Aktif mi?")
 
     class Meta:
+        verbose_name = "Performans Kriteri"
+        verbose_name_plural = "Performans Kriterleri"
         ordering = ["name"]
 
     def __str__(self):
@@ -65,17 +68,18 @@ class PerformanceTemplate(TimeStampedModel):
     """
     Performans Şablonu
     """
-    name = models.CharField(max_length=150)
-
-    description = models.TextField(blank=True)
-
-    valid_from = models.DateField()
-    valid_to = models.DateField(null=True, blank=True)
-
-    active = models.BooleanField(default=True)
+    name = models.CharField(max_length=150, verbose_name="Ad")
+    description = models.TextField(blank=True, verbose_name="Açıklama")
+    valid_from = models.DateField(verbose_name="Tarihinden itibaren geçerli")
+    valid_to = models.DateField(null=True, blank=True, verbose_name="Tarihine kadar geçerli")
+    active = models.BooleanField(default=True, verbose_name="Aktif mi?")
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        verbose_name = "Performas Şablonu"
+        verbose_name_plural = "Performas Şablonları"
 
     @property
     def max_score(self):
@@ -229,46 +233,13 @@ class PerformanceEvaluationReviewer(TimeStampedModel):
     """
     Şemadaki ağırlığı snapshot olarak buraya yazılıyor.
     """
-    evaluation = models.ForeignKey(
-        PerformanceEvaluation,
-        on_delete=models.CASCADE,
-        related_name="reviewers",
-    )
-
-    reviewer_employee = models.ForeignKey(
-        Employee,
-        on_delete=models.PROTECT,
-        related_name="performance_reviews_given",
-    )
-
-    reviewer_role = models.ForeignKey(
-        ReviewerRole,
-        on_delete=models.PROTECT,
-    )
-
-    weight = models.DecimalField(
-        max_digits=6,
-        decimal_places=2,
-    )
-
-    raw_score = models.DecimalField(
-        max_digits=8,
-        decimal_places=4,
-        null=True,
-        blank=True,
-    )
-
-    weighted_score = models.DecimalField(
-        max_digits=8,
-        decimal_places=4,
-        null=True,
-        blank=True,
-    )
-
-    submitted_at = models.DateTimeField(
-        null=True,
-        blank=True,
-    )
+    evaluation = models.ForeignKey(PerformanceEvaluation, on_delete=models.CASCADE, related_name="reviewers")
+    reviewer_employee = models.ForeignKey(Employee, on_delete=models.PROTECT, related_name="performance_reviews_given")
+    reviewer_role = models.ForeignKey(ReviewerRole, on_delete=models.PROTECT)
+    weight = models.DecimalField(max_digits=6, decimal_places=2)
+    raw_score = models.DecimalField(max_digits=8, decimal_places=4, null=True, blank=True)
+    weighted_score = models.DecimalField(max_digits=8, decimal_places=4, null=True, blank=True)
+    submitted_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         constraints = [

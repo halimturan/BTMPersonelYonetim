@@ -7,6 +7,8 @@ from apps.employees.models import (EducationLevel, Employee, EmployeeAssignmentH
 
 
 class EmployeeEducationInline(admin.TabularInline):
+    verbose_name = "Eğitimler"
+    verbose_name_plural = "Eğitimler"
     model = EmployeeEducation
     extra = 0
     autocomplete_fields = ("education_level",)
@@ -17,89 +19,44 @@ class EmployeeEducationInline(admin.TabularInline):
 
 
 class EmployeeAssignmentHistoryInline(admin.TabularInline):
+    verbose_name = "İş Kolu Geçmişi"
+    verbose_name_plural = "İş Kolu Geçmişi"
     model = EmployeeAssignmentHistory
     extra = 0
-
-    autocomplete_fields = (
-        "job_role",
-    )
-
-    fields = (
-        "job_role",
-        "start_date",
-        "end_date",
-        "description",
-    )
+    fields = ("job_role", "start_date", "end_date", "description")
 
 
 class EmployeeTitleHistoryInline(admin.TabularInline):
+    verbose_name = "Ünvan Geçmişi"
+    verbose_name_plural = "Ünvan Geçmişi"
     model = EmployeeTitleHistory
     extra = 0
-
-    autocomplete_fields = (
-        "job_title",
-    )
-
-    fields = (
-        "job_title",
-        "start_date",
-        "end_date",
-    )
+    fields = ("job_title", "start_date", "end_date")
 
 
 class EmployeeDepartmentHistoryInline(admin.TabularInline):
+    verbose_name = "Şeflik Geçmişi"
+    verbose_name_plural = "Şeflik Geçmişi"
     model = EmployeeDepartmentHistory
     extra = 0
-
-    autocomplete_fields = (
-        "department",
-        "unit",
-    )
-
-    fields = (
-        "department",
-        "unit",
-        "start_date",
-        "end_date",
-    )
+    fields = ("department", "unit", "start_date", "end_date")
 
 
 class EmployeeLevelHistoryInline(admin.TabularInline):
+    verbose_name = "Seviye Geçmişi"
+    verbose_name_plural = "Seviye Geçmişi"
     model = EmployeeLevelHistory
     extra = 0
-
-    autocomplete_fields = (
-        "job_role",
-        "level",
-    )
-
-    fields = (
-        "job_role",
-        "level",
-        "start_date",
-        "end_date",
-        "reason",
-    )
+    fields = ("job_role", "level", "start_date", "end_date", "reason")
 
 
 class EmployeeReportingLineInline(admin.TabularInline):
+    verbose_name = "Rapor Geçmişi"
+    verbose_name_plural = "Rapor Geçmişi"
     model = EmployeeReportingLine
-
     fk_name = "employee"
-
     extra = 0
-
-    autocomplete_fields = (
-        "manager",
-        "relation_type",
-    )
-
-    fields = (
-        "manager",
-        "relation_type",
-        "start_date",
-        "end_date",
-    )
+    fields = ("manager", "relation_type", "start_date", "end_date")
 
 
 @admin.register(Employee)
@@ -130,12 +87,6 @@ class EmployeeAdmin(admin.ModelAdmin):
             "Tecrübe Tarihleri",
             {
                 "fields": ("institution_start_date", "professional_start_date", "it_start_date",)
-            },
-        ),
-        (
-            "Entegrasyon",
-            {
-                "fields": ("ikys_reference",)
             },
         ),
     )
