@@ -8,22 +8,15 @@
 
 
 <div class="mb-3">
-
-    <a
-        href="{% url 'performance:period_list' %}"
-        class="text-decoration-none small"
-    >
+    <a href="{% url 'performance:period_list' %}" class="text-decoration-none small">
         <i class="bi bi-arrow-left"></i>
         Dönemler
     </a>
-
 </div>
 
 
 <div class="d-flex justify-content-between align-items-start mb-4">
-
     <div>
-
         <h3 class="mb-1">
             {{ period.name }}
         </h3>
@@ -33,14 +26,9 @@
             -
             {{ period.end_date|date:"d.m.Y" }}
         </div>
-
     </div>
-
-
     <div>
-
         {% if period.is_locked %}
-
             <span class="badge text-bg-secondary fs-6">
                 <i class="bi bi-lock me-1"></i>
                 Kilitli
@@ -152,6 +140,50 @@
 
 </div>
 
+    <div class="row g-4 mb-4">
+
+    <div class="col-md-4">
+
+        <div class="card border-0 shadow-sm">
+
+            <div class="card-body">
+
+                <div class="small text-muted">
+                    Nihai Skoru Hesaplanan
+                </div>
+
+                <div class="display-6 fw-semibold">
+                    {{ score_count }}
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-4">
+
+        <div class="card border-0 shadow-sm">
+
+            <div class="card-body">
+
+                <div class="small text-muted">
+                    Skoru Eksik
+                </div>
+
+                <div class="display-6 fw-semibold">
+                    {{ score_missing_count }}
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
 
 {% if not period.is_locked %}
 
@@ -167,19 +199,38 @@
 
         <div class="d-flex flex-wrap gap-2">
 
+            {% if period.evaluation_count and not all_evaluations_completed %}
+                <!--begin::alert-->
+                <div class="alert alert-warning mt-3 mb-0">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+
+                    Tüm performans değerlendirmeleri
+                    tamamlanmadığı için bazı personellerin
+                    nihai skoru hesaplanamayacaktır.
+                </div>
+                <!--end::alert-->
+            {% endif %}
+
+            {% if period.evaluation_count and not period.is_locked %}
+                <!--begin::form-->
+                <form method="post" action="{% url 'performance:period_calculate_scores' period.pk %}">
+                    {% csrf_token %}
+                    <!--begin::button-->
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-calculator me-1"></i>
+                        Skorları Hesapla
+                    </button>
+                    <!--end::button-->
+                </form>
+                <!--end::form-->
+            {% endif %}
+
             {% if not period.evaluation_count %}
 
-                <form
-                    method="post"
-                    action="{% url 'performance:period_validate' period.pk %}"
-                >
-
+                <form method="post" action="{% url 'performance:period_validate' period.pk %}">
                     {% csrf_token %}
 
-                    <button
-                        type="submit"
-                        class="btn btn-outline-primary"
-                    >
+                    <button type="submit" class="btn btn-outline-primary">
                         <i class="bi bi-shield-check me-1"></i>
                         Ön Kontrol Yap
                     </button>
@@ -189,67 +240,205 @@
 
                 {% if validation and validation.valid %}
 
-                    <form
-                        method="post"
-                        action="{% url 'performance:period_initialize' period.pk %}"
-                    >
-
+                    <form method="post" action="{% url 'performance:period_initialize' period.pk %}">
                         {% csrf_token %}
 
-                        <button
-                            type="submit"
-                            class="btn btn-success"
+                        <button type="submit" class="btn btn-success"
                             onclick="
                                 return confirm(
                                     'Tüm personel için değerlendirme kayıtları oluşturulacak. Devam edilsin mi?'
                                 );
-                            "
-                        >
+                            ">
                             <i class="bi bi-play-fill me-1"></i>
                             Değerlendirmeleri Oluştur
                         </button>
-
                     </form>
-
                 {% endif %}
-
             {% endif %}
 
-
             {% if period.evaluation_count and not period.is_locked %}
-
-                <form
-                    method="post"
-                    action="{% url 'performance:period_lock' period.pk %}"
-                >
-
-                    {% csrf_token %}
-
-                    <button
-                        type="submit"
-                        class="btn btn-outline-danger"
-                        onclick="
-                            return confirm(
-                                'Dönem kilitlendikten sonra değerlendirmeler değiştirilemeyecek. Devam edilsin mi?'
-                            );
-                        "
-                    >
+                {% if all_evaluations_completed and all_scores_calculated %}
+                    <!--begin::form-->
+                    <form method="post" action="{% url 'performance:period_lock' period.pk %}">
+                        {% csrf_token %}
+                        <!--begin::button-->
+                        <button type="submit" class="btn btn-outline-danger" onclick="return confirm('Dönem kilitlenecek. Devam edilsin mi?');">
+                            <i class="bi bi-lock me-1"></i>
+                            Dönemi Kilitle
+                        </button>
+                        <!--end::button-->
+                    </form>
+                    <!--end::form-->
+                {% else %}
+                    <!--begin::button-->
+                    <button type="button" class="btn btn-outline-secondary" disabled>
                         <i class="bi bi-lock me-1"></i>
                         Dönemi Kilitle
                     </button>
-
-                </form>
-
+                    <!--end::button-->
+                {% endif %}
             {% endif %}
-
         </div>
-
+        <!--end::d-flex-->
     </div>
 
 </div>
 
 {% endif %}
 
+{% if score_result %}
+
+<div class="card border-0 shadow-sm mb-4">
+
+    <div class="card-header bg-white d-flex justify-content-between">
+
+        <strong>
+            Skor Hesaplama Sonucu
+        </strong>
+
+        {% if score_result.valid %}
+
+            <span class="badge text-bg-success">
+                Başarılı
+            </span>
+
+        {% else %}
+
+            <span class="badge text-bg-warning">
+                Eksikler Var
+            </span>
+
+        {% endif %}
+
+    </div>
+
+
+    <div class="card-body">
+
+        <div class="row g-3 mb-4">
+
+            <div class="col-md-4">
+
+                <div class="validation-stat">
+
+                    <small>
+                        Toplam Personel
+                    </small>
+
+                    <strong>
+                        {{ score_result.employee_count }}
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-4">
+
+                <div class="validation-stat">
+
+                    <small>
+                        Başarılı
+                    </small>
+
+                    <strong>
+                        {{ score_result.success_count }}
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-4">
+
+                <div class="validation-stat">
+
+                    <small>
+                        Hata
+                    </small>
+
+                    <strong>
+                        {{ score_result.error_count }}
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        {% if score_result.issues %}
+
+            <div class="table-responsive">
+
+                <table class="table align-middle mb-0">
+
+                    <thead class="table-light">
+
+                        <tr>
+                            <th>Personel No</th>
+                            <th>Personel</th>
+                            <th>Hata</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for issue in score_result.issues %}
+
+                            <tr>
+
+                                <td>
+                                    {{ issue.personnel_no }}
+                                </td>
+
+                                <td>
+
+                                    <a
+                                        href="{% url 'employees:detail' issue.employee_id %}"
+                                        class="text-decoration-none"
+                                    >
+                                        {{ issue.employee_name }}
+                                    </a>
+
+                                </td>
+
+                                <td>
+                                    {{ issue.message }}
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        {% else %}
+
+            <div class="alert alert-success mb-0">
+
+                <i class="bi bi-check-circle me-2"></i>
+
+                Tüm personellerin nihai skorları
+                başarıyla hesaplandı.
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endif %}
 
 {% if validation %}
 
@@ -351,7 +540,7 @@
                                     {% if issue.employee_id %}
 
                                         <a
-                                            href="{% url 'employees:detail' issue.employee_id %}"
+                                            href="{% url 'employees:employee_detail' issue.employee_id %}"
                                         >
                                             {{ issue.employee_name }}
                                         </a>

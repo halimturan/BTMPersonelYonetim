@@ -1,0 +1,27 @@
+<svg width="62" height="62" viewBox="0 0 62 62" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+  <path d="M15.5 0C13.3687 0 11.625 1.74375 11.625 3.875V58.125C11.625 60.2562 13.3687 62 15.5 62H54.25C56.3812 62 58.125 60.2562 58.125 58.125V15.5L42.625 0H15.5Z" fill="#E2E5E7"/>
+
+  <path d="M46.5 15.5H58.125L42.625 0V11.625C42.625 13.7563 44.3687 15.5 46.5 15.5Z" fill="#B0B7BD"/>
+
+  <path d="M58.125 27.125L46.5 15.5H58.125V27.125Z" fill="#CAD1D8"/>
+
+  <!-- Turuncu alan YEŞİL yapıldı -->
+  <path d="M50.375 50.375C50.375 51.4406 49.5031 52.3125 48.4375 52.3125H5.8125C4.74687 52.3125 3.875 51.4406 3.875 50.375V31C3.875 29.9344 4.74687 29.0625 5.8125 29.0625H48.4375C49.5031 29.0625 50.375 29.9344 50.375 31V50.375Z" fill="#4CAF50"/>
+
+  <!-- Eski PDF harflerini kaldırıp yerine XLS yazdık -->
+  <text
+    x="27.125"
+    y="41"
+    text-anchor="middle"
+    dominant-baseline="middle"
+    font-family="Arial, sans-serif"
+    font-size="11"
+    fill="white"
+    font-weight="bold">
+    XLS
+  </text>
+
+  <path d="M48.4375 52.3125H11.625V54.25H48.4375C49.5031 54.25 50.375 53.3781 50.375 52.3125V50.375C50.375 51.4406 49.5031 52.3125 48.4375 52.3125Z" fill="#CAD1D8"/>
+
+</svg>

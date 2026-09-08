@@ -610,29 +610,82 @@ class EvaluationPeriodLockView(
         "performance.change_evaluationperiod"
     )
 
-    def post(
-        self,
-        request,
-        pk,
-    ):
-        period = EvaluationPeriod.objects.get(
-            pk=pk
+    def post(self, request, pk):
+        period = get_object_or_404(
+            EvaluationPeriod,
+            pk=pk,
         )
 
-        incomplete_exists = (
+        if period.is_locked:
+            messages.info(
+                request,
+                "Bu dönem zaten kilitli.",
+            )
+
+            return redirect(
+                "performance:period_detail",
+                pk=period.pk,
+            )
+
+        evaluation_count = (
+            period.evaluations.count()
+        )
+
+        if evaluation_count == 0:
+            messages.error(
+                request,
+                (
+                    "Değerlendirme kaydı olmayan "
+                    "bir dönem kilitlenemez."
+                ),
+            )
+
+            return redirect(
+                "performance:period_detail",
+                pk=period.pk,
+            )
+
+        incomplete_count = (
             period.evaluations
             .filter(
                 completed_at__isnull=True
             )
-            .exists()
+            .count()
         )
 
-        if incomplete_exists:
+        if incomplete_count:
             messages.error(
                 request,
                 (
-                    "Tüm değerlendirmeler "
-                    "tamamlanmadan dönem kilitlenemez."
+                    f"{incomplete_count} personelin "
+                    "performans değerlendirmesi "
+                    "henüz tamamlanmadı."
+                ),
+            )
+
+            return redirect(
+                "performance:period_detail",
+                pk=period.pk,
+            )
+
+        score_count = (
+            EmployeePeriodScore.objects
+            .filter(period=period)
+            .count()
+        )
+
+        if score_count != evaluation_count:
+            missing = (
+                evaluation_count
+                - score_count
+            )
+
+            messages.error(
+                request,
+                (
+                    f"{missing} personelin nihai skoru "
+                    "henüz hesaplanmadı. "
+                    "Dönem kilitlenemez."
                 ),
             )
 
@@ -654,7 +707,10 @@ class EvaluationPeriodLockView(
 
         messages.success(
             request,
-            "Dönem başarıyla kilitlendi.",
+            (
+                "Tüm değerlendirmeler ve nihai "
+                "skorlar tamamlandı. Dönem kilitlendi."
+            ),
         )
 
         return redirect(
