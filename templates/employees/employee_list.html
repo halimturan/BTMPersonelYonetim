@@ -1,0 +1,299 @@
+{% extends "base.html" %}
+
+{% block title %}
+Personeller
+{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+
+    <div>
+        <h3 class="mb-1">
+            Personeller
+        </h3>
+
+        <div class="text-muted">
+            Yetkiniz dahilindeki personeller
+        </div>
+    </div>
+
+</div>
+
+
+<div class="card border-0 shadow-sm">
+
+    <div class="card-body border-bottom">
+
+        <form method="get">
+
+            <div class="row g-2">
+
+                <div class="col-md-6 col-lg-4">
+
+                    <div class="input-group">
+
+                        <span class="input-group-text bg-white">
+                            <i class="bi bi-search"></i>
+                        </span>
+
+                        <input
+                            type="text"
+                            name="q"
+                            class="form-control"
+                            value="{{ request.GET.q }}"
+                            placeholder="Ad, soyad veya personel no"
+                        >
+
+                    </div>
+
+                </div>
+
+                <div class="col-auto">
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                    >
+                        Ara
+                    </button>
+
+                </div>
+
+                {% if request.GET.q %}
+
+                    <div class="col-auto">
+
+                        <a
+                            href="{% url 'employees:list' %}"
+                            class="btn btn-outline-secondary"
+                        >
+                            Temizle
+                        </a>
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </form>
+
+    </div>
+
+
+    <div class="table-responsive">
+
+        <table class="table table-hover align-middle mb-0">
+
+            <thead class="table-light">
+
+                <tr>
+
+                    <th>
+                        Personel
+                    </th>
+
+                    <th>
+                        Personel No
+                    </th>
+
+                    <th>
+                        Ünvan
+                    </th>
+
+                    <th>
+                        İş Kolu
+                    </th>
+
+                    <th>
+                        Birim
+                    </th>
+
+                    <th>
+                        Kariyer Seviyesi
+                    </th>
+
+                    <th class="text-end">
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for employee in employees %}
+
+                    <tr>
+
+                        <td>
+
+                            <div class="d-flex align-items-center">
+
+                                <div class="employee-avatar me-3">
+
+                                    {{ employee.first_name|first }}
+                                    {{ employee.last_name|first }}
+
+                                </div>
+
+                                <div>
+
+                                    <strong>
+                                        {{ employee.full_name }}
+                                    </strong>
+
+                                    <div class="small text-muted">
+                                        {{ employee.employment_type }}
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </td>
+
+
+                        <td>
+                            {{ employee.personnel_no }}
+                        </td>
+
+
+                        <td>
+                            {{ employee.current_title|default:"-" }}
+                        </td>
+
+
+                        <td>
+                            {{ employee.current_job_role|default:"-" }}
+                        </td>
+
+
+                        <td>
+                            {{ employee.current_unit|default:"-" }}
+                        </td>
+
+
+                        <td>
+
+                            {% if employee.current_level_record %}
+
+                                <span class="badge text-bg-light border">
+                                    {{ employee.current_level_record.level }}
+                                </span>
+
+                            {% else %}
+
+                                -
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <td class="text-end">
+
+                            <a
+                                href="{% url 'employees:employee_detail' employee.pk %}"
+                                class="btn btn-sm btn-outline-primary"
+                            >
+                                Görüntüle
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                {% empty %}
+
+                    <tr>
+
+                        <td
+                            colspan="7"
+                            class="text-center py-5 text-muted"
+                        >
+
+                            <i
+                                class="bi bi-people fs-1 d-block mb-2"
+                            ></i>
+
+                            Personel bulunamadı.
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+    {% if is_paginated %}
+
+        <div class="card-footer bg-white">
+
+            <nav>
+
+                <ul class="pagination mb-0">
+
+                    {% if page_obj.has_previous %}
+
+                        <li class="page-item">
+
+                            <a
+                                class="page-link"
+                                href="?page={{ page_obj.previous_page_number }}&q={{ request.GET.q }}"
+                            >
+                                Önceki
+                            </a>
+
+                        </li>
+
+                    {% endif %}
+
+
+                    <li class="page-item active">
+
+                        <span class="page-link">
+
+                            {{ page_obj.number }}
+                            /
+                            {{ page_obj.paginator.num_pages }}
+
+                        </span>
+
+                    </li>
+
+
+                    {% if page_obj.has_next %}
+
+                        <li class="page-item">
+
+                            <a
+                                class="page-link"
+                                href="?page={{ page_obj.next_page_number }}&q={{ request.GET.q }}"
+                            >
+                                Sonraki
+                            </a>
+
+                        </li>
+
+                    {% endif %}
+
+                </ul>
+
+            </nav>
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

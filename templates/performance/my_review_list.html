@@ -1,82 +1,275 @@
 {% extends "base.html" %}
 
+{% block title %}
+Değerlendirmelerim
+{% endblock %}
+
 {% block content %}
 
-<h1>Değerlendirmelerim</h1>
+<div
+    class="d-flex justify-content-between
+           align-items-center mb-4"
+>
 
-<table>
+    <div>
 
-    <thead>
-        <tr>
-            <th>Dönem</th>
-            <th>Personel</th>
-            <th>Rolüm</th>
-            <th>Puan</th>
-            <th>Durum</th>
-            <th></th>
-        </tr>
-    </thead>
+        <h3 class="mb-1">
+            Değerlendirmelerim
+        </h3>
 
-    <tbody>
+        <div class="text-muted">
+            Size atanmış personel
+            performans değerlendirmeleri
+        </div>
 
-        {% for review in reviews %}
+    </div>
 
-            <tr>
+</div>
 
-                <td>
-                    {{ review.evaluation.period }}
-                </td>
 
-                <td>
-                    {{ review.evaluation.employee.full_name }}
-                </td>
+<div class="card border-0 shadow-sm mb-4">
 
-                <td>
-                    {{ review.reviewer_role }}
-                </td>
+    <div class="card-body">
 
-                <td>
-                    {% if review.raw_score %}
-                        {{ review.raw_score|floatformat:2 }}
-                    {% else %}
-                        -
-                    {% endif %}
-                </td>
+        <div class="btn-group">
 
-                <td>
+            <a
+                href="{% url 'performance:my_reviews' %}"
+                class="btn
+                {% if not request.GET.status %}
+                    btn-primary
+                {% else %}
+                    btn-outline-primary
+                {% endif %}"
+            >
+                Tümü
+            </a>
 
-                    {% if review.submitted_at %}
-                        Tamamlandı
-                    {% else %}
-                        Bekliyor
-                    {% endif %}
+            <a
+                href="?status=pending"
+                class="btn
+                {% if request.GET.status == 'pending' %}
+                    btn-primary
+                {% else %}
+                    btn-outline-primary
+                {% endif %}"
+            >
+                Bekleyenler
+            </a>
 
-                </td>
+            <a
+                href="?status=completed"
+                class="btn
+                {% if request.GET.status == 'completed' %}
+                    btn-primary
+                {% else %}
+                    btn-outline-primary
+                {% endif %}"
+            >
+                Tamamlananlar
+            </a>
 
-                <td>
-                    <a href="{% url 'performance:my_review_detail' review.pk %}">
-                        {% if review.submitted_at %}
-                            Görüntüle
-                        {% else %}
-                            Değerlendir
-                        {% endif %}
-                    </a>
-                </td>
+        </div>
 
-            </tr>
+    </div>
 
-        {% empty %}
+</div>
 
-            <tr>
-                <td colspan="6">
-                    Değerlendirmeniz gereken personel bulunmuyor.
-                </td>
-            </tr>
 
-        {% endfor %}
+<div class="card border-0 shadow-sm">
 
-    </tbody>
+    <div class="table-responsive">
 
-</table>
+        <table
+            class="table
+                   table-hover
+                   align-middle
+                   mb-0"
+        >
+
+            <thead class="table-light">
+
+                <tr>
+
+                    <th>
+                        Personel
+                    </th>
+
+                    <th>
+                        Dönem
+                    </th>
+
+                    <th>
+                        Değerlendiren Rolü
+                    </th>
+
+                    <th>
+                        Ağırlık
+                    </th>
+
+                    <th>
+                        Puan
+                    </th>
+
+                    <th>
+                        Durum
+                    </th>
+
+                    <th></th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for review in reviews %}
+
+                    <tr>
+
+                        <td>
+
+                            <div class="d-flex align-items-center">
+
+                                <div
+                                    class="employee-avatar me-3"
+                                >
+                                    {{ review.evaluation.employee.first_name|first }}
+                                    {{ review.evaluation.employee.last_name|first }}
+                                </div>
+
+                                <div>
+
+                                    <strong>
+                                        {{ review.evaluation.employee.full_name }}
+                                    </strong>
+
+                                    <div
+                                        class="small text-muted"
+                                    >
+                                        {{ review.evaluation.employee.personnel_no }}
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </td>
+
+
+                        <td>
+                            {{ review.evaluation.period.name }}
+                        </td>
+
+
+                        <td>
+                            {{ review.reviewer_role }}
+                        </td>
+
+
+                        <td>
+                            %{{ review.weight|floatformat:0 }}
+                        </td>
+
+
+                        <td>
+
+                            {% if review.raw_score is not None %}
+
+                                <strong>
+                                    {{ review.raw_score|floatformat:2 }}
+                                </strong>
+
+                            {% else %}
+
+                                -
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <td>
+
+                            {% if review.submitted_at %}
+
+                                <span
+                                    class="badge text-bg-success"
+                                >
+                                    Tamamlandı
+                                </span>
+
+                            {% else %}
+
+                                <span
+                                    class="badge text-bg-warning"
+                                >
+                                    Bekliyor
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <td class="text-end">
+
+                            <a
+                                href="{% url 'performance:my_review_detail' review.pk %}"
+                                class="btn btn-sm
+                                {% if review.submitted_at %}
+                                    btn-outline-secondary
+                                {% else %}
+                                    btn-primary
+                                {% endif %}"
+                            >
+
+                                {% if review.submitted_at %}
+                                    Görüntüle
+                                {% else %}
+                                    Değerlendir
+                                {% endif %}
+
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                {% empty %}
+
+                    <tr>
+
+                        <td
+                            colspan="7"
+                            class="text-center
+                                   py-5
+                                   text-muted"
+                        >
+
+                            <i
+                                class="bi
+                                       bi-clipboard-check
+                                       fs-1
+                                       d-block
+                                       mb-2"
+                            ></i>
+
+                            Size atanmış
+                            değerlendirme bulunmuyor.
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
 
 {% endblock %}

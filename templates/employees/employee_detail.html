@@ -1,0 +1,969 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ employee.full_name }}
+{% endblock %}
+
+{% block content %}
+
+
+<div class="mb-4">
+
+    <a
+        href="{% url 'employees:employee_list' %}"
+        class="text-decoration-none small"
+    >
+        <i class="bi bi-arrow-left"></i>
+        Personeller
+    </a>
+
+</div>
+
+
+<div class="card border-0 shadow-sm mb-4">
+
+    <div class="card-body p-4">
+
+        <div class="d-flex align-items-center">
+
+            <div class="employee-avatar employee-avatar-lg me-4">
+
+                {{ employee.first_name|first }}
+                {{ employee.last_name|first }}
+
+            </div>
+
+
+            <div class="flex-grow-1">
+
+                <h3 class="mb-1">
+                    {{ employee.full_name }}
+                </h3>
+
+                <div class="text-muted mb-2">
+
+                    {{ current_job_role|default:"İş kolu tanımlanmamış" }}
+
+                </div>
+
+
+                <div class="d-flex flex-wrap gap-2">
+
+                    {% if current_title %}
+
+                        <span class="badge text-bg-light border">
+
+                            <i class="bi bi-person-badge me-1"></i>
+
+                            {{ current_title }}
+
+                        </span>
+
+                    {% endif %}
+
+
+                    {% if current_unit %}
+
+                        <span class="badge text-bg-light border">
+
+                            <i class="bi bi-diagram-3 me-1"></i>
+
+                            {{ current_unit }}
+
+                        </span>
+
+                    {% endif %}
+
+
+                    {% if current_level %}
+
+                        <span class="badge text-bg-primary">
+
+                            {{ current_level }}
+
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<div class="row g-4 mb-4">
+
+    <div class="col-md-6 col-xl-3">
+
+        <div class="card border-0 shadow-sm h-100">
+
+            <div class="card-body">
+
+                <div class="small text-muted mb-1">
+                    Personel No
+                </div>
+
+                <strong>
+                    {{ employee.personnel_no }}
+                </strong>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-md-6 col-xl-3">
+
+        <div class="card border-0 shadow-sm h-100">
+
+            <div class="card-body">
+
+                <div class="small text-muted mb-1">
+                    İstihdam Türü
+                </div>
+
+                <strong>
+                    {{ employee.employment_type }}
+                </strong>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-md-6 col-xl-3">
+
+        <div class="card border-0 shadow-sm h-100">
+
+            <div class="card-body">
+
+                <div class="small text-muted mb-1">
+                    Yönetim Seviyesi
+                </div>
+
+                <strong>
+                    {{ current_management_level|default:"-" }}
+                </strong>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-md-6 col-xl-3">
+
+        <div class="card border-0 shadow-sm h-100">
+
+            <div class="card-body">
+
+                <div class="small text-muted mb-1">
+                    Kariyer Seviyesi
+                </div>
+
+                <strong>
+                    {{ current_level|default:"-" }}
+                </strong>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<ul
+    class="nav nav-tabs mb-4"
+    id="employeeTabs"
+    role="tablist"
+>
+
+    <li class="nav-item">
+
+        <button
+            class="nav-link active"
+            data-bs-toggle="tab"
+            data-bs-target="#general"
+            type="button"
+        >
+            Genel
+        </button>
+
+    </li>
+
+
+    <li class="nav-item">
+
+        <button
+            class="nav-link"
+            data-bs-toggle="tab"
+            data-bs-target="#education"
+            type="button"
+        >
+            Eğitim
+        </button>
+
+    </li>
+
+
+    <li class="nav-item">
+
+        <button
+            class="nav-link"
+            data-bs-toggle="tab"
+            data-bs-target="#history"
+            type="button"
+        >
+            Geçmiş
+        </button>
+
+    </li>
+
+
+    <li class="nav-item">
+
+        <button
+            class="nav-link"
+            data-bs-toggle="tab"
+            data-bs-target="#performance"
+            type="button"
+        >
+            Performans
+        </button>
+
+    </li>
+
+
+    <li class="nav-item">
+
+        <button
+            class="nav-link"
+            data-bs-toggle="tab"
+            data-bs-target="#upgrades"
+            type="button"
+        >
+            Upgrade
+        </button>
+
+    </li>
+
+</ul>
+
+
+<div class="tab-content">
+
+
+    <!-- GENEL -->
+
+    <div
+        class="tab-pane fade show active"
+        id="general"
+    >
+
+        <div class="card border-0 shadow-sm">
+
+            <div class="card-header bg-white">
+                <strong>
+                    Güncel Görev Bilgileri
+                </strong>
+            </div>
+
+            <div class="card-body">
+
+                <div class="row g-4">
+
+                    <div class="col-md-6">
+
+                        <div class="detail-label">
+                            Ünvan
+                        </div>
+
+                        <div class="detail-value">
+                            {{ current_title|default:"-" }}
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <div class="detail-label">
+                            İş Kolu
+                        </div>
+
+                        <div class="detail-value">
+                            {{ current_job_role|default:"-" }}
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <div class="detail-label">
+                            Birim
+                        </div>
+
+                        <div class="detail-value">
+                            {{ current_unit|default:"-" }}
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <div class="detail-label">
+                            Kariyer Seviyesi
+                        </div>
+
+                        <div class="detail-value">
+                            {{ current_level|default:"-" }}
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- EĞİTİM -->
+
+    <div
+        class="tab-pane fade"
+        id="education"
+    >
+
+        <div class="card border-0 shadow-sm">
+
+            <div class="card-header bg-white">
+                <strong>
+                    Eğitim Bilgileri
+                </strong>
+            </div>
+
+
+            <div class="table-responsive">
+
+                <table class="table mb-0 align-middle">
+
+                    <thead class="table-light">
+
+                        <tr>
+
+                            <th>
+                                Eğitim Seviyesi
+                            </th>
+
+                            <th>
+                                Okul
+                            </th>
+
+                            <th>
+                                Bölüm
+                            </th>
+
+                            <th>
+                                Mezuniyet
+                            </th>
+
+                            <th>
+                                Puanlamada
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        {% for item in educations %}
+
+                            <tr>
+
+                                <td>
+                                    {{ item.education_level }}
+                                </td>
+
+                                <td>
+                                    {{ item.school_name|default:"-" }}
+                                </td>
+
+                                <td>
+                                    {{ item.department_name|default:"-" }}
+                                </td>
+
+                                <td>
+                                    {{ item.graduation_date|date:"d.m.Y"|default:"-" }}
+                                </td>
+
+                                <td>
+
+                                    {% if item.is_primary_for_scoring %}
+
+                                        <span class="badge text-bg-success">
+                                            Kullanılıyor
+                                        </span>
+
+                                    {% else %}
+
+                                        -
+
+                                    {% endif %}
+
+                                </td>
+
+                            </tr>
+
+                        {% empty %}
+
+                            <tr>
+
+                                <td
+                                    colspan="5"
+                                    class="text-center py-4 text-muted"
+                                >
+                                    Eğitim bilgisi bulunmuyor.
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- GEÇMİŞ -->
+
+    <div
+        class="tab-pane fade"
+        id="history"
+    >
+
+        <div class="row g-4">
+
+
+            <div class="col-xl-6">
+
+                <div class="card border-0 shadow-sm h-100">
+
+                    <div class="card-header bg-white">
+                        <strong>
+                            Birim Geçmişi
+                        </strong>
+                    </div>
+
+                    <div class="card-body">
+
+                        {% for item in department_history %}
+
+                            <div class="timeline-item">
+
+                                <div class="timeline-title">
+                                    {{ item.unit|default:item.department }}
+                                </div>
+
+                                <div class="timeline-meta">
+                                    {{ item.start_date|date:"d.m.Y" }}
+                                    -
+                                    {% if item.end_date %}
+                                        {{ item.end_date|date:"d.m.Y" }}
+                                    {% else %}
+                                        Devam ediyor
+                                    {% endif %}
+                                </div>
+
+                            </div>
+
+                        {% empty %}
+
+                            <div class="text-muted">
+                                Kayıt bulunmuyor.
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="col-xl-6">
+
+                <div class="card border-0 shadow-sm h-100">
+
+                    <div class="card-header bg-white">
+                        <strong>
+                            Ünvan Geçmişi
+                        </strong>
+                    </div>
+
+                    <div class="card-body">
+
+                        {% for item in title_history %}
+
+                            <div class="timeline-item">
+
+                                <div class="timeline-title">
+                                    {{ item.job_title }}
+                                </div>
+
+                                <div class="timeline-meta">
+                                    {{ item.start_date|date:"d.m.Y" }}
+                                    -
+                                    {% if item.end_date %}
+                                        {{ item.end_date|date:"d.m.Y" }}
+                                    {% else %}
+                                        Devam ediyor
+                                    {% endif %}
+                                </div>
+
+                            </div>
+
+                        {% empty %}
+
+                            <div class="text-muted">
+                                Kayıt bulunmuyor.
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="col-12">
+
+                <div class="card border-0 shadow-sm">
+
+                    <div class="card-header bg-white">
+                        <strong>
+                            İş Kolu Geçmişi
+                        </strong>
+                    </div>
+
+                    <div class="table-responsive">
+
+                        <table class="table mb-0">
+
+                            <thead class="table-light">
+
+                                <tr>
+
+                                    <th>
+                                        İş Kolu
+                                    </th>
+
+                                    <th>
+                                        Başlangıç
+                                    </th>
+
+                                    <th>
+                                        Bitiş
+                                    </th>
+
+                                    <th>
+                                        Açıklama
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+                            <tbody>
+
+                                {% for item in assignment_history %}
+
+                                    <tr>
+
+                                        <td>
+                                            {{ item.job_role }}
+                                        </td>
+
+                                        <td>
+                                            {{ item.start_date|date:"d.m.Y" }}
+                                        </td>
+
+                                        <td>
+                                            {{ item.end_date|date:"d.m.Y"|default:"Devam ediyor" }}
+                                        </td>
+
+                                        <td>
+                                            {{ item.description|default:"-" }}
+                                        </td>
+
+                                    </tr>
+
+                                {% empty %}
+
+                                    <tr>
+                                        <td
+                                            colspan="4"
+                                            class="text-center py-4 text-muted"
+                                        >
+                                            Kayıt bulunmuyor.
+                                        </td>
+                                    </tr>
+
+                                {% endfor %}
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- PERFORMANS -->
+
+    <div
+        class="tab-pane fade"
+        id="performance"
+    >
+    
+    {% for score in period_scores %}
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-header bg-white">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <div>
+
+                    <strong>
+                        {{ score.period.name }}
+                    </strong>
+
+                    <div class="small text-muted">
+                        {{ score.formula.name }}
+                    </div>
+
+                </div>
+
+                <div class="text-end">
+
+                    <div class="small text-muted">
+                        Nihai Skor
+                    </div>
+
+                    <div class="fs-3 fw-bold">
+                        {{ score.final_score|floatformat:2 }}
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="card-body">
+
+            <div class="row g-3">
+
+                {% for component in score.components.all %}
+
+                    <div class="col-md-6 col-xl-3">
+
+                        <div class="score-component-card">
+
+                            <div class="small text-muted mb-2">
+                                {{ component.component.name }}
+                            </div>
+
+                            <div class="fs-4 fw-semibold">
+                                {{ component.raw_score|floatformat:2 }}
+                            </div>
+
+                            <div class="small text-muted mt-2">
+                                Ağırlık:
+                                %{{ component.weight|floatformat:0 }}
+                            </div>
+
+                            <div class="small">
+                                Katkı:
+                                <strong>
+                                    {{ component.weighted_score|floatformat:2 }}
+                                </strong>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+{% empty %}
+
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-body text-center py-5 text-muted">
+
+            <i class="bi bi-bar-chart fs-1 d-block mb-2"></i>
+
+            Henüz hesaplanmış dönem skoru bulunmuyor.
+
+        </div>
+
+    </div>
+
+{% endfor %}
+
+        <div class="card border-0 shadow-sm">
+
+            <div class="card-header bg-white">
+                <strong>
+                    Dönem Skorları
+                </strong>
+            </div>
+
+
+            <div class="table-responsive">
+
+                <table class="table align-middle mb-0">
+
+                    <thead class="table-light">
+
+                        <tr>
+
+                            <th>
+                                Dönem
+                            </th>
+
+                            <th>
+                                Formül
+                            </th>
+
+                            <th>
+                                Nihai Skor
+                            </th>
+
+                            <th>
+                                Durum
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for score in period_scores %}
+
+                            <tr>
+
+                                <td>
+                                    {{ score.period }}
+                                </td>
+
+                                <td>
+                                    {{ score.formula }}
+                                </td>
+
+                                <td>
+
+                                    <strong>
+                                        {{ score.final_score|floatformat:2 }}
+                                    </strong>
+
+                                </td>
+
+                                <td>
+
+                                    {% if score.locked %}
+
+                                        <span class="badge text-bg-success">
+                                            Kesinleşti
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="badge text-bg-warning">
+                                            Taslak
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+                            </tr>
+
+                        {% empty %}
+
+                            <tr>
+
+                                <td
+                                    colspan="4"
+                                    class="text-center py-4 text-muted"
+                                >
+                                    Henüz dönem skoru bulunmuyor.
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- UPGRADE -->
+
+    <div
+        class="tab-pane fade"
+        id="upgrades"
+    >
+
+        <div class="card border-0 shadow-sm">
+
+            <div class="card-header bg-white">
+                <strong>
+                    Kariyer / Upgrade Geçmişi
+                </strong>
+            </div>
+
+            <div class="table-responsive">
+
+                <table class="table mb-0 align-middle">
+
+                    <thead class="table-light">
+
+                        <tr>
+
+                            <th>
+                                Tarih
+                            </th>
+
+                            <th>
+                                İş Kolu
+                            </th>
+
+                            <th>
+                                Önceki Seviye
+                            </th>
+
+                            <th>
+                                Yeni Seviye
+                            </th>
+
+                            <th>
+                                Açıklama
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for item in upgrades %}
+
+                            <tr>
+
+                                <td>
+                                    {{ item.effective_date|date:"d.m.Y" }}
+                                </td>
+
+                                <td>
+                                    {{ item.job_role }}
+                                </td>
+
+                                <td>
+                                    {{ item.from_level|default:"-" }}
+                                </td>
+
+                                <td>
+
+                                    <span class="badge text-bg-success">
+                                        {{ item.to_level }}
+                                    </span>
+
+                                </td>
+
+                                <td>
+                                    {{ item.reason|default:"-" }}
+                                </td>
+
+                            </tr>
+
+                        {% empty %}
+
+                            <tr>
+
+                                <td
+                                    colspan="5"
+                                    class="text-center py-4 text-muted"
+                                >
+                                    Upgrade kaydı bulunmuyor.
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

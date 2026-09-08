@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}
+Yeni Dönem
+{% endblock %}
+
+{% block content %}
+
+<div class="mb-4">
+
+    <a
+        href="{% url 'performance:period_list' %}"
+        class="text-decoration-none small"
+    >
+        <i class="bi bi-arrow-left"></i>
+        Dönemler
+    </a>
+
+</div>
+
+
+<div class="row justify-content-center">
+
+    <div class="col-xl-8">
+
+        <div class="card border-0 shadow-sm">
+
+            <div class="card-header bg-white p-4">
+
+                <h4 class="mb-1">
+                    Yeni Değerlendirme Dönemi
+                </h4>
+
+                <div class="text-muted">
+                    Yeni 6 aylık performans dönemini oluşturun.
+                </div>
+
+            </div>
+
+            <div class="card-body p-4">
+
+                <form method="post">
+
+                    {% csrf_token %}
+
+                    {% if form.non_field_errors %}
+
+                        <div class="alert alert-danger">
+                            {{ form.non_field_errors }}
+                        </div>
+
+                    {% endif %}
+
+
+                    <div class="mb-4">
+
+                        <label class="form-label">
+                            Dönem Adı
+                        </label>
+
+                        {{ form.name }}
+
+                        {% for error in form.name.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ error }}
+                            </div>
+                        {% endfor %}
+
+                    </div>
+
+
+                    <div class="row g-4">
+
+                        <div class="col-md-6">
+
+                            <label class="form-label">
+                                Dönem Başlangıcı
+                            </label>
+
+                            {{ form.start_date }}
+
+                        </div>
+
+                        <div class="col-md-6">
+
+                            <label class="form-label">
+                                Dönem Bitişi
+                            </label>
+
+                            {{ form.end_date }}
+
+                        </div>
+
+
+                        <div class="col-md-6">
+
+                            <label class="form-label">
+                                Değerlendirme Başlangıcı
+                            </label>
+
+                            {{ form.evaluation_start_date }}
+
+                        </div>
+
+                        <div class="col-md-6">
+
+                            <label class="form-label">
+                                Değerlendirme Bitişi
+                            </label>
+
+                            {{ form.evaluation_end_date }}
+
+                        </div>
+
+                    </div>
+
+
+                    <hr class="my-4">
+
+
+                    <div class="d-flex justify-content-end gap-2">
+
+                        <a
+                            href="{% url 'performance:period_list' %}"
+                            class="btn btn-outline-secondary"
+                        >
+                            Vazgeç
+                        </a>
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary"
+                        >
+                            <i class="bi bi-check-lg me-1"></i>
+                            Dönemi Oluştur
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

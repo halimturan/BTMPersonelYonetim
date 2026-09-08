@@ -1,62 +1,538 @@
 {% extends "base.html" %}
 
+{% block title %}
+Performans Değerlendirmesi
+{% endblock %}
+
+
 {% block content %}
 
-<h1>
-    Performans Değerlendirmesi
-</h1>
+<div class="mb-3">
 
-<div>
+    <a
+        href="{% url 'performance:my_reviews' %}"
+        class="text-decoration-none small"
+    >
+        <i class="bi bi-arrow-left"></i>
+        Değerlendirmelerim
+    </a>
 
-    <strong>
-        {{ review.evaluation.employee.full_name }}
-    </strong>
+</div>
 
-    <div>
-        {{ review.evaluation.period }}
-    </div>
 
-    <div>
-        Değerlendirici Rolü:
-        {{ review.reviewer_role }}
+<div class="card border-0 shadow-sm mb-4">
+
+    <div class="card-body p-4">
+
+        <div
+            class="d-flex
+                   justify-content-between
+                   align-items-start"
+        >
+
+            <div>
+
+                <div
+                    class="small
+                           text-muted
+                           mb-1"
+                >
+                    Performans Değerlendirmesi
+                </div>
+
+                <h3 class="mb-1">
+
+                    {{ review.evaluation.employee.full_name }}
+
+                </h3>
+
+                <div class="text-muted">
+
+                    {{ review.evaluation.period.name }}
+
+                    ·
+
+                    {{ review.reviewer_role }}
+
+                </div>
+
+            </div>
+
+
+            <div class="text-end">
+
+                {% if review.submitted_at %}
+
+                    <span
+                        class="badge
+                               text-bg-success
+                               fs-6"
+                    >
+                        <i
+                            class="bi
+                                   bi-check-circle
+                                   me-1"
+                        ></i>
+
+                        Tamamlandı
+                    </span>
+
+                {% else %}
+
+                    <span
+                        class="badge
+                               text-bg-warning
+                               fs-6"
+                    >
+                        Bekliyor
+                    </span>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
     </div>
 
 </div>
 
 
-<form method="post">
+{% if missing_criteria and not review.submitted_at %}
 
-    {% csrf_token %}
+    <div class="alert alert-warning">
 
-    {% for field in form %}
+        <div class="d-flex">
 
-        <div>
+            <i
+                class="bi
+                       bi-exclamation-triangle
+                       fs-4
+                       me-3"
+            ></i>
 
-            <label>
-                {{ field.label }}
-            </label>
+            <div>
 
-            {% if field.help_text %}
-                <p>
-                    {{ field.help_text }}
-                </p>
-            {% endif %}
+                <strong>
+                    Eksik değerlendirme var.
+                </strong>
 
-            {{ field }}
+                <div>
+                    Değerlendirmeyi gönderebilmek
+                    için zorunlu kriterlerin
+                    tamamını puanlamalısınız.
+                </div>
 
-            {% if field.errors %}
-                {{ field.errors }}
-            {% endif %}
+            </div>
 
         </div>
 
-    {% endfor %}
+    </div>
+
+{% endif %}
 
 
-    <button type="submit">
-        Taslak Kaydet
-    </button>
+<div class="row g-4">
 
-</form>
+    <div class="col-xl-9">
+
+        <form method="post" id="reviewForm">
+
+            {% csrf_token %}
+
+
+            {% for row in criterion_rows %}
+
+                <div
+                    class="card
+                           border-0
+                           shadow-sm
+                           mb-3
+                           criterion-card"
+                >
+
+                    <div class="card-body p-4">
+
+                        <div class="row g-4">
+
+                            <div class="col-lg-8">
+
+                                <div
+                                    class="d-flex
+                                           align-items-start"
+                                >
+
+                                    <div
+                                        class="criterion-number
+                                               me-3"
+                                    >
+                                        {{ forloop.counter }}
+                                    </div>
+
+                                    <div>
+
+                                        <h5 class="mb-1">
+
+                                            {{ row.criterion.name }}
+
+                                        </h5>
+
+                                        {% if row.criterion.description %}
+
+                                            <div
+                                                class="text-muted"
+                                            >
+                                                {{ row.criterion.description }}
+                                            </div>
+
+                                        {% endif %}
+
+                                        {% if row.item.required %}
+
+                                            <span
+                                                class="badge
+                                                       text-bg-light
+                                                       border
+                                                       mt-2"
+                                            >
+                                                Zorunlu
+                                            </span>
+
+                                        {% endif %}
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="col-lg-4">
+
+                                <label
+                                    class="form-label
+                                           fw-semibold"
+                                >
+                                    Puan
+
+                                    <span
+                                        class="text-muted
+                                               fw-normal"
+                                    >
+                                        / {{ row.item.max_score|floatformat:0 }}
+                                    </span>
+                                </label>
+
+                                {{ row.score_field }}
+
+                                {% if row.score_field.errors %}
+
+                                    <div
+                                        class="text-danger
+                                               small
+                                               mt-1"
+                                    >
+                                        {{ row.score_field.errors }}
+                                    </div>
+
+                                {% endif %}
+
+                            </div>
+
+
+                            <div class="col-12">
+
+                                <label class="form-label">
+                                    Açıklama
+                                </label>
+
+                                {{ row.comment_field }}
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+
+            {% if not review.submitted_at %}
+
+                <div
+                    class="card
+                           border-0
+                           shadow-sm
+                           sticky-review-actions"
+                >
+
+                    <div
+                        class="card-body
+                               d-flex
+                               justify-content-between
+                               align-items-center"
+                    >
+
+                        <div>
+
+                            <div class="small text-muted">
+                                Toplam Puan
+                            </div>
+
+                            <strong
+                                class="fs-4"
+                                id="currentScore"
+                            >
+                                0
+                            </strong>
+
+                            <span class="text-muted">
+                                / 100
+                            </span>
+
+                        </div>
+
+
+                        <div class="d-flex gap-2">
+
+                            <button
+                                type="submit"
+                                name="action"
+                                value="draft"
+                                class="btn
+                                       btn-outline-primary"
+                            >
+                                <i
+                                    class="bi
+                                           bi-save
+                                           me-1"
+                                ></i>
+
+                                Taslak Kaydet
+                            </button>
+
+
+                            <button
+                                type="submit"
+                                name="action"
+                                value="submit"
+                                class="btn
+                                       btn-success"
+                                onclick="
+                                    return confirm(
+                                        'Değerlendirmeyi gönderdikten sonra değiştiremeyeceksiniz. Devam edilsin mi?'
+                                    );
+                                "
+                            >
+                                <i
+                                    class="bi
+                                           bi-send
+                                           me-1"
+                                ></i>
+
+                                Değerlendirmeyi Gönder
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            {% else %}
+
+                <div
+                    class="alert
+                           alert-success
+                           mt-4"
+                >
+
+                    <i
+                        class="bi
+                               bi-check-circle
+                               me-2"
+                    ></i>
+
+                    Bu değerlendirme
+                    {{ review.submitted_at|date:"d.m.Y H:i" }}
+                    tarihinde tamamlandı.
+
+                </div>
+
+            {% endif %}
+
+        </form>
+
+    </div>
+
+
+    <div class="col-xl-3">
+
+        <div
+            class="card
+                   border-0
+                   shadow-sm
+                   review-summary"
+        >
+
+            <div class="card-header bg-white">
+
+                <strong>
+                    Değerlendirme Özeti
+                </strong>
+
+            </div>
+
+            <div class="card-body">
+
+                <div class="summary-row">
+
+                    <span>
+                        Dönem
+                    </span>
+
+                    <strong>
+                        {{ review.evaluation.period.name }}
+                    </strong>
+
+                </div>
+
+
+                <div class="summary-row">
+
+                    <span>
+                        Rolünüz
+                    </span>
+
+                    <strong>
+                        {{ review.reviewer_role }}
+                    </strong>
+
+                </div>
+
+
+                <div class="summary-row">
+
+                    <span>
+                        Ağırlığınız
+                    </span>
+
+                    <strong>
+                        %{{ review.weight|floatformat:0 }}
+                    </strong>
+
+                </div>
+
+
+                <hr>
+
+
+                <div class="summary-row">
+
+                    <span>
+                        Ham Puan
+                    </span>
+
+                    <strong>
+                        {{ review.raw_score|default:0|floatformat:2 }}
+                    </strong>
+
+                </div>
+
+
+                <div class="summary-row">
+
+                    <span>
+                        Ağırlıklı Puan
+                    </span>
+
+                    <strong>
+                        {{ review.weighted_score|default:0|floatformat:2 }}
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+
+<script>
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+        const inputs = document.querySelectorAll(
+            ".score-input"
+        );
+
+        const totalElement = document.getElementById(
+            "currentScore"
+        );
+
+        function calculateTotal() {
+
+            let score = 0;
+            let maxScore = 0;
+
+            inputs.forEach(function (input) {
+
+                const value = parseFloat(
+                    input.value || 0
+                );
+
+                const max = parseFloat(
+                    input.dataset.maxScore || 0
+                );
+
+                score += value;
+                maxScore += max;
+
+            });
+
+            if (!totalElement) {
+                return;
+            }
+
+            if (maxScore === 0) {
+                totalElement.textContent = "0";
+                return;
+            }
+
+            const normalized = (
+                score / maxScore
+            ) * 100;
+
+            totalElement.textContent =
+                normalized.toFixed(2);
+
+        }
+
+        inputs.forEach(function (input) {
+
+            input.addEventListener(
+                "input",
+                calculateTotal
+            );
+
+        });
+
+        calculateTotal();
+
+    }
+);
+
+</script>
 
 {% endblock %}

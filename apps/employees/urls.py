@@ -6,6 +6,6 @@ app_name = "employees"
 
 
 urlpatterns = [
-    path("list/", EmployeeListView.as_view(), name="employee_list"),
-    path("detailt/<int:id>/", EmployeeDetailView.as_view(), name="employee_detail"),
+    path("", EmployeeListView.as_view(), name="employee_list"),
+    path("<int:pk>/", EmployeeDetailView.as_view(), name="employee_detail"),
 ]

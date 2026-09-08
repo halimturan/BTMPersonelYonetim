@@ -130,11 +130,11 @@ class EducationLevel(TimeStampedModel):
 
 
 class EmployeeEducation(TimeStampedModel):
-    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name="educations")
-    education_level = models.ForeignKey(EducationLevel, on_delete=models.PROTECT)
-    school_name = models.CharField(max_length=250, blank=True)
-    department_name = models.CharField(max_length=250, blank=True)
-    graduation_date = models.DateField(null=True, blank=True)
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name="educations", verbose_name="Personel")
+    education_level = models.ForeignKey(EducationLevel, on_delete=models.PROTECT, verbose_name="Eğitim Seviyesi")
+    school_name = models.CharField(max_length=250, blank=True, verbose_name="Okul Adı")
+    department_name = models.CharField(max_length=250, blank=True, verbose_name="Bölüm")
+    graduation_date = models.DateField(null=True, blank=True, verbose_name="Mezuniyet Tarihi")
     is_it_related = models.BooleanField(default=False)
     is_engineering = models.BooleanField(default=False)
     is_open_education = models.BooleanField(default=False)

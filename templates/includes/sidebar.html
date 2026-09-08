@@ -1,0 +1,49 @@
+<aside class="sidebar">
+
+    <div class="sidebar-brand">
+        <div class="sidebar-logo">
+            PP
+        </div>
+
+        <div>
+            <strong>
+                Performans
+            </strong>
+
+            <small class="d-block">
+                Yönetim Sistemi
+            </small>
+        </div>
+    </div>
+
+
+    <nav class="sidebar-nav">
+
+        <a href="{% url 'dashboard:index' %}" class="sidebar-link">
+            <i class="bi bi-grid"></i>
+            Dashboard
+        </a>
+
+
+        {% if perms.employees.view_employee %}
+            <a href="{% url 'employees:employee_list' %}" class="sidebar-link">
+                <i class="bi bi-people"></i>
+                Personeller
+            </a>
+        {% endif %}
+
+
+        <a href="{% url 'performance:my_reviews' %}" class="sidebar-link">
+            <i class="bi bi-clipboard-check"></i>
+            Değerlendirmelerim
+        </a>
+
+
+        {% if perms.performance.view_evaluationperiod %}
+            <a href="{% url 'performance:period_list' %}" class="sidebar-link">
+                <i class="bi bi-calendar3"></i>
+                Dönem Yönetimi
+            </a>
+        {% endif %}
+    </nav>
+</aside>

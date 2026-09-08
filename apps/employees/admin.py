@@ -9,7 +9,6 @@ class EmployeeEducationInline(admin.TabularInline):
     verbose_name_plural = "Eğitimler"
     model = EmployeeEducation
     extra = 0
-    autocomplete_fields = ("education_level",)
     fields = (
         "education_level", "school_name", "department_name", "graduation_date", "is_it_related", "is_engineering",
         "is_open_education", "is_primary_for_scoring",

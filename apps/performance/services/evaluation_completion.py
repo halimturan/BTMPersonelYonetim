@@ -2,7 +2,7 @@ from decimal import Decimal
 
 from django.db import transaction
 from django.utils import timezone
-
+from apps.scoring.services.final_score import  EmployeeFinalScoreCalculator, FinalScoreCalculationError
 
 class EvaluationCompletionService:
     def __init__(self, evaluation):
@@ -44,5 +44,14 @@ class EvaluationCompletionService:
                 "updated_at",
             ]
         )
+
+        try:
+            EmployeeFinalScoreCalculator(
+                employee=self.evaluation.employee,
+                period=self.evaluation.period,
+            ).calculate_and_save()
+
+        except FinalScoreCalculationError:
+            pass
 
         return True

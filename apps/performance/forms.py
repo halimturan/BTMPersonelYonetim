@@ -88,4 +88,110 @@ class PerformanceReviewForm(forms.Form):
 
         return self.reviewer
 
+from django import forms
+
+from apps.performance.models import EvaluationPeriod
+
+
+class EvaluationPeriodForm(forms.ModelForm):
+    class Meta:
+        model = EvaluationPeriod
+
+        fields = (
+            "name",
+            "start_date",
+            "end_date",
+            "evaluation_start_date",
+            "evaluation_end_date",
+        )
+
+        widgets = {
+            "name": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Örn. 2026 / 2",
+                }
+            ),
+
+            "start_date": forms.DateInput(
+                attrs={
+                    "class": "form-control",
+                    "type": "date",
+                }
+            ),
+
+            "end_date": forms.DateInput(
+                attrs={
+                    "class": "form-control",
+                    "type": "date",
+                }
+            ),
+
+            "evaluation_start_date": forms.DateInput(
+                attrs={
+                    "class": "form-control",
+                    "type": "date",
+                }
+            ),
+
+            "evaluation_end_date": forms.DateInput(
+                attrs={
+                    "class": "form-control",
+                    "type": "date",
+                }
+            ),
+        }
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        start_date = cleaned_data.get(
+            "start_date"
+        )
+
+        end_date = cleaned_data.get(
+            "end_date"
+        )
+
+        evaluation_start_date = (
+            cleaned_data.get(
+                "evaluation_start_date"
+            )
+        )
+
+        evaluation_end_date = (
+            cleaned_data.get(
+                "evaluation_end_date"
+            )
+        )
+
+        if (
+            start_date
+            and end_date
+            and start_date >= end_date
+        ):
+            self.add_error(
+                "end_date",
+                (
+                    "Dönem bitiş tarihi başlangıç "
+                    "tarihinden sonra olmalıdır."
+                ),
+            )
+
+        if (
+            evaluation_start_date
+            and evaluation_end_date
+            and evaluation_start_date
+            >= evaluation_end_date
+        ):
+            self.add_error(
+                "evaluation_end_date",
+                (
+                    "Değerlendirme bitiş tarihi "
+                    "başlangıç tarihinden sonra olmalıdır."
+                ),
+            )
+
+        return cleaned_data
+
 

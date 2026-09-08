@@ -1,0 +1,520 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ period.name }}
+{% endblock %}
+
+{% block content %}
+
+
+<div class="mb-3">
+
+    <a
+        href="{% url 'performance:period_list' %}"
+        class="text-decoration-none small"
+    >
+        <i class="bi bi-arrow-left"></i>
+        Dönemler
+    </a>
+
+</div>
+
+
+<div class="d-flex justify-content-between align-items-start mb-4">
+
+    <div>
+
+        <h3 class="mb-1">
+            {{ period.name }}
+        </h3>
+
+        <div class="text-muted">
+            {{ period.start_date|date:"d.m.Y" }}
+            -
+            {{ period.end_date|date:"d.m.Y" }}
+        </div>
+
+    </div>
+
+
+    <div>
+
+        {% if period.is_locked %}
+
+            <span class="badge text-bg-secondary fs-6">
+                <i class="bi bi-lock me-1"></i>
+                Kilitli
+            </span>
+
+        {% elif period.is_active %}
+
+            <span class="badge text-bg-success fs-6">
+                Aktif
+            </span>
+
+        {% else %}
+
+            <span class="badge text-bg-warning fs-6">
+                Hazırlık
+            </span>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+
+<div class="row g-4 mb-4">
+
+    <div class="col-md-3">
+
+        <div class="card border-0 shadow-sm h-100">
+
+            <div class="card-body">
+
+                <div class="small text-muted">
+                    Değerlendirme
+                </div>
+
+                <div class="display-6 fw-semibold">
+                    {{ period.evaluation_count }}
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-md-3">
+
+        <div class="card border-0 shadow-sm h-100">
+
+            <div class="card-body">
+
+                <div class="small text-muted">
+                    Tamamlanan
+                </div>
+
+                <div class="display-6 fw-semibold">
+                    {{ period.completed_count }}
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-md-3">
+
+        <div class="card border-0 shadow-sm h-100">
+
+            <div class="card-body">
+
+                <div class="small text-muted">
+                    Değerlendirici Ataması
+                </div>
+
+                <div class="display-6 fw-semibold">
+                    {{ reviewer_count }}
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-md-3">
+
+        <div class="card border-0 shadow-sm h-100">
+
+            <div class="card-body">
+
+                <div class="small text-muted">
+                    Tamamlanma
+                </div>
+
+                <div class="display-6 fw-semibold">
+                    %{{ completion_percentage }}
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+{% if not period.is_locked %}
+
+<div class="card border-0 shadow-sm mb-4">
+
+    <div class="card-header bg-white">
+        <strong>
+            Dönem İşlemleri
+        </strong>
+    </div>
+
+    <div class="card-body">
+
+        <div class="d-flex flex-wrap gap-2">
+
+            {% if not period.evaluation_count %}
+
+                <form
+                    method="post"
+                    action="{% url 'performance:period_validate' period.pk %}"
+                >
+
+                    {% csrf_token %}
+
+                    <button
+                        type="submit"
+                        class="btn btn-outline-primary"
+                    >
+                        <i class="bi bi-shield-check me-1"></i>
+                        Ön Kontrol Yap
+                    </button>
+
+                </form>
+
+
+                {% if validation and validation.valid %}
+
+                    <form
+                        method="post"
+                        action="{% url 'performance:period_initialize' period.pk %}"
+                    >
+
+                        {% csrf_token %}
+
+                        <button
+                            type="submit"
+                            class="btn btn-success"
+                            onclick="
+                                return confirm(
+                                    'Tüm personel için değerlendirme kayıtları oluşturulacak. Devam edilsin mi?'
+                                );
+                            "
+                        >
+                            <i class="bi bi-play-fill me-1"></i>
+                            Değerlendirmeleri Oluştur
+                        </button>
+
+                    </form>
+
+                {% endif %}
+
+            {% endif %}
+
+
+            {% if period.evaluation_count and not period.is_locked %}
+
+                <form
+                    method="post"
+                    action="{% url 'performance:period_lock' period.pk %}"
+                >
+
+                    {% csrf_token %}
+
+                    <button
+                        type="submit"
+                        class="btn btn-outline-danger"
+                        onclick="
+                            return confirm(
+                                'Dönem kilitlendikten sonra değerlendirmeler değiştirilemeyecek. Devam edilsin mi?'
+                            );
+                        "
+                    >
+                        <i class="bi bi-lock me-1"></i>
+                        Dönemi Kilitle
+                    </button>
+
+                </form>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endif %}
+
+
+{% if validation %}
+
+<div class="card border-0 shadow-sm mb-4">
+
+    <div class="card-header bg-white d-flex justify-content-between">
+
+        <strong>
+            Ön Kontrol Sonucu
+        </strong>
+
+        {% if validation.valid %}
+
+            <span class="badge text-bg-success">
+                Başarılı
+            </span>
+
+        {% else %}
+
+            <span class="badge text-bg-danger">
+                Hata Var
+            </span>
+
+        {% endif %}
+
+    </div>
+
+
+    <div class="card-body">
+
+        <div class="row g-3 mb-4">
+
+            <div class="col-md-3">
+                <div class="validation-stat">
+                    <small>Personel</small>
+                    <strong>
+                        {{ validation.employee_count }}
+                    </strong>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="validation-stat">
+                    <small>Hazır</small>
+                    <strong>
+                        {{ validation.ready_count }}
+                    </strong>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="validation-stat">
+                    <small>Hata</small>
+                    <strong>
+                        {{ validation.error_count }}
+                    </strong>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="validation-stat">
+                    <small>Uyarı</small>
+                    <strong>
+                        {{ validation.warning_count }}
+                    </strong>
+                </div>
+            </div>
+
+        </div>
+
+
+        {% if validation.issues %}
+
+            <div class="table-responsive">
+
+                <table class="table align-middle">
+
+                    <thead class="table-light">
+                        <tr>
+                            <th>Personel No</th>
+                            <th>Personel</th>
+                            <th>Durum</th>
+                            <th>Açıklama</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for issue in validation.issues %}
+
+                            <tr>
+
+                                <td>
+                                    {{ issue.personnel_no }}
+                                </td>
+
+                                <td>
+
+                                    {% if issue.employee_id %}
+
+                                        <a
+                                            href="{% url 'employees:detail' issue.employee_id %}"
+                                        >
+                                            {{ issue.employee_name }}
+                                        </a>
+
+                                    {% else %}
+
+                                        {{ issue.employee_name }}
+
+                                    {% endif %}
+
+                                </td>
+
+                                <td>
+
+                                    {% if issue.severity == "error" %}
+
+                                        <span class="badge text-bg-danger">
+                                            Hata
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="badge text-bg-warning">
+                                            Uyarı
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+                                <td>
+                                    {{ issue.message }}
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        {% else %}
+
+            <div class="alert alert-success mb-0">
+
+                <i class="bi bi-check-circle me-2"></i>
+
+                Organizasyon, değerlendirme profilleri,
+                kriterler ve değerlendirici atamaları hazır.
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endif %}
+
+
+{% if period.evaluation_count %}
+
+<div class="card border-0 shadow-sm">
+
+    <div class="card-header bg-white">
+        <strong>
+            Personel Değerlendirmeleri
+        </strong>
+    </div>
+
+    <div class="table-responsive">
+
+        <table class="table table-hover align-middle mb-0">
+
+            <thead class="table-light">
+
+                <tr>
+                    <th>Personel</th>
+                    <th>Şablon</th>
+                    <th>Değerlendirici</th>
+                    <th>Performans Skoru</th>
+                    <th>Durum</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for evaluation in evaluations %}
+
+                    <tr>
+
+                        <td>
+
+                            <a
+                                href="{% url 'employees:detail' evaluation.employee.pk %}"
+                                class="text-decoration-none fw-semibold"
+                            >
+                                {{ evaluation.employee.full_name }}
+                            </a>
+
+                            <div class="small text-muted">
+                                {{ evaluation.employee.personnel_no }}
+                            </div>
+
+                        </td>
+
+                        <td>
+                            {{ evaluation.template.name }}
+                        </td>
+
+                        <td>
+                            {{ evaluation.reviewers.count }}
+                        </td>
+
+                        <td>
+
+                            {% if evaluation.final_performance_score is not None %}
+
+                                <strong>
+                                    {{ evaluation.final_performance_score|floatformat:2 }}
+                                </strong>
+
+                            {% else %}
+                                -
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            {% if evaluation.completed_at %}
+
+                                <span class="badge text-bg-success">
+                                    Tamamlandı
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge text-bg-warning">
+                                    Devam Ediyor
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+{% endif %}
+
+{% endblock %}

@@ -1,10 +1,150 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends "base.html" %}
 
-</body>
-</html>
+
+{% block title %}
+Dashboard
+{% endblock %}
+
+
+{% block content %}
+
+<div class="mb-4">
+
+    <h3 class="mb-1">
+        Dashboard
+    </h3>
+
+    <div class="text-muted">
+        Personel performans yönetim sistemi
+    </div>
+
+</div>
+
+
+<div class="row g-4">
+
+    <div class="col-md-4">
+
+        <div class="card border-0 shadow-sm">
+
+            <div class="card-body">
+
+                <div class="text-muted mb-2">
+                    Görüntüleyebildiğim Personel
+                </div>
+
+                <div class="display-6 fw-semibold">
+                    {{ visible_employee_count }}
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-md-4">
+
+        <div class="card border-0 shadow-sm">
+
+            <div class="card-body">
+
+                <div class="text-muted mb-2">
+                    Bekleyen Değerlendirmeler
+                </div>
+
+                <div class="display-6 fw-semibold">
+                    {{ pending_review_count }}
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<div class="card border-0 shadow-sm mt-4">
+
+    <div class="card-header bg-white">
+        <strong>
+            Bekleyen Değerlendirmeler
+        </strong>
+    </div>
+
+    <div class="card-body p-0">
+
+        {% if pending_reviews %}
+
+            <div class="table-responsive">
+
+                <table class="table table-hover mb-0">
+
+                    <thead>
+
+                        <tr>
+                            <th>
+                                Personel
+                            </th>
+
+                            <th>
+                                Dönem
+                            </th>
+
+                            <th>
+                            </th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for review in pending_reviews %}
+
+                            <tr>
+
+                                <td>
+                                    {{ review.evaluation.employee.full_name }}
+                                </td>
+
+                                <td>
+                                    {{ review.evaluation.period.name }}
+                                </td>
+
+                                <td class="text-end">
+
+                                    <a
+                                        href="{% url 'performance:my_review_detail' review.pk %}"
+                                        class="btn btn-sm btn-primary"
+                                    >
+                                        Değerlendir
+                                    </a>
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        {% else %}
+
+            <div class="p-4 text-muted">
+                Bekleyen değerlendirme bulunmuyor.
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}

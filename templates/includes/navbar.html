@@ -1,0 +1,38 @@
+<nav class="navbar bg-white border-bottom px-4">
+
+    <div class="container-fluid">
+        <div>
+            {% block page_title %}
+            {% endblock %}
+        </div>
+
+        <div class="d-flex align-items-center gap-3">
+
+            {% if request.user.employee %}
+                <div class="text-end">
+                    <strong class="d-block">
+                        {{ request.user.employee.full_name }}
+                    </strong>
+
+                    <small class="text-muted">
+                        {{ request.user.employee.current_title|default:"-" }}
+                    </small>
+                </div>
+
+            {% else %}
+                <strong>
+                    {{ request.user.get_full_name|default:request.user.username }}
+                </strong>
+            {% endif %}
+
+
+            <form method="post" action="{% url 'accounts:logout' %}">
+                {% csrf_token %}
+                <button class="btn btn-sm btn-outline-secondary" type="submit">
+                    <i class="bi bi-box-arrow-right"></i>
+                </button>
+
+            </form>
+        </div>
+    </div>
+</nav>
