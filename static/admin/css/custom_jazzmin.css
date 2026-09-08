@@ -1,0 +1,20 @@
+/* Tekli Select seçim kutuları için kenarlık */
+.select2-container--default .select2-selection--single {
+    border: 1px solid #ced4da !important; /* Tercihe göre #aaa veya daha koyu bir gri yapabilirsiniz */
+    border-radius: 4px !important;
+}
+
+/* Çoklu (ManyToMany) Select seçim kutuları için kenarlık */
+.select2-container--default .select2-selection--multiple {
+    border: 1px solid #ced4da !important;
+    border-radius: 4px !important;
+}
+
+/* Select kutusuna odaklanıldığında (Focus) kenarlık rengi */
+.select2-selection .select2-selection--single,
+.select2-container--default.select2-container--focus .select2-selection--single,
+.select2-container--default.select2-container--focus .select2-selection--multiple {
+    border-color: #80bdff !important;
+    outline: 0 !important;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25) !important;
+}

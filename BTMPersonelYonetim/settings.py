@@ -157,6 +157,7 @@ LOGIN_REDIRECT_URL = "dashboard:index"
 LOGOUT_REDIRECT_URL = "accounts:login"
 
 JAZZMIN_SETTINGS = {
+    "custom_css": "admin/css/custom_jazzmin.css",
     "copyright": "Bilgi Teknolojileri Müdürlüğü",
     "site_title": "BTM Yönetim",
     "site_header": "BTM Yönetim Admin",
@@ -178,7 +179,6 @@ JAZZMIN_SETTINGS = {
         "employees": "fas fa-users",
         "employees.employee": "fas fa-user-shield",
         "employees.employeeupgrade": "fas fa-level-up",
-        "employees.employeereportingline": "fas fa-line-chart",
         "employees.educationlevel": "fas fa-graduation-cap",
         "performance": "fas fa-gauge",
         "performance.performancecriterion": "fas fa-list",

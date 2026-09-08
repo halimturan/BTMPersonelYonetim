@@ -57,13 +57,46 @@ class EmploymentType(TimeStampedModel):
         return self.name
 
 
+class ManagementLevel(TimeStampedModel):
+    """
+    Organizasyon hiyerarşisindeki yönetsel seviye.
+
+    Örnek:
+        Personel             order=10
+        Şef                  order=20
+        Müdür Yardımcısı     order=30
+        Müdür                order=40
+    """
+    name = models.CharField(max_length=100, verbose_name="İsim")
+    code = models.CharField(max_length=50, unique=True, verbose_name="Kod")
+    order = models.PositiveIntegerField(default=0, verbose_name="Ağırlık")
+    can_manage_people = models.BooleanField(default=False, verbose_name="Sistemde işlem yapabilir mi?")
+    active = models.BooleanField(default=True, verbose_name="Aktif mi?")
+
+    class Meta:
+        verbose_name = "Yönetsel Seviye"
+        verbose_name_plural = "Yönetse Seviyeler"
+        ordering = ["order"]
+
+    def __str__(self):
+        return self.name
+
+
 class JobTitle(TimeStampedModel):
     """
-    Resmi unvan:
-    Memur, Mühendis, Şef, Kıdemli Şef vb.
-    """
+    Resmî unvan.
 
+    Örnek:
+        Memur
+        Mühendis
+        Tekniker
+        Şef
+        Kıdemli Şef
+        Müdür Yardımcısı
+        Müdür
+    """
     name = models.CharField(max_length=150)
+    management_level = models.ForeignKey(ManagementLevel, null=True, blank=True, on_delete=models.PROTECT, related_name="job_titles")
     code = models.CharField(max_length=50, unique=True)
     active = models.BooleanField(default=True)
 
@@ -78,10 +111,13 @@ class JobTitle(TimeStampedModel):
 
 class JobRole(TimeStampedModel):
     """
-    Fiili görev:
-    Yazılım Geliştirici,
-    DevOps Yöneticisi,
-    Sistem Yöneticisi vb.
+    Personelin yaptığı iş.
+
+    Örnek:
+        Yazılım Geliştirici
+        İş Analisti
+        Sistem Yöneticisi
+        Teknik Servis
     """
     name = models.CharField(max_length=150)
     code = models.CharField(max_length=50, unique=True)
@@ -90,24 +126,6 @@ class JobRole(TimeStampedModel):
     class Meta:
         verbose_name_plural = "İş Kolları"
         ordering = ["name"]
-
-    def __str__(self):
-        return self.name
-
-
-class PositionType(models.Model):
-    name = models.CharField(max_length=100)
-    code = models.CharField(max_length=50, unique=True)
-    level = models.PositiveIntegerField()
-    active = models.BooleanField(default=True)
-
-
-class OrganizationPosition(models.Model):
-    unit = models.ForeignKey(Unit, on_delete=models.PROTECT, related_name="positions")
-    position_type = models.ForeignKey(PositionType, on_delete=models.PROTECT, related_name="positions")
-    parent = models.ForeignKey("self", null=True, blank=True, on_delete=models.PROTECT, related_name="children")
-    name = models.CharField(max_length=200)
-    active = models.BooleanField(default=True)
 
     def __str__(self):
         return self.name

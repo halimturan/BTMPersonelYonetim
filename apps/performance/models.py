@@ -156,6 +156,7 @@ class ReviewerSchemeItem(TimeStampedModel):
     """
     scheme = models.ForeignKey(ReviewerScheme, on_delete=models.CASCADE, related_name="items")
     reviewer_role = models.ForeignKey(ReviewerRole, on_delete=models.PROTECT)
+    management_level = models.ForeignKey("organization.ManagementLevel", on_delete=models.PROTECT, related_name="reviewer_scheme_items")
     weight = models.DecimalField(max_digits=6, decimal_places=2)
     order = models.PositiveIntegerField(default=0)
 
@@ -191,6 +192,7 @@ class EvaluationProfile(TimeStampedModel):
     department = models.ForeignKey(Department, null=True, blank=True, on_delete=models.PROTECT)
     priority = models.PositiveIntegerField(default=100)
     active = models.BooleanField(default=True)
+    management_level = models.ForeignKey("organization.ManagementLevel", null=True, blank=True, on_delete=models.PROTECT, related_name="evaluation_profiles")
 
     class Meta:
         ordering = ["priority", "name"]

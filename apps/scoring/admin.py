@@ -58,6 +58,7 @@ class ScoreFormulaAdmin(admin.ModelAdmin):
     list_filter = ("active", "valid_from", "valid_to",)
     search_fields = ("name", "description",)
     inlines = (ScoreFormulaComponentInline,)
+    attrs = {"class": "noSelect2DAL"}
 
 
 @admin.register(EducationScoreRule)
@@ -79,9 +80,9 @@ class JobRoleScoreRuleAdmin(admin.ModelAdmin):
 
 @admin.register(ExperienceSource)
 class ExperienceSourceAdmin(admin.ModelAdmin):
-    list_display = ("name", "code", "field_name", "active",)
+    list_display = ("name", "code", "active",)
     list_filter = ("active",)
-    search_fields = ("name", "code", "field_name")
+    search_fields = ("name", "code")
 
 
 @admin.register(ExperienceScoreRule)

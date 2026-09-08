@@ -1,5 +1,5 @@
 from django.contrib import admin
-from apps.organization.models import CareerLevel, Department, EmploymentType, JobRole, JobTitle, Unit
+from apps.organization.models import CareerLevel, Department, EmploymentType, JobRole, JobTitle, Unit, ManagementLevel
 
 
 class ActiveAdminMixin:
@@ -24,6 +24,14 @@ class UnitAdmin(ActiveAdminMixin, admin.ModelAdmin):
 class EmploymentTypeAdmin(ActiveAdminMixin, admin.ModelAdmin,):
     list_display = ("name", "code", "active",)
     search_fields = ("name", "code",)
+
+
+@admin.register(ManagementLevel)
+class ManagementLevelAdmin(ActiveAdminMixin, admin.ModelAdmin):
+    list_display = ("order", "name", "code", "can_manage_people", "active")
+    list_editable = ("name", "can_manage_people", "active")
+    search_fields = ("name", "code")
+    ordering = ("order",)
 
 
 @admin.register(JobTitle)

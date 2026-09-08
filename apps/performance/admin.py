@@ -22,21 +22,14 @@ class PerformanceTemplateCriterionInlineFormSet(
         total = Decimal("0")
 
         for form in self.forms:
-
-            if not hasattr(
-                form,
-                "cleaned_data",
-            ):
+            if not hasattr(form, "cleaned_data"):
                 continue
 
-            if form.cleaned_data.get(
-                "DELETE",
-                False,
-            ):
+            if form.cleaned_data.get("DELETE"):
                 continue
 
-            max_score = form.cleaned_data.get(
-                "max_score"
+            max_score = (
+                form.cleaned_data.get("max_score")
             )
 
             if max_score is not None:
@@ -44,78 +37,34 @@ class PerformanceTemplateCriterionInlineFormSet(
 
         if total != Decimal("100"):
             raise ValidationError(
-                f"Performans kriterlerinin toplam "
-                f"puanı 100 olmalıdır. "
-                f"Mevcut toplam: {total}"
+                f"Performans kriterlerinin toplam puanı "
+                f"100 olmalıdır. Mevcut toplam: {total}"
             )
 
 
-class PerformanceTemplateCriterionInline(
-    admin.TabularInline
-):
+class PerformanceTemplateCriterionInline(admin.TabularInline):
     model = PerformanceTemplateCriterion
-
-    formset = (
-        PerformanceTemplateCriterionInlineFormSet
-    )
-
+    formset = PerformanceTemplateCriterionInlineFormSet
     extra = 0
-
-    autocomplete_fields = (
-        "criterion",
-    )
-
-    fields = (
-        "order",
-        "criterion",
-        "max_score",
-        "required",
-    )
-
-    ordering = (
-        "order",
-    )
+    fields = ("order", "criterion", "max_score", "required")
 
 
 @admin.register(PerformanceTemplate)
 class PerformanceTemplateAdmin(admin.ModelAdmin):
-
-    list_display = (
-        "name",
-        "valid_from",
-        "valid_to",
-        "active",
-    )
-
-    list_filter = (
-        "active",
-        "valid_from",
-        "valid_to",
-    )
-
-    search_fields = (
-        "name",
-        "description",
-    )
-
-    date_hierarchy = "valid_from"
-
-    inlines = (
-        PerformanceTemplateCriterionInline,
-    )
+    list_display = ("name", "valid_from", "valid_to", "active")
+    list_filter = ("active",)
+    search_fields = ("name",)
+    inlines = (PerformanceTemplateCriterionInline,)
 
 
 @admin.register(PerformanceCriterion)
 class PerformanceCriterionAdmin(admin.ModelAdmin):
-    list_display = ("name", "code", "active")
+    list_display = ("name", "code", "active",)
     list_filter = ("active",)
-    search_fields = ("name", "code", "description",)
-    ordering = ("name",)
+    search_fields = ("name", "code", "description")
 
 
-class ReviewerSchemeItemInlineFormSet(
-    BaseInlineFormSet
-):
+class ReviewerSchemeItemInlineFormSet(BaseInlineFormSet):
     def clean(self):
         super().clean()
 
@@ -125,22 +74,13 @@ class ReviewerSchemeItemInlineFormSet(
         total = Decimal("0")
 
         for form in self.forms:
-
-            if not hasattr(
-                form,
-                "cleaned_data",
-            ):
+            if not hasattr(form, "cleaned_data"):
                 continue
 
-            if form.cleaned_data.get(
-                "DELETE",
-                False,
-            ):
+            if form.cleaned_data.get("DELETE"):
                 continue
 
-            weight = form.cleaned_data.get(
-                "weight"
-            )
+            weight = form.cleaned_data.get("weight")
 
             if weight is not None:
                 total += weight
@@ -148,42 +88,38 @@ class ReviewerSchemeItemInlineFormSet(
         if total != Decimal("100"):
             raise ValidationError(
                 f"Değerlendirici ağırlıkları toplamı "
-                f"%100 olmalıdır. "
-                f"Mevcut toplam: %{total}"
+                f"100 olmalıdır. Mevcut toplam: {total}"
             )
+
 
 class ReviewerSchemeItemInline(admin.TabularInline):
     model = ReviewerSchemeItem
     formset = ReviewerSchemeItemInlineFormSet
     extra = 0
-    autocomplete_fields = ("reviewer_role",)
-    fields = ("order", "reviewer_role", "weight",)
-    ordering = ("order",)
+    fields = ("order", "reviewer_role", "management_level", "weight",)
 
 
 @admin.register(ReviewerScheme)
 class ReviewerSchemeAdmin(admin.ModelAdmin):
-    list_display = ("name", "performance_template", "valid_from", "valid_to", "active",)
-    list_filter = ("active", "performance_template",)
+    list_display = ("name", "performance_template", "valid_from", "valid_to", "active")
+    list_filter = ("active",)
     search_fields = ("name",)
-    autocomplete_fields = ("performance_template",)
     inlines = (ReviewerSchemeItemInline,)
 
 
 @admin.register(ReviewerRole)
 class ReviewerRoleAdmin(admin.ModelAdmin):
-    list_display = ("name", "code", "active",)
+    list_display = ("name", "code", "active")
     list_filter = ("active",)
     search_fields = ("name", "code",)
 
 
 @admin.register(EvaluationProfile)
 class EvaluationProfileAdmin(admin.ModelAdmin):
-    list_display = ("name", "job_title", "employment_type", "department", "reviewer_scheme", "priority", "active")
-    list_filter = ("active", "job_title", "employment_type", "department")
-    search_fields = ("name",)
-    autocomplete_fields = ("reviewer_scheme", "job_title", "employment_type", "department",)
-    ordering = ("priority", "name",)
+    list_display = ("name", "management_level", "job_title", "employment_type", "department", "reviewer_scheme",
+                    "priority", "active")
+    list_filter = ("active", "management_level", "employment_type", "department",)
+    search_fields = ("name", "job_title__name", "management_level__name",)
 
 
 @admin.register(EvaluationPeriod)
@@ -192,12 +128,11 @@ class EvaluationPeriodAdmin(admin.ModelAdmin):
                     "is_locked")
     list_filter = ("is_active", "is_locked",)
     search_fields = ("name",)
-    date_hierarchy = "start_date"
 
 
 @admin.register(EvaluationStatus)
 class EvaluationStatusAdmin(admin.ModelAdmin):
-    list_display = ("name", "code", "active")
+    list_display = ("name", "code", "active",)
     list_filter = ("active",)
     search_fields = ("name", "code",)
 
@@ -205,28 +140,50 @@ class EvaluationStatusAdmin(admin.ModelAdmin):
 class PerformanceEvaluationReviewerInline(admin.TabularInline):
     model = PerformanceEvaluationReviewer
     extra = 0
-    autocomplete_fields = ("reviewer_employee", "reviewer_role",)
-    readonly_fields = ("raw_score", "weighted_score", "submitted_at",)
-    fields = ("reviewer_employee", "reviewer_role", "weight", "raw_score", "weighted_score", "submitted_at",)
+    readonly_fields = ("raw_score", "weighted_score", "submitted_at")
+    fields = ("reviewer_employee", "reviewer_role", "weight", "raw_score", "weighted_score", "submitted_at")
 
 
 @admin.register(PerformanceEvaluation)
 class PerformanceEvaluationAdmin(admin.ModelAdmin):
+    list_display = (
+        "employee",
+        "period",
+        "template",
+        "reviewer_scheme",
+        "status",
+        "final_performance_score",
+        "completed_at",
+    )
 
-    list_display = ("employee", "period", "template", "reviewer_scheme", "status", "final_performance_score",
-                    "completed_at",)
-    list_filter = ("period", "status", "template", "reviewer_scheme",)
-    search_fields = ("employee__personnel_no", "employee__first_name", "employee__last_name",)
-    autocomplete_fields = ("employee", "period", "template", "reviewer_scheme", "status",)
-    readonly_fields = ("final_performance_score", "completed_at", "created_at", "updated_at",)
-    inlines = PerformanceEvaluationReviewerInline,
+    list_filter = (
+        "period",
+        "status",
+        "template",
+    )
+
+    search_fields = (
+        "employee__personnel_no",
+        "employee__first_name",
+        "employee__last_name",
+    )
+
+    readonly_fields = (
+        "final_performance_score",
+        "completed_at",
+        "created_at",
+        "updated_at",
+    )
+
+    inlines = (
+        PerformanceEvaluationReviewerInline,
+    )
 
 
 class PerformanceCriterionScoreInline(
     admin.TabularInline
 ):
     model = PerformanceCriterionScore
-
     extra = 0
 
     autocomplete_fields = (
@@ -245,7 +202,6 @@ class PerformanceCriterionScoreInline(
 class PerformanceEvaluationReviewerAdmin(
     admin.ModelAdmin
 ):
-
     list_display = (
         "evaluation",
         "reviewer_employee",
@@ -259,11 +215,9 @@ class PerformanceEvaluationReviewerAdmin(
     list_filter = (
         "reviewer_role",
         "submitted_at",
-        "evaluation__period",
     )
 
     search_fields = (
-        "evaluation__employee__personnel_no",
         "evaluation__employee__first_name",
         "evaluation__employee__last_name",
         "reviewer_employee__first_name",
@@ -280,6 +234,8 @@ class PerformanceEvaluationReviewerAdmin(
         "raw_score",
         "weighted_score",
         "submitted_at",
+        "created_at",
+        "updated_at",
     )
 
     inlines = (

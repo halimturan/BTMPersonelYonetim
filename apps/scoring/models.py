@@ -47,13 +47,6 @@ class ExperienceSource(TimeStampedModel):
     """
     name = models.CharField(max_length=150, verbose_name="İsim")
     code = models.CharField(max_length=60, unique=True, verbose_name="Kod")
-    field_name = models.CharField(
-        max_length=100, verbose_name="Kolon Adı",
-        help_text=(
-            "Personel modelinde kullanılacak tarih alanı. "
-            "Örn: it_start_date"
-        ),
-    )
     active = models.BooleanField(default=True)
 
     def __str__(self):

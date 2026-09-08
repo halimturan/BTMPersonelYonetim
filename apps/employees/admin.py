@@ -1,8 +1,6 @@
 from django.contrib import admin
-
 from apps.employees.models import (EducationLevel, Employee, EmployeeAssignmentHistory, EmployeeDepartmentHistory,
-    EmployeeEducation, EmployeeLevelHistory, EmployeeReportingLine, EmployeeTitleHistory, EmployeeUpgrade,
-    ReportingRelationType,
+    EmployeeEducation, EmployeeLevelHistory, EmployeeTitleHistory, EmployeeUpgrade, EmployeeExperience
 )
 
 
@@ -50,13 +48,12 @@ class EmployeeLevelHistoryInline(admin.TabularInline):
     fields = ("job_role", "level", "start_date", "end_date", "reason")
 
 
-class EmployeeReportingLineInline(admin.TabularInline):
-    verbose_name = "Rapor Geçmişi"
-    verbose_name_plural = "Rapor Geçmişi"
-    model = EmployeeReportingLine
-    fk_name = "employee"
+class EmployeeExperienceInline(admin.TabularInline):
+    model = EmployeeExperience
     extra = 0
-    fields = ("manager", "relation_type", "start_date", "end_date")
+    autocomplete_fields = ("source",)
+    fields = ("source", "start_date", "end_date", "description")
+    ordering = ("-start_date",)
 
 
 @admin.register(Employee)
@@ -73,7 +70,7 @@ class EmployeeAdmin(admin.ModelAdmin):
 
     inlines = (
         EmployeeEducationInline, EmployeeAssignmentHistoryInline, EmployeeTitleHistoryInline,
-        EmployeeDepartmentHistoryInline, EmployeeLevelHistoryInline, EmployeeReportingLineInline,
+        EmployeeDepartmentHistoryInline, EmployeeLevelHistoryInline, EmployeeExperienceInline,
     )
 
     fieldsets = (
@@ -91,6 +88,30 @@ class EmployeeAdmin(admin.ModelAdmin):
         ),
     )
 
+    @admin.display(
+        description="Birim"
+    )
+    def get_current_unit(self, obj):
+        return obj.current_unit or "-"
+
+    @admin.display(
+        description="Unvan"
+    )
+    def get_current_title(self, obj):
+        return obj.current_title or "-"
+
+    @admin.display(
+        description="Yönetim Seviyesi"
+    )
+    def get_management_level(self, obj):
+        return obj.current_management_level or "-"
+
+    @admin.display(
+        description="İş Kolu"
+    )
+    def get_current_job_role(self, obj):
+        return obj.current_job_role or "-"
+
 
 @admin.register(EducationLevel)
 class EducationLevelAdmin(admin.ModelAdmin):
@@ -99,25 +120,6 @@ class EducationLevelAdmin(admin.ModelAdmin):
     search_fields = ("name", "code",)
     list_filter = ("active",)
     ordering = ("order",)
-
-
-@admin.register(ReportingRelationType)
-class ReportingRelationTypeAdmin(admin.ModelAdmin):
-    list_display = ("order", "name", "code", "active",)
-    list_editable = ("name", "active",)
-    search_fields = ("name", "code",)
-    list_filter = ("active",)
-    ordering = ("order",)
-
-
-@admin.register(EmployeeReportingLine)
-class EmployeeReportingLineAdmin(admin.ModelAdmin):
-    list_display = ("employee", "manager", "relation_type", "start_date", "end_date",)
-    list_filter = ("relation_type","start_date","end_date",)
-    search_fields = ("employee__personnel_no", "employee__first_name", "employee__last_name", "manager__personnel_no",
-                     "manager__first_name", "manager__last_name",)
-    autocomplete_fields = ("employee", "manager", "relation_type",)
-    list_select_related = ("employee", "manager", "relation_type",)
 
 
 @admin.register(EmployeeUpgrade)
