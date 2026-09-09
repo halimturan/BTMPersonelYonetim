@@ -174,6 +174,7 @@ JAZZMIN_SETTINGS = {
         "organization.employmenttype": "fas fa-users",
         "organization.jobtitle": "fas fa-tags",
         "organization.jobrole": "fas fa-briefcase",
+        "organization.managementlevel": "fas fa-user-tie",
         "employees": "fas fa-users",
         "employees.employee": "fas fa-user-shield",
         "employees.employeeupgrade": "fas fa-level-up",

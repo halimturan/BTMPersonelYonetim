@@ -12,9 +12,7 @@ class Employee(TimeStampedModel):
     last_name = models.CharField(max_length=100, verbose_name="Soyad")
     employment_type = models.ForeignKey(EmploymentType, on_delete=models.PROTECT, related_name="employees", verbose_name="Personel Tipi")
 
-    institution_start_date = models.DateField(null=True, blank=True, verbose_name="Kuruma Başlangıç Tarihi")
-    professional_start_date = models.DateField(null=True, blank=True, verbose_name="Profesyonel Çalışma Tarihi")
-    it_start_date = models.DateField(null=True, blank=True, verbose_name="IT Sektörüne Başlangıç Tarihi")
+    current_management_level = models.ForeignKey("organization.ManagementLevel", on_delete=models.PROTECT, related_name="employees", null=True, blank=True, verbose_name="Yöetim Seviyesi")
     is_active = models.BooleanField(default=True, verbose_name="Aktif mi?")
 
     class Meta:
@@ -64,7 +62,7 @@ class Employee(TimeStampedModel):
             self.title_history
             .filter(start_date__lte=today)
             .filter(Q(end_date__isnull=True) | Q(end_date__gte=today))
-            .select_related("job_title", "job_title__management_level",)
+            .select_related("job_title",)
             .order_by("-start_date")
             .first()
         )
@@ -73,15 +71,6 @@ class Employee(TimeStampedModel):
     def current_title(self):
         record = self.current_title_record
         return record.job_title if record else None
-
-    @property
-    def current_management_level(self):
-        title = self.current_title
-
-        if not title:
-            return None
-
-        return title.management_level
 
     @property
     def current_assignment(self):
@@ -338,3 +327,18 @@ class EmployeeExperience(TimeStampedModel):
             raise ValidationError({
                 "end_date": "Bitiş tarihi başlangıç tarihinden önce olamaz."
             })
+
+
+class EmployeeManagementLevelHistory(TimeStampedModel):
+    employee = models.ForeignKey("employees.Employee", on_delete=models.CASCADE, related_name="management_level_history", verbose_name="Personel")
+    management_level = models.ForeignKey("organization.ManagementLevel", on_delete=models.PROTECT, related_name="employee_history", verbose_name="Yönetsel Seviye")
+    start_date = models.DateField(verbose_name="Başlangıç Tarihi")
+    end_date = models.DateField(null=True, blank=True, verbose_name="Bitiş Tarihi")
+
+    class Meta:
+        verbose_name = "Personel Yönetsel Seviye Geçmişi"
+        verbose_name_plural = "Personel Yönetsel Seviye Geçmişi"
+        ordering = ["-start_date", "-pk"]
+
+    def __str__(self):
+        return f"{self.employee} - {self.management_level}"

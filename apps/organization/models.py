@@ -75,7 +75,7 @@ class ManagementLevel(TimeStampedModel):
 
     class Meta:
         verbose_name = "Yönetsel Seviye"
-        verbose_name_plural = "Yönetse Seviyeler"
+        verbose_name_plural = "Yönetsel Seviyeler"
         ordering = ["order"]
 
     def __str__(self):
@@ -95,14 +95,13 @@ class JobTitle(TimeStampedModel):
         Müdür Yardımcısı
         Müdür
     """
-    name = models.CharField(max_length=150)
-    management_level = models.ForeignKey(ManagementLevel, null=True, blank=True, on_delete=models.PROTECT, related_name="job_titles")
-    code = models.CharField(max_length=50, unique=True)
-    active = models.BooleanField(default=True)
+    name = models.CharField(max_length=150, verbose_name="İsim")
+    code = models.CharField(max_length=50, unique=True, verbose_name="Kod")
+    active = models.BooleanField(default=True, verbose_name="Aktif mi?")
 
     class Meta:
-        verbose_name = "Resmi Ünvan"
-        verbose_name_plural = "Resmi Ünvanlar"
+        verbose_name = "Ünvan"
+        verbose_name_plural = "Ünvanlar"
         ordering = ["name"]
 
     def __str__(self):

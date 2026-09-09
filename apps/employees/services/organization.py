@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from datetime import date
 
 from django.db.models import Q
+from django.db import models
 
 from apps.employees.models import Employee, EmployeeDepartmentHistory, EmployeeTitleHistory
 from apps.organization.models import ManagementLevel, Unit
@@ -70,58 +71,45 @@ class EmployeeOrganizationService:
                 Q(end_date__isnull=True)
                 | Q(end_date__gte=self.reference_date)
             )
-            .select_related(
-                "job_title",
-                "job_title__management_level",
-            )
+            .select_related("job_title")
             .order_by("-start_date")
             .first()
         )
+
+    def get_management_level_record(self, employee):
+        return (
+            employee.management_level_history
+            .filter(start_date__lte=self.reference_date,)
+            .filter(models.Q(end_date__isnull=True) | models.Q(end_date__gte=self.reference_date))
+            .select_related("management_level")
+            .order_by("-start_date", "-pk")
+            .first()
+        )
+
+    def get_management_level(self, employee):
+        record = self.get_management_level_record(employee)
+
+        if record:
+            return record.management_level
+
+        return employee.current_management_level
 
     # ----------------------------------------
     # Snapshot
     # ----------------------------------------
 
     def get_snapshot(self, employee):
-        department_record = (
-            self.get_department_record(employee)
-        )
 
-        title_record = (
-            self.get_title_record(employee)
-        )
+        department_record = self.get_department_record(employee)
+        title_record = self.get_title_record(employee)
+        management_level = self.get_management_level(employee)
 
         return EmployeeOrganizationSnapshot(
             employee=employee,
-
-            unit=(
-                department_record.unit
-                if department_record
-                else None
-            ),
-
-            department=(
-                department_record.department
-                if department_record
-                else None
-            ),
-
-            job_title=(
-                title_record.job_title
-                if title_record
-                else None
-            ),
-
-            management_level=(
-                title_record
-                .job_title
-                .management_level
-                if (
-                    title_record
-                    and title_record.job_title
-                )
-                else None
-            ),
+            unit=department_record.unit if department_record else None,
+            department=department_record.department if department_record else None,
+            job_title=(title_record.job_title if title_record else None),
+            management_level = management_level
         )
 
     # ----------------------------------------
@@ -253,7 +241,6 @@ class EmployeeOrganizationService:
                 is_active=True,
             )
             .filter(
-                title_history__job_title__management_level=management_level,
                 title_history__start_date__lte=self.reference_date,
             )
             .filter(

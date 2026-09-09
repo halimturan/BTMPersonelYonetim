@@ -1,6 +1,7 @@
 from django.contrib import admin
 from apps.employees.models import (EducationLevel, Employee, EmployeeAssignmentHistory, EmployeeDepartmentHistory,
-    EmployeeEducation, EmployeeLevelHistory, EmployeeTitleHistory, EmployeeUpgrade, EmployeeExperience
+    EmployeeEducation, EmployeeLevelHistory, EmployeeTitleHistory, EmployeeUpgrade, EmployeeExperience,
+    EmployeeManagementLevelHistory
 )
 
 
@@ -14,6 +15,12 @@ class EmployeeEducationInline(admin.TabularInline):
         "is_open_education", "is_primary_for_scoring",
     )
 
+
+class EmployeeManagementLevelHistoryInline(admin.TabularInline):
+    model = EmployeeManagementLevelHistory
+    extra = 0
+    fields = ("management_level", "start_date", "end_date")
+    ordering = ("-start_date",)
 
 class EmployeeAssignmentHistoryInline(admin.TabularInline):
     verbose_name = "İş Kolu Geçmişi"
@@ -50,39 +57,29 @@ class EmployeeLevelHistoryInline(admin.TabularInline):
 class EmployeeExperienceInline(admin.TabularInline):
     model = EmployeeExperience
     extra = 0
-    autocomplete_fields = ("source",)
     fields = ("source", "start_date", "end_date", "description")
     ordering = ("-start_date",)
 
 
 @admin.register(Employee)
 class EmployeeAdmin(admin.ModelAdmin):
-    list_display = (
-        "personnel_no", "first_name", "last_name", "employment_type", "institution_start_date",
-        "it_start_date", "is_active",
-    )
+    list_display = ("personnel_no", "first_name", "last_name", "employment_type", "current_management_level", "is_active")
     list_filter = ("is_active", "employment_type",)
-    search_fields = ("personnel_no", "first_name", "last_name", "ikys_reference",)
-    autocomplete_fields = ("employment_type",)
+    search_fields = ("personnel_no", "first_name", "last_name")
     list_select_related = ("employment_type",)
     ordering = ("first_name", "last_name",)
 
     inlines = (
         EmployeeEducationInline, EmployeeAssignmentHistoryInline, EmployeeTitleHistoryInline,
         EmployeeDepartmentHistoryInline, EmployeeLevelHistoryInline, EmployeeExperienceInline,
+        EmployeeManagementLevelHistoryInline
     )
 
     fieldsets = (
         (
             "Personel Bilgileri",
             {
-                "fields": ("personnel_no", "first_name", "last_name", "employment_type", "is_active",)
-            },
-        ),
-        (
-            "Tecrübe Tarihleri",
-            {
-                "fields": ("institution_start_date", "professional_start_date", "it_start_date",)
+                "fields": ("personnel_no", "first_name", "last_name", "employment_type", "current_management_level", "is_active",)
             },
         ),
     )
@@ -99,9 +96,7 @@ class EmployeeAdmin(admin.ModelAdmin):
     def get_current_title(self, obj):
         return obj.current_title or "-"
 
-    @admin.display(
-        description="Yönetim Seviyesi"
-    )
+    @admin.display(description="Yönetim Seviyesi")
     def get_management_level(self, obj):
         return obj.current_management_level or "-"
 

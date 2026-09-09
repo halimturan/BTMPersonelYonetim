@@ -1,5 +1,4 @@
 from apps.performance.models import EvaluationProfile
-
 from apps.employees.services.organization import EmployeeOrganizationService
 
 
@@ -10,18 +9,10 @@ class EvaluationProfileResolutionError(Exception):
 class EvaluationProfileResolver:
     def __init__(self, reference_date):
         self.reference_date = reference_date
-
-        self.organization_service = (
-            EmployeeOrganizationService(
-                reference_date
-            )
-        )
+        self.organization_service = EmployeeOrganizationService(reference_date)
 
     def resolve(self, employee):
-        snapshot = (
-            self.organization_service
-            .get_snapshot(employee)
-        )
+        snapshot = self.organization_service.get_snapshot(employee)
 
         candidates = (
             EvaluationProfile.objects
@@ -33,10 +24,7 @@ class EvaluationProfileResolver:
                 "employment_type",
                 "department",
             )
-            .order_by(
-                "-priority",
-                "pk",
-            )
+            .order_by("-priority", "pk")
         )
 
         matched = []
@@ -45,22 +33,14 @@ class EvaluationProfileResolver:
             if (
                 profile.management_level_id
                 and profile.management_level_id
-                != getattr(
-                    snapshot.management_level,
-                    "pk",
-                    None,
-                )
+                != getattr(snapshot.management_level, "pk", None)
             ):
                 continue
 
             if (
                 profile.job_title_id
                 and profile.job_title_id
-                != getattr(
-                    snapshot.job_title,
-                    "pk",
-                    None,
-                )
+                != getattr(snapshot.job_title, "pk", None)
             ):
                 continue
 
@@ -74,11 +54,7 @@ class EvaluationProfileResolver:
             if (
                 profile.department_id
                 and profile.department_id
-                != getattr(
-                    snapshot.department,
-                    "pk",
-                    None,
-                )
+                != getattr(snapshot.department, "pk", None)
             ):
                 continue
 
@@ -86,19 +62,25 @@ class EvaluationProfileResolver:
 
         if not matched:
             raise EvaluationProfileResolutionError(
-                f"{employee.full_name} için "
-                f"uygun değerlendirme profili bulunamadı."
+                (
+                    f"{employee.full_name} için uygun değerlendirme profili bulunamadı. "
+                    f"Yönetim Seviyesi: "
+                    f"{getattr(snapshot.management_level, 'name', 'YOK')}, "
+                    f"Ünvan: "
+                    f"{getattr(snapshot.job_title, 'name', 'YOK')}, "
+                    f"İstihdam Tipi: "
+                    f"{getattr(employee.employment_type, 'name', 'YOK')}, "
+                    f"Departman: "
+                    f"{getattr(snapshot.department, 'name', 'YOK')}"
+                )
             )
 
-        highest_priority = (
-            matched[0].priority
-        )
+        highest_priority = matched[0].priority
 
         same_priority = [
             profile
             for profile in matched
-            if profile.priority
-            == highest_priority
+            if profile.priority == highest_priority
         ]
 
         if len(same_priority) > 1:
@@ -108,10 +90,10 @@ class EvaluationProfileResolver:
             )
 
             raise EvaluationProfileResolutionError(
-                f"{employee.full_name} için "
-                f"aynı öncelikte birden fazla "
-                f"değerlendirme profili bulundu: "
-                f"{names}"
+                (
+                    f"{employee.full_name} için aynı öncelikte "
+                    f"birden fazla değerlendirme profili bulundu: {names}"
+                )
             )
 
         return matched[0]
