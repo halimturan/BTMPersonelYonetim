@@ -163,7 +163,7 @@ class EmployeeOrganizationService:
             child_ids = list(
                 Unit.objects
                 .filter(
-                    # parent_id=parent_id,
+                    parent_id=parent_id,
                     active=True,
                 )
                 .values_list(
@@ -204,6 +204,29 @@ class EmployeeOrganizationService:
             .distinct()
         )
 
+    def get_employee_ids_in_unit(
+            self,
+            unit,
+    ):
+        return (
+            EmployeeDepartmentHistory.objects
+            .filter(
+                unit=unit,
+                start_date__lte=self.reference_date,
+            )
+            .filter(
+                models.Q(end_date__isnull=True)
+                | models.Q(
+                    end_date__gte=self.reference_date
+                )
+            )
+            .values_list(
+                "employee_id",
+                flat=True,
+            )
+            .distinct()
+        )
+
     def get_employees_in_unit(
         self,
         unit,
@@ -217,6 +240,29 @@ class EmployeeOrganizationService:
         return Employee.objects.filter(
             pk__in=employee_ids,
             is_active=True,
+        )
+
+    def get_employee_ids_in_department(
+            self,
+            department,
+    ):
+        return (
+            EmployeeDepartmentHistory.objects
+            .filter(
+                department=department,
+                start_date__lte=self.reference_date,
+            )
+            .filter(
+                models.Q(end_date__isnull=True)
+                | models.Q(
+                    end_date__gte=self.reference_date
+                )
+            )
+            .values_list(
+                "employee_id",
+                flat=True,
+            )
+            .distinct()
         )
 
     # ----------------------------------------
@@ -259,61 +305,79 @@ class EmployeeOrganizationService:
     # ----------------------------------------
 
     def find_manager(
-        self,
-        employee,
-        management_level,
+            self,
+            employee,
+            target_management_level,
     ):
-        """
-        Personelin bulunduğu birimden başlayarak
-        yukarı doğru çıkar.
-
-        İstenen ManagementLevel'a sahip ilk
-        tekil çalışanı döndürür.
-        """
-
         snapshot = self.get_snapshot(employee)
 
-        if not snapshot.unit:
+        target_order = target_management_level.order
+        current_order = snapshot.management_level.order
+
+        # Bir üst kademe olmak zorunda
+        if target_order <= current_order:
+            raise ManagerNotFoundError(
+                "Hedef yönetim seviyesi personelin üstünde olmalıdır."
+            )
+
+        qs = Employee.objects.filter(
+            is_active=True,
+            current_management_level=target_management_level,
+        ).exclude(
+            pk=employee.pk
+        )
+
+        # Personel -> Şef
+        if current_order == 10 and target_order == 20:
+            if not snapshot.unit:
+                raise ManagerNotFoundError(
+                    f"{employee.full_name} için şeflik birimi bulunamadı."
+                )
+
+            employee_ids = self.get_employee_ids_in_unit(
+                snapshot.unit
+            )
+
+            qs = qs.filter(
+                pk__in=employee_ids
+            )
+
+        # Şef -> Müdür Yardımcısı
+        elif current_order == 20 and target_order == 30:
+            if not snapshot.department:
+                raise ManagerNotFoundError(
+                    f"{employee.full_name} için departman bulunamadı."
+                )
+
+            employee_ids = self.get_employee_ids_in_department(
+                snapshot.department
+            )
+
+            qs = qs.filter(
+                pk__in=employee_ids
+            )
+
+        # Müdür Yardımcısı -> Müdür
+        elif current_order == 30 and target_order == 40:
+            pass
+
+        else:
+            raise ManagerNotFoundError(
+                f"{employee.full_name} için geçersiz yönetici zinciri."
+            )
+
+        count = qs.count()
+
+        if count == 0:
             raise ManagerNotFoundError(
                 f"{employee.full_name} için "
-                f"aktif organizasyon birimi bulunamadı."
+                f"{target_management_level.name} bulunamadı."
             )
 
-        units = self.get_ancestor_units(snapshot.unit, include_self=True,)
-
-        for unit in units:
-            candidates = list(
-                self.get_employees_in_unit_by_level(
-                    unit=unit,
-                    management_level=management_level,
-                )
+        if count > 1:
+            raise MultipleManagersFoundError(
+                f"{employee.full_name} için "
+                f"birden fazla {target_management_level.name} bulundu."
             )
 
-            # Kişi kendi yöneticisi olamaz.
-            candidates = [
-                candidate
-                for candidate in candidates
-                if candidate.pk != employee.pk
-            ]
-
-            if len(candidates) == 1:
-                return candidates[0]
-
-            if len(candidates) > 1:
-                names = ", ".join(
-                    candidate.full_name
-                    for candidate in candidates
-                )
-
-                raise MultipleManagersFoundError(
-                    f"{unit.name} biriminde "
-                    f"{management_level.name} seviyesinde "
-                    f"birden fazla aktif personel bulundu: "
-                    f"{names}"
-                )
-
-        raise ManagerNotFoundError(
-            f"{employee.full_name} için "
-            f"{management_level.name} seviyesinde "
-            f"yönetici bulunamadı."
-        )
+        return qs.first()

@@ -67,10 +67,18 @@ class ManagementLevel(TimeStampedModel):
         Müdür Yardımcısı     order=30
         Müdür                order=40
     """
+    class VisibilityScope(models.TextChoices):
+        NONE = "NONE", "Personel Göremez"
+        OWN_UNIT = "OWN_UNIT", "Sadece Kendi Birimi"
+        UNIT_TREE = "UNIT_TREE", "Kendi Birimi ve Alt Birimler"
+        ALL = "ALL", "Tüm Personeller"
+
     name = models.CharField(max_length=100, verbose_name="İsim")
     code = models.CharField(max_length=50, unique=True, verbose_name="Kod")
     order = models.PositiveIntegerField(default=0, verbose_name="Ağırlık")
     can_manage_people = models.BooleanField(default=False, verbose_name="Sistemde işlem yapabilir mi?")
+    visibility_scope = models.CharField(max_length=20, choices=VisibilityScope.choices,
+        default=VisibilityScope.NONE, verbose_name="Personel Görüntüleme Kapsamı",)
     active = models.BooleanField(default=True, verbose_name="Aktif mi?")
 
     class Meta:

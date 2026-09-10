@@ -1,150 +1,140 @@
-from django.db.models import Q
 from django.utils import timezone
 
-from apps.employees.models import Employee, EmployeeTitleHistory
-from apps.employees.services.organization import EmployeeOrganizationService
+from apps.employees.models import Employee
+from apps.employees.services.organization import (
+    EmployeeOrganizationService,
+)
+from apps.organization.models import ManagementLevel
 
 
 class EmployeeVisibilityService:
-    def __init__(
-        self,
-        user,
-        reference_date=None,
-    ):
+    def __init__(self, user, reference_date=None):
         self.user = user
+        self.reference_date = reference_date or timezone.localdate()
 
-        self.employee = getattr(
-            user,
-            "employee",
-            None,
+        self.organization_service = EmployeeOrganizationService(
+            reference_date=self.reference_date
         )
 
-        self.reference_date = (
-            reference_date
-            or timezone.localdate()
-        )
-
-        self.organization_service = (
-            EmployeeOrganizationService(
-                self.reference_date
-            )
-        )
-
-    def get_visible_employees(
-        self,
-        include_self=False,
-    ):
-        # Sistem yöneticisi
+    def get_visible_employees(self):
         if self.user.is_superuser:
             return Employee.objects.filter(
                 is_active=True
             )
 
-        # User ile Employee bağlı değil
-        if not self.employee:
-            return Employee.objects.none()
-
-        snapshot = (
-            self.organization_service
-            .get_snapshot(self.employee)
+        employee = getattr(
+            self.user,
+            "employee",
+            None,
         )
 
-        # Organizasyon kaydı yok
-        if not snapshot.unit:
-            if include_self:
-                return Employee.objects.filter(
-                    pk=self.employee.pk
-                )
-
+        if not employee:
             return Employee.objects.none()
 
-        # Yönetim seviyesi yok
-        if not snapshot.management_level:
-            if include_self:
-                return Employee.objects.filter(
-                    pk=self.employee.pk
-                )
+        snapshot = self.organization_service.get_snapshot(
+            employee
+        )
 
+        management_level = snapshot.management_level
+
+        if not management_level:
             return Employee.objects.none()
 
-        # Normal personel
-        if not snapshot.management_level.can_manage_people:
-            if include_self:
-                return Employee.objects.filter(
-                    pk=self.employee.pk
-                )
-
+        if not management_level.can_manage_people:
             return Employee.objects.none()
 
-        # Yöneticinin kendi birimi + alt birimleri
-        unit_ids = (
-            self.organization_service
-            .get_descendant_unit_ids(
-                snapshot.unit,
-                include_self=True,
+        scope = management_level.visibility_scope
+
+        if scope == ManagementLevel.VisibilityScope.OWN_UNIT:
+            return self._employees_in_same_unit(
+                employee,
+                snapshot,
             )
-        )
+
+        if scope == ManagementLevel.VisibilityScope.UNIT_TREE:
+            return self._employees_in_same_department(
+                employee,
+                snapshot,
+            )
+
+        if scope == ManagementLevel.VisibilityScope.ALL:
+            return (
+                Employee.objects
+                .filter(
+                    is_active=True,
+                    current_management_level__order__lt=
+                    management_level.order,
+                )
+                .exclude(pk=employee.pk)
+            )
+
+        return Employee.objects.none()
+
+    def _employees_in_same_unit(
+        self,
+        employee,
+        snapshot,
+    ):
+        if not snapshot.unit:
+            return Employee.objects.none()
 
         employee_ids = (
             self.organization_service
-            .get_employee_ids_in_units(
-                unit_ids
+            .get_employee_ids_in_unit(
+                snapshot.unit
             )
         )
-
-        queryset = Employee.objects.filter(
-            pk__in=employee_ids,
-            is_active=True,
-        )
-
-        # Kendinden düşük management level
-        lower_level_employee_ids = (
-            EmployeeTitleHistory.objects
-            .filter(
-                employee_id__in=employee_ids,
-
-                start_date__lte=(
-                    self.reference_date
-                ),
-            )
-            .filter(
-                Q(end_date__isnull=True)
-                | Q(
-                    end_date__gte=(
-                        self.reference_date
-                    )
-                )
-            )
-            .values_list(
-                "employee_id",
-                flat=True,
-            )
-        )
-
-        queryset = queryset.filter(
-            pk__in=lower_level_employee_ids
-        )
-
-        if include_self:
-            queryset = (
-                Employee.objects
-                .filter(
-                    Q(pk__in=queryset.values("pk"))
-                    | Q(pk=self.employee.pk)
-                )
-                .filter(is_active=True)
-            )
-
-        return queryset.distinct()
-
-    def can_view(self, employee):
-        if self.user.is_superuser:
-            return True
 
         return (
-            self.get_visible_employees(
-                include_self=True
+            Employee.objects
+            .filter(
+                pk__in=employee_ids,
+                is_active=True,
+                current_management_level__order__lt=
+                    snapshot.management_level.order,
             )
+            .exclude(pk=employee.pk)
+            .select_related(
+                "employment_type",
+                "current_management_level",
+            )
+            .distinct()
+        )
+
+    def _employees_in_same_department(
+        self,
+        employee,
+        snapshot,
+    ):
+        if not snapshot.department:
+            return Employee.objects.none()
+
+        employee_ids = (
+            self.organization_service
+            .get_employee_ids_in_department(
+                snapshot.department
+            )
+        )
+
+        return (
+            Employee.objects
+            .filter(
+                pk__in=employee_ids,
+                is_active=True,
+                current_management_level__order__lt=
+                    snapshot.management_level.order,
+            )
+            .exclude(pk=employee.pk)
+            .select_related(
+                "employment_type",
+                "current_management_level",
+            )
+            .distinct()
+        )
+
+    def can_view(self, employee):
+        return (
+            self.get_visible_employees()
             .filter(pk=employee.pk)
             .exists()
         )

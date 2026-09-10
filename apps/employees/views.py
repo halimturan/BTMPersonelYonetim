@@ -21,7 +21,6 @@ class EmployeeListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
         queryset = (
             EmployeeVisibilityService(self.request.user)
             .get_visible_employees()
-            .select_related("employment_type")
         )
 
         search = self.request.GET.get("q", "").strip()
