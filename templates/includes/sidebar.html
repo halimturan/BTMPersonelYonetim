@@ -25,7 +25,7 @@
         </a>
 
 
-        {% if perms.employees.view_employee %}
+        {% if request.user.is_superuser or request.user.employee.current_management_level.can_manage_people %}
             <a href="{% url 'employees:employee_list' %}" class="sidebar-link">
                 <i class="bi bi-people"></i>
                 Personeller
