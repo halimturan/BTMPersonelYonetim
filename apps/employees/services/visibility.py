@@ -106,12 +106,6 @@ class EmployeeVisibilityService:
                 start_date__lte=(
                     self.reference_date
                 ),
-
-                job_title__management_level__order__lt=(
-                    snapshot
-                    .management_level
-                    .order
-                ),
             )
             .filter(
                 Q(end_date__isnull=True)

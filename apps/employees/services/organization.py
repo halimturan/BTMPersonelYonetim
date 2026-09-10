@@ -163,7 +163,7 @@ class EmployeeOrganizationService:
             child_ids = list(
                 Unit.objects
                 .filter(
-                    parent_id=parent_id,
+                    # parent_id=parent_id,
                     active=True,
                 )
                 .values_list(
