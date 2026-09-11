@@ -63,8 +63,16 @@ class EmployeeExperienceInline(admin.TabularInline):
 
 @admin.register(Employee)
 class EmployeeAdmin(admin.ModelAdmin):
-    list_display = ("personnel_no", "first_name", "last_name", "employment_type", "current_management_level", "is_active")
-    list_filter = ("is_active", "employment_type",)
+    list_display = (
+        "personnel_no",
+        "first_name",
+        "last_name",
+        "phone",
+        "employment_type",
+        "current_management_level",
+        "is_active"
+    )
+    list_filter = ("is_active", "employment_type", "current_management_level",)
     search_fields = ("personnel_no", "first_name", "last_name")
     list_select_related = ("employment_type",)
     ordering = ("first_name", "last_name",)
@@ -79,7 +87,16 @@ class EmployeeAdmin(admin.ModelAdmin):
         (
             "Personel Bilgileri",
             {
-                "fields": ("personnel_no", "first_name", "last_name", "employment_type", "current_management_level", "is_active",)
+                "fields": (
+                    "personnel_no",
+                    "domain_name",
+                    "first_name",
+                    "last_name",
+                    "phone",
+                    "employment_type",
+                    "current_management_level",
+                    "is_active",
+                )
             },
         ),
     )

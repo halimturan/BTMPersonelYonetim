@@ -12,15 +12,11 @@ class OrganizationResolutionError(Exception):
     pass
 
 
-class MultipleManagersFoundError(
-    OrganizationResolutionError
-):
+class MultipleManagersFoundError(OrganizationResolutionError):
     pass
 
 
-class ManagerNotFoundError(
-    OrganizationResolutionError
-):
+class ManagerNotFoundError(OrganizationResolutionError):
     pass
 
 
@@ -44,18 +40,9 @@ class EmployeeOrganizationService:
     def get_department_record(self, employee):
         return (
             EmployeeDepartmentHistory.objects
-            .filter(
-                employee=employee,
-                start_date__lte=self.reference_date,
-            )
-            .filter(
-                Q(end_date__isnull=True)
-                | Q(end_date__gte=self.reference_date)
-            )
-            .select_related(
-                "department",
-                "unit",
-            )
+            .filter(employee=employee, start_date__lte=self.reference_date)
+            .filter(Q(end_date__isnull=True) | Q(end_date__gte=self.reference_date))
+            .select_related("department", "unit",)
             .order_by("-start_date")
             .first()
         )
@@ -63,14 +50,8 @@ class EmployeeOrganizationService:
     def get_title_record(self, employee):
         return (
             EmployeeTitleHistory.objects
-            .filter(
-                employee=employee,
-                start_date__lte=self.reference_date,
-            )
-            .filter(
-                Q(end_date__isnull=True)
-                | Q(end_date__gte=self.reference_date)
-            )
+            .filter(employee=employee, start_date__lte=self.reference_date)
+            .filter(Q(end_date__isnull=True) | Q(end_date__gte=self.reference_date))
             .select_related("job_title")
             .order_by("-start_date")
             .first()
@@ -116,26 +97,15 @@ class EmployeeOrganizationService:
     # Unit ağacı
     # ----------------------------------------
 
-    def get_ancestor_units(
-        self,
-        unit,
-        include_self=True,
-    ):
+    def get_ancestor_units(self, unit, include_self=True):
         result = []
 
-        current = (
-            unit
-            if include_self
-            else unit.parent
-        )
-
+        current = unit if include_self else unit.parent
         visited = set()
 
         while current:
             if current.pk in visited:
-                raise OrganizationResolutionError(
-                    "Organizasyon ağacında döngü tespit edildi."
-                )
+                raise OrganizationResolutionError("Organizasyon ağacında döngü tespit edildi.")
 
             visited.add(current.pk)
             result.append(current)
@@ -144,17 +114,8 @@ class EmployeeOrganizationService:
 
         return result
 
-    def get_descendant_unit_ids(
-        self,
-        unit,
-        include_self=True,
-    ):
-        result = (
-            {unit.pk}
-            if include_self
-            else set()
-        )
-
+    def get_descendant_unit_ids(self, unit, include_self=True):
+        result = {unit.pk} if include_self else set()
         pending = [unit.pk]
 
         while pending:
@@ -162,14 +123,8 @@ class EmployeeOrganizationService:
 
             child_ids = list(
                 Unit.objects
-                .filter(
-                    parent_id=parent_id,
-                    active=True,
-                )
-                .values_list(
-                    "pk",
-                    flat=True,
-                )
+                .filter(parent_id=parent_id, active=True)
+                .values_list("pk", flat=True)
             )
 
             for child_id in child_ids:
@@ -183,85 +138,34 @@ class EmployeeOrganizationService:
     # Birimdeki çalışanlar
     # ----------------------------------------
 
-    def get_employee_ids_in_units(
-        self,
-        unit_ids,
-    ):
+    def get_employee_ids_in_units(self, unit_ids):
         return (
             EmployeeDepartmentHistory.objects
-            .filter(
-                unit_id__in=unit_ids,
-                start_date__lte=self.reference_date,
-            )
-            .filter(
-                Q(end_date__isnull=True)
-                | Q(end_date__gte=self.reference_date)
-            )
-            .values_list(
-                "employee_id",
-                flat=True,
-            )
+            .filter(unit_id__in=unit_ids, start_date__lte=self.reference_date)
+            .filter(Q(end_date__isnull=True) | Q(end_date__gte=self.reference_date))
+            .values_list("employee_id", flat=True)
             .distinct()
         )
 
-    def get_employee_ids_in_unit(
-            self,
-            unit,
-    ):
+    def get_employee_ids_in_unit(self, unit):
         return (
             EmployeeDepartmentHistory.objects
-            .filter(
-                unit=unit,
-                start_date__lte=self.reference_date,
-            )
-            .filter(
-                models.Q(end_date__isnull=True)
-                | models.Q(
-                    end_date__gte=self.reference_date
-                )
-            )
-            .values_list(
-                "employee_id",
-                flat=True,
-            )
+            .filter(unit=unit, start_date__lte=self.reference_date)
+            .filter(models.Q(end_date__isnull=True) | models.Q(end_date__gte=self.reference_date))
+            .values_list("employee_id", flat=True)
             .distinct()
         )
 
-    def get_employees_in_unit(
-        self,
-        unit,
-    ):
-        employee_ids = (
-            self.get_employee_ids_in_units(
-                [unit.pk]
-            )
-        )
+    def get_employees_in_unit(self, unit):
+        employee_ids = self.get_employee_ids_in_units([unit.pk])
+        return Employee.objects.filter(pk__in=employee_ids, is_active=True)
 
-        return Employee.objects.filter(
-            pk__in=employee_ids,
-            is_active=True,
-        )
-
-    def get_employee_ids_in_department(
-            self,
-            department,
-    ):
+    def get_employee_ids_in_department(self, department):
         return (
             EmployeeDepartmentHistory.objects
-            .filter(
-                department=department,
-                start_date__lte=self.reference_date,
-            )
-            .filter(
-                models.Q(end_date__isnull=True)
-                | models.Q(
-                    end_date__gte=self.reference_date
-                )
-            )
-            .values_list(
-                "employee_id",
-                flat=True,
-            )
+            .filter(department=department, start_date__lte=self.reference_date)
+            .filter(models.Q(end_date__isnull=True) | models.Q(end_date__gte=self.reference_date))
+            .values_list("employee_id", flat=True)
             .distinct()
         )
 
@@ -269,34 +173,14 @@ class EmployeeOrganizationService:
     # ManagementLevel'a göre personel bulma
     # ----------------------------------------
 
-    def get_employees_in_unit_by_level(
-        self,
-        unit,
-        management_level,
-    ):
-        employee_ids = (
-            self.get_employee_ids_in_units(
-                [unit.pk]
-            )
-        )
+    def get_employees_in_unit_by_level(self, unit, management_level):
+        employee_ids = self.get_employee_ids_in_units([unit.pk])
 
         return (
             Employee.objects
-            .filter(
-                pk__in=employee_ids,
-                is_active=True,
-            )
-            .filter(
-                title_history__start_date__lte=self.reference_date,
-            )
-            .filter(
-                Q(
-                    title_history__end_date__isnull=True
-                )
-                | Q(
-                    title_history__end_date__gte=self.reference_date
-                )
-            )
+            .filter(pk__in=employee_ids, is_active=True)
+            .filter(title_history__start_date__lte=self.reference_date,)
+            .filter(Q(title_history__end_date__isnull=True) | Q(title_history__end_date__gte=self.reference_date))
             .distinct()
         )
 
@@ -304,11 +188,7 @@ class EmployeeOrganizationService:
     # Yönetici çözümleme
     # ----------------------------------------
 
-    def find_manager(
-            self,
-            employee,
-            target_management_level,
-    ):
+    def find_manager(self, employee, target_management_level):
         snapshot = self.get_snapshot(employee)
 
         target_order = target_management_level.order
@@ -316,55 +196,35 @@ class EmployeeOrganizationService:
 
         # Bir üst kademe olmak zorunda
         if target_order <= current_order:
-            raise ManagerNotFoundError(
-                "Hedef yönetim seviyesi personelin üstünde olmalıdır."
-            )
+            raise ManagerNotFoundError("Hedef yönetim seviyesi personelin üstünde olmalıdır.")
 
-        qs = Employee.objects.filter(
-            is_active=True,
-            current_management_level=target_management_level,
-        ).exclude(
-            pk=employee.pk
-        )
+        qs = (Employee.objects.filter(is_active=True, current_management_level=target_management_level)
+              .exclude(pk=employee.pk))
 
         # Personel -> Şef
         if current_order == 10 and target_order == 20:
             if not snapshot.unit:
-                raise ManagerNotFoundError(
-                    f"{employee.full_name} için şeflik birimi bulunamadı."
-                )
+                raise ManagerNotFoundError(f"{employee.full_name} için şeflik birimi bulunamadı.")
 
-            employee_ids = self.get_employee_ids_in_unit(
-                snapshot.unit
-            )
+            employee_ids = self.get_employee_ids_in_unit(snapshot.unit)
 
-            qs = qs.filter(
-                pk__in=employee_ids
-            )
+            qs = qs.filter(pk__in=employee_ids)
 
         # Şef -> Müdür Yardımcısı
         elif current_order == 20 and target_order == 30:
             if not snapshot.department:
-                raise ManagerNotFoundError(
-                    f"{employee.full_name} için departman bulunamadı."
-                )
+                raise ManagerNotFoundError(f"{employee.full_name} için departman bulunamadı.")
 
-            employee_ids = self.get_employee_ids_in_department(
-                snapshot.department
-            )
+            employee_ids = self.get_employee_ids_in_department(snapshot.department)
 
-            qs = qs.filter(
-                pk__in=employee_ids
-            )
+            qs = qs.filter(pk__in=employee_ids)
 
         # Müdür Yardımcısı -> Müdür
         elif current_order == 30 and target_order == 40:
             pass
 
         else:
-            raise ManagerNotFoundError(
-                f"{employee.full_name} için geçersiz yönetici zinciri."
-            )
+            raise ManagerNotFoundError(f"{employee.full_name} için geçersiz yönetici zinciri.")
 
         count = qs.count()
 

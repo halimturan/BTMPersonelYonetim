@@ -67,28 +67,17 @@ class ReviewerResolver:
         for item in scheme_items:
             try:
                 reviewer = (
-                    self.organization_service
-                    .find_manager(
-                        employee=employee,
-                        management_level=(
-                            item.management_level
-                        ),
-                    )
+                    self.organization_service.find_manager(employee=employee, target_management_level=item.management_level)
                 )
 
             except (
                 ManagerNotFoundError,
                 MultipleManagersFoundError,
             ) as exc:
-                raise ReviewerResolutionError(
-                    str(exc)
-                ) from exc
+                raise ReviewerResolutionError(str(exc)) from exc
 
             if reviewer.pk == employee.pk:
-                raise ReviewerResolutionError(
-                    f"{employee.full_name} "
-                    f"kendi değerlendiricisi olamaz."
-                )
+                raise ReviewerResolutionError(f"{employee.full_name} kendi değerlendiricisi olamaz.")
 
             # Aynı kişi iki farklı reviewer rolüyle
             # atanmasın.

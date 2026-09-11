@@ -4,16 +4,30 @@ from django.utils import timezone
 from apps.core.models import TimeStampedModel
 from django.db.models import Q
 from apps.organization.models import (CareerLevel, Department, EmploymentType, JobRole, JobTitle, Unit)
+from apps.employees.services.personnel_detais import get_ibb_user_info
 
 
 class Employee(TimeStampedModel):
-    personnel_no = models.CharField(max_length=50, unique=True, db_index=True, verbose_name="Sicil No")
-    first_name = models.CharField(max_length=100, verbose_name="Ad")
-    last_name = models.CharField(max_length=100, verbose_name="Soyad")
+    personnel_no = models.CharField(max_length=50, unique=True, db_index=True, verbose_name="Sicil No", null=True, blank=True)
+    first_name = models.CharField(max_length=100, verbose_name="Ad", null=True, blank=True)
+    last_name = models.CharField(max_length=100, verbose_name="Soyad", null=True, blank=True)
     employment_type = models.ForeignKey(EmploymentType, on_delete=models.PROTECT, related_name="employees", verbose_name="Personel Tipi")
+    domain_name = models.CharField(max_length=100, verbose_name="Domain Adı", help_text="Ör: adem.karakaya")
+    phone = models.BigIntegerField(verbose_name="Telefon", null=True, blank=True)
 
-    current_management_level = models.ForeignKey("organization.ManagementLevel", on_delete=models.PROTECT, related_name="employees", null=True, blank=True, verbose_name="Yöetim Seviyesi")
+    current_management_level = models.ForeignKey("organization.ManagementLevel", on_delete=models.PROTECT,
+                                                 related_name="employees", null=True, blank=True,
+                                                 verbose_name="Yönetim Seviyesi")
     is_active = models.BooleanField(default=True, verbose_name="Aktif mi?")
+
+    def save(self, *args, **kwargs):
+        if self.domain_name:
+            user_info = get_ibb_user_info(self.domain_name)
+            self.first_name = user_info.get('ad')
+            self.last_name = user_info.get('soyad')
+            self.phone = user_info.get('cepTelefonu')
+            self.personnel_no = user_info.get('kurumSicilNo')
+        super(Employee, self).save(*args, **kwargs)
 
     class Meta:
         verbose_name = "Personel"
@@ -237,15 +251,18 @@ class EmployeeDepartmentHistory(TimeStampedModel):
         ordering = ["employee", "-start_date"]
 
     def clean(self):
-        if self.unit and self.unit.department_id != self.department_id:
-            raise ValidationError(
-                "Birim seçilen departmana bağlı değil."
-            )
+        super().clean()
 
-        if self.end_date and self.end_date < self.start_date:
-            raise ValidationError(
-                "Bitiş tarihi başlangıç tarihinden önce olamaz."
-            )
+        level = self.employee.current_management_level
+
+        if not level:
+            return
+
+        if level.code == "PERSONNEL" and not self.unit_id:
+            raise ValidationError("Personel mutlaka bir şefliğe bağlı olmalıdır.")
+
+        if level.code == "CHIEF" and not self.unit_id:
+            raise ValidationError("Şef mutlaka bir şeflik birimine bağlı olmalıdır.")
 
         validate_history_overlap(EmployeeDepartmentHistory, self.employee, self.start_date, self.end_date, self.pk)
 

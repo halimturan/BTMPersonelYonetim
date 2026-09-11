@@ -77,6 +77,9 @@ class ManagementLevel(TimeStampedModel):
     code = models.CharField(max_length=50, unique=True, verbose_name="Kod")
     order = models.PositiveIntegerField(default=0, verbose_name="Ağırlık")
     can_manage_people = models.BooleanField(default=False, verbose_name="Sistemde işlem yapabilir mi?")
+    parent_level = models.ForeignKey("self", null=True, blank=True, on_delete=models.PROTECT,
+        related_name="child_levels", verbose_name="Bir Üst Yönetim Seviyesi",
+    )
     visibility_scope = models.CharField(max_length=20, choices=VisibilityScope.choices,
         default=VisibilityScope.NONE, verbose_name="Personel Görüntüleme Kapsamı",)
     active = models.BooleanField(default=True, verbose_name="Aktif mi?")
