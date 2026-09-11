@@ -19,33 +19,16 @@ class ResolvedReviewer:
 class ReviewerResolver:
     def __init__(self, reference_date):
         self.reference_date = reference_date
-
-        self.organization_service = (
-            EmployeeOrganizationService(
-                reference_date
-            )
-        )
+        self.organization_service = EmployeeOrganizationService(reference_date)
 
     def resolve(self, employee, reviewer_scheme):
         scheme_items = (
             reviewer_scheme.items
-            .select_related(
-                "reviewer_role",
-                "management_level",
-            )
-            .order_by(
-                "order",
-                "pk",
-            )
+            .select_related("reviewer_role", "management_level")
+            .order_by("order", "pk")
         )
 
-        total_weight = sum(
-            (
-                item.weight
-                for item in scheme_items
-            ),
-            Decimal("0"),
-        )
+        total_weight = sum((item.weight for item in scheme_items), Decimal("0"))
 
         if total_weight != Decimal("100"):
             raise ReviewerResolutionError(
@@ -89,24 +72,14 @@ class ReviewerResolver:
                     f"rolüne çözülüyor."
                 )
 
-            used_employee_ids.add(
-                reviewer.pk
-            )
+            used_employee_ids.add(reviewer.pk)
 
             result.append(
                 ResolvedReviewer(
                     employee=reviewer,
-
-                    reviewer_role=(
-                        item.reviewer_role
-                    ),
-
-                    management_level=(
-                        item.management_level
-                    ),
-
+                    reviewer_role=item.reviewer_role,
+                    management_level=item.management_level,
                     weight=item.weight,
-
                     scheme_item=item,
                 )
             )
