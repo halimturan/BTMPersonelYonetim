@@ -28,7 +28,7 @@ class EmploymentTypeAdmin(ActiveAdminMixin, admin.ModelAdmin,):
 
 @admin.register(ManagementLevel)
 class ManagementLevelAdmin(ActiveAdminMixin, admin.ModelAdmin):
-    list_display = ("order", "name", "code", "can_manage_people", "active")
+    list_display = ("order", "name", "code", "can_manage_people", "is_evaluated", "active")
     list_editable = ("name", "can_manage_people", "active")
     search_fields = ("name", "code")
     ordering = ("order",)

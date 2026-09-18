@@ -1,9 +1,7 @@
 from django.utils import timezone
 
 from apps.employees.models import Employee
-from apps.employees.services.organization import (
-    EmployeeOrganizationService,
-)
+from apps.employees.services.organization import EmployeeOrganizationService
 from apps.organization.models import ManagementLevel
 
 
@@ -58,14 +56,11 @@ class EmployeeVisibilityService:
             )
 
         if scope == ManagementLevel.VisibilityScope.ALL:
-            return (
+            return(
                 Employee.objects
-                .filter(
-                    is_active=True,
-                    current_management_level__order__lt=
-                    management_level.order,
-                )
+                .filter(is_active=True, current_management_level__order__lt=management_level.order)
                 .exclude(pk=employee.pk)
+                .distinct()
             )
 
         return Employee.objects.none()

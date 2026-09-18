@@ -1,96 +1,152 @@
 from decimal import Decimal
-from django import forms
 from apps.performance.models import (PerformanceCriterionScore)
 from django.db import transaction
 from apps.performance.services.calculator import WeightedReviewerScoreCalculator
+from django import forms
+from apps.performance.models import EvaluationPeriod
+
 
 class PerformanceReviewForm(forms.Form):
-
-    def __init__(self, *args, reviewer, **kwargs):
+    def __init__(
+        self,
+        *args,
+        reviewer=None,
+        **kwargs,
+    ):
         super().__init__(*args, **kwargs)
 
         self.reviewer = reviewer
-        self.evaluation = reviewer.evaluation
+        self.template_criteria = []
 
-        template_items = (
-            self.evaluation.template.criteria
+        if not reviewer:
+            return
+
+        evaluation = reviewer.evaluation
+        template = evaluation.template
+
+        self.template_criteria = list(
+            template.criteria
             .select_related("criterion")
-            .order_by("order")
+            .order_by("order", "pk")
         )
 
         existing_scores = {
-            item.criterion_id: item
-            for item in reviewer.criterion_scores.all()
+            score.criterion_id: score
+            for score in reviewer.criterion_scores.all()
         }
 
-        for item in template_items:
+        is_submitted = bool(
+            reviewer.submitted_at
+        )
 
-            field_name = (f"criterion_{item.criterion_id}")
-            existing = existing_scores.get(item.criterion_id)
+        for item in self.template_criteria:
+            criterion = item.criterion
 
-            self.fields[field_name] = (
+            score_field_name = (
+                f"score_{criterion.pk}"
+            )
+
+            comment_field_name = (
+                f"comment_{criterion.pk}"
+            )
+
+            existing = existing_scores.get(
+                criterion.pk
+            )
+
+            #
+            # PUAN
+            #
+            self.fields[score_field_name] = (
                 forms.DecimalField(
-                    label=item.criterion.name,
-                    min_value=Decimal("0"),
+                    label=criterion.name,
+                    required=False,
+                    min_value=0,
                     max_value=item.max_score,
                     decimal_places=2,
-                    required=item.required,
-                    help_text=item.criterion.description,
+                    max_digits=5,
                     initial=(
                         existing.score
                         if existing
                         else None
                     ),
+                    disabled=is_submitted,
+                    widget=forms.NumberInput(
+                        attrs={
+                            "class": (
+                                "form-control "
+                                "score-input"
+                            ),
+                            "step": "0.5",
+                            "min": "0",
+                            "max": str(
+                                item.max_score
+                            ),
+                            "data-max-score": str(
+                                item.max_score
+                            ),
+                            "placeholder": (
+                                f"0 - "
+                                f"{item.max_score}"
+                            ),
+                        }
+                    ),
                 )
             )
 
-    @transaction.atomic
-    def save(self):
-
-        template_items = (
-            self.evaluation.template.criteria
-            .select_related("criterion")
-            .order_by("order")
-        )
-
-        for item in template_items:
-            field_name = (
-                f"criterion_{item.criterion_id}"
+            #
+            # AÇIKLAMA
+            #
+            self.fields[comment_field_name] = (
+                forms.CharField(
+                    label="Açıklama",
+                    required=False,
+                    initial=(
+                        existing.comment
+                        if existing
+                        else ""
+                    ),
+                    disabled=is_submitted,
+                    widget=forms.Textarea(
+                        attrs={
+                            "class": "form-control",
+                            "rows": 3,
+                            "placeholder": (
+                                "Değerlendirme ile "
+                                "ilgili açıklama..."
+                            ),
+                        }
+                    ),
+                )
             )
 
-            score = self.cleaned_data[field_name]
+    def get_criterion_rows(self):
+        rows = []
 
-            PerformanceCriterionScore.objects.update_or_create(
-                reviewer=self.reviewer,
-                criterion=item.criterion,
-                defaults={
-                    "max_score": item.max_score,
-                    "score": score,
-                },
+        for item in self.template_criteria:
+            criterion = item.criterion
+
+            score_field_name = (
+                f"score_{criterion.pk}"
             )
 
-        raw_score, weighted_score = (
-            WeightedReviewerScoreCalculator(
-                self.reviewer
-            ).calculate()
-        )
+            comment_field_name = (
+                f"comment_{criterion.pk}"
+            )
 
-        self.reviewer.raw_score = raw_score
-        self.reviewer.weighted_score = weighted_score
+            rows.append({
+                "item": item,
+                "criterion": criterion,
 
-        self.reviewer.save(
-            update_fields=[
-                "raw_score",
-                "weighted_score",
-                "updated_at",
-            ]
-        )
+                "score_field":
+                    self[score_field_name],
 
-        return self.reviewer
+                "comment_field":
+                    self[comment_field_name],
+            })
 
-from django import forms
+        return rows
 
-from apps.performance.models import EvaluationPeriod
 
 
 class EvaluationPeriodForm(forms.ModelForm):

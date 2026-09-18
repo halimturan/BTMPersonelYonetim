@@ -1,21 +1,17 @@
-from django.contrib import messages
-from django.contrib.auth.mixins import (
-    LoginRequiredMixin,
-)
-from django.shortcuts import (
-    get_object_or_404,
-    redirect,
-)
-from django.views.generic import (
-    DetailView,
-    ListView,
-)
+from django.shortcuts import get_object_or_404
+from django.views.generic import DetailView
 
 from apps.performance.forms import PerformanceReviewForm
 from apps.performance.models import PerformanceEvaluationReviewer
 from apps.performance.services.submission import ReviewSubmissionError, ReviewSubmissionService
 from apps.scoring.services.period_score_calculator import PeriodScoreCalculator
 from apps.scoring.models import EmployeePeriodScore
+
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import ListView
+
+from apps.performance.models import PerformanceEvaluation
+from apps.performance.services.visibility import PerformanceEvaluationVisibilityService
 
 
 class MyReviewListView(
@@ -78,17 +74,10 @@ class MyReviewListView(
         return queryset
 
 
-class MyReviewDetailView(
-    LoginRequiredMixin,
-    DetailView,
-):
-    model = (
-        PerformanceEvaluationReviewer
-    )
+class MyReviewDetailView(LoginRequiredMixin, DetailView):
+    model = PerformanceEvaluationReviewer
 
-    template_name = (
-        "performance/my_review_detail.html"
-    )
+    template_name = "performance/my_review_detail.html"
 
     context_object_name = "review"
 
@@ -100,169 +89,107 @@ class MyReviewDetailView(
         )
 
         if not employee:
-            return (
-                PerformanceEvaluationReviewer
-                .objects
-                .none()
-            )
+            return PerformanceEvaluationReviewer.objects.none()
 
         return (
             PerformanceEvaluationReviewer.objects
-            .filter(
-                reviewer_employee=employee
-            )
-            .select_related(
-                "evaluation",
-                "evaluation__employee",
-                "evaluation__period",
-                "evaluation__template",
-                "reviewer_role",
-            )
-            .prefetch_related(
-                "criterion_scores"
-            )
+            .filter(reviewer_employee=employee)
+            .select_related("evaluation", "evaluation__employee", "evaluation__period", "evaluation__template", "reviewer_role")
+            .prefetch_related("criterion_scores")
         )
 
-    def get_context_data(
-        self,
-        **kwargs,
-    ):
-        context = super().get_context_data(
-            **kwargs
-        )
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
 
         review = self.object
-
-        form = kwargs.get(
-            "form"
-        )
+        form = kwargs.get("form")
 
         if form is None:
-            form = PerformanceReviewForm(
-                reviewer=review
+            form = PerformanceReviewForm(reviewer=review)
+
+        current_level = (
+            review
+            .reviewer_employee
+            .current_management_level
+        )
+
+        if current_level:
+            previous_reviews = (
+                review.evaluation.reviewers
+                .exclude(pk=review.pk)
+                .filter(
+                    reviewer_employee__current_management_level__order__lt=current_level.order,
+                    submitted_at__isnull=False,
+                )
+                .select_related(
+                    "reviewer_employee",
+                    "reviewer_employee__current_management_level",
+                    "reviewer_role",
+                )
+                .prefetch_related(
+                    "criterion_scores__criterion"
+                )
+                .order_by(
+                    "reviewer_employee__current_management_level__order"
+                )
+            )
+        else:
+            previous_reviews = (
+                review.evaluation.reviewers.none()
             )
 
         context["form"] = form
-        context["criterion_rows"] = (
-            form.get_criterion_rows()
-        )
-
-        context["missing_criteria"] = (
-            ReviewSubmissionService(
-                review
-            )
-            .get_missing_required_criteria()
-        )
+        context["criterion_rows"] = form.get_criterion_rows()
+        context["missing_criteria"] = ReviewSubmissionService(review).get_missing_required_criteria()
+        context["previous_reviews"] = previous_reviews
 
         return context
 
-    def post(
-        self,
-        request,
-        *args,
-        **kwargs,
-    ):
+    def post(self, request, *args, **kwargs):
         self.object = self.get_object()
 
         review = self.object
 
         if review.submitted_at:
-            messages.warning(
-                request,
-                "Bu değerlendirme daha önce gönderilmiş."
-            )
+            messages.warning(request,"Bu değerlendirme daha önce gönderilmiş.")
+            return redirect("performance:my_review_detail", pk=review.pk)
 
-            return redirect(
-                "performance:my_review_detail",
-                pk=review.pk,
-            )
-
-        form = PerformanceReviewForm(
-            request.POST,
-            reviewer=review,
-        )
+        form = PerformanceReviewForm(request.POST, reviewer=review)
 
         if not form.is_valid():
-            messages.error(
-                request,
-                "Formda hatalı veya eksik alanlar var."
-            )
+            messages.error(request,"Formda hatalı veya eksik alanlar var.")
+            context = self.get_context_data(form=form)
+            return self.render_to_response(context)
 
-            context = (
-                self.get_context_data(
-                    form=form
-                )
-            )
+        action = request.POST.get("action")
 
-            return self.render_to_response(
-                context
-            )
-
-        action = request.POST.get(
-            "action"
-        )
-
-        service = ReviewSubmissionService(
-            review
-        )
+        service = ReviewSubmissionService(review)
 
         try:
             if action == "submit":
-                service.submit(
-                    form.cleaned_data
-                )
-
-                messages.success(
-                    request,
-                    "Değerlendirme başarıyla gönderildi."
-                )
+                service.submit(form.cleaned_data)
+                messages.success(request, "Değerlendirme başarıyla gönderildi.")
 
             else:
-                service.save_draft(
-                    form.cleaned_data
-                )
-
-                messages.success(
-                    request,
-                    "Değerlendirme taslak olarak kaydedildi."
-                )
+                service.save_draft(form.cleaned_data)
+                messages.success(request, "Değerlendirme taslak olarak kaydedildi.")
 
         except ReviewSubmissionError as exc:
-            messages.error(
-                request,
-                str(exc)
-            )
+            messages.error(request, str(exc))
 
-        return redirect(
-            "performance:my_review_detail",
-            pk=review.pk,
-        )
+        return redirect("performance:my_review_detail", pk=review.pk)
 
 from django.contrib import messages
-from django.contrib.auth.mixins import (
-    LoginRequiredMixin,
-    PermissionRequiredMixin,
-)
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.db.models import Count, Q
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import (
-    CreateView,
-    DetailView,
-    ListView,
-)
+from django.views.generic import CreateView, DetailView, ListView
 
-from apps.performance.forms import (
-    EvaluationPeriodForm,
-)
-from apps.performance.models import (
-    EvaluationPeriod,
-)
-from apps.performance.services.period_initializer import (
-    EvaluationPeriodInitializer,
-    PeriodInitializationError,
-)
+from apps.performance.forms import EvaluationPeriodForm
+from apps.performance.models import EvaluationPeriod
+from apps.performance.services.period_initializer import EvaluationPeriodInitializer, PeriodInitializationError
 
 
 class EvaluationPeriodListView(
@@ -807,3 +734,95 @@ class EvaluationPeriodCalculateScoresView(
             "performance:period_detail",
             pk=period.pk,
         )
+
+
+class EvaluationListView(
+    LoginRequiredMixin,
+    PermissionRequiredMixin,
+    ListView,
+):
+    model = PerformanceEvaluation
+    template_name = "performance/evaluation_list.html"
+    context_object_name = "evaluations"
+    permission_required = (
+        "performance.view_performanceevaluation"
+    )
+    paginate_by = 25
+
+    def get_queryset(self):
+        return (
+            PerformanceEvaluationVisibilityService(
+                self.request.user
+            )
+            .get_visible_evaluations()
+            .select_related(
+                "employee",
+                "employee__current_management_level",
+                "period",
+                "status",
+                "template",
+            )
+            .prefetch_related(
+                "reviewers",
+                "reviewers__reviewer_employee",
+                "reviewers__reviewer_employee__current_management_level",
+                "reviewers__reviewer_role",
+            )
+            .order_by(
+                "-period__start_date",
+                "employee__first_name",
+                "employee__last_name",
+            )
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        evaluation_rows = []
+
+        for evaluation in context["evaluations"]:
+
+            chief_review = None
+            assistant_manager_review = None
+            manager_review = None
+
+            for review in evaluation.reviewers.all():
+
+                reviewer_employee = (
+                    review.reviewer_employee
+                )
+
+                if not reviewer_employee:
+                    continue
+
+                level = (
+                    reviewer_employee
+                    .current_management_level
+                )
+
+                if not level:
+                    continue
+
+                if level.order == 20:
+                    chief_review = review
+
+                elif level.order == 30:
+                    assistant_manager_review = review
+
+                elif level.order == 40:
+                    manager_review = review
+
+            evaluation_rows.append({
+                "evaluation": evaluation,
+                "chief_review": chief_review,
+                "assistant_manager_review": (
+                    assistant_manager_review
+                ),
+                "manager_review": manager_review,
+            })
+
+        context["evaluation_rows"] = (
+            evaluation_rows
+        )
+
+        return context

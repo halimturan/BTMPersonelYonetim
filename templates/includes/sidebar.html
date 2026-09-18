@@ -45,5 +45,12 @@
                 Dönem Yönetimi
             </a>
         {% endif %}
+
+        {% if perms.performance.view_performanceevaluation %}
+            <a href="{% url 'performance:evaluation_list' %}" class="sidebar-link">
+                <i class="bi bi-card-checklist"></i>
+                Değerlendirmeler
+            </a>
+        {% endif %}
     </nav>
 </aside>

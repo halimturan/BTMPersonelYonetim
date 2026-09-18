@@ -75,6 +75,30 @@ class EmployeeOrganizationService:
 
         return employee.current_management_level
 
+    def get_assignment_record(self, employee):
+        return (
+            employee.assignments
+            .filter(
+                start_date__lte=self.reference_date,
+            )
+            .filter(
+                Q(end_date__isnull=True)
+                | Q(end_date__gte=self.reference_date)
+            )
+            .select_related("job_role")
+            .order_by("-start_date")
+            .first()
+        )
+
+    def get_job_role(self, employee):
+        record = self.get_assignment_record(employee)
+
+        return (
+            record.job_role
+            if record
+            else None
+        )
+
     # ----------------------------------------
     # Snapshot
     # ----------------------------------------
@@ -189,55 +213,82 @@ class EmployeeOrganizationService:
     # ----------------------------------------
 
     def find_manager(self, employee, target_management_level):
-        snapshot = self.get_snapshot(employee)
+        current_employee = employee
+        visited_employee_ids = set()
 
-        target_order = target_management_level.order
-        current_order = snapshot.management_level.order
+        while True:
+            if current_employee.pk in visited_employee_ids:
+                raise ManagerNotFoundError(
+                    f"{employee.full_name} için yönetici zincirinde döngü tespit edildi."
+                )
 
-        # Bir üst kademe olmak zorunda
-        if target_order <= current_order:
-            raise ManagerNotFoundError("Hedef yönetim seviyesi personelin üstünde olmalıdır.")
+            visited_employee_ids.add(current_employee.pk)
 
-        qs = (Employee.objects.filter(is_active=True, current_management_level=target_management_level)
-              .exclude(pk=employee.pk))
+            current_snapshot = self.get_snapshot(current_employee)
+
+            current_level = current_snapshot.management_level
+
+            if not current_level:
+                raise ManagerNotFoundError(
+                    f"{current_employee.full_name} için "
+                    f"yönetim seviyesi bulunamadı."
+                )
+
+            parent_level = current_level.parent_level
+
+            if not parent_level:
+                raise ManagerNotFoundError(
+                    f"{employee.full_name} için "
+                    f"{target_management_level.name} seviyesine "
+                    f"ulaşılamadı."
+                )
+
+            direct_manager = self._find_direct_manager(current_employee, current_snapshot, parent_level)
+
+            if direct_manager.current_management_level_id == target_management_level.pk:
+                return direct_manager
+
+            current_employee = direct_manager
+
+    def _find_direct_manager(self, employee, snapshot, parent_level):
+        qs = (
+            Employee.objects
+            .filter(is_active=True, current_management_level=parent_level)
+            .exclude(pk=employee.pk)
+        )
 
         # Personel -> Şef
-        if current_order == 10 and target_order == 20:
-            if not snapshot.unit:
-                raise ManagerNotFoundError(f"{employee.full_name} için şeflik birimi bulunamadı.")
-
+        if snapshot.unit:
             employee_ids = self.get_employee_ids_in_unit(snapshot.unit)
 
-            qs = qs.filter(pk__in=employee_ids)
+            same_unit_qs = qs.filter(pk__in=employee_ids)
+
+            if same_unit_qs.exists():
+                return self._get_single_manager(same_unit_qs, employee, parent_level)
 
         # Şef -> Müdür Yardımcısı
-        elif current_order == 20 and target_order == 30:
-            if not snapshot.department:
-                raise ManagerNotFoundError(f"{employee.full_name} için departman bulunamadı.")
-
+        if snapshot.department:
             employee_ids = self.get_employee_ids_in_department(snapshot.department)
 
-            qs = qs.filter(pk__in=employee_ids)
+            same_department_qs = qs.filter(pk__in=employee_ids)
+
+            if same_department_qs.exists():
+                return self._get_single_manager(same_department_qs, employee, parent_level)
 
         # Müdür Yardımcısı -> Müdür
-        elif current_order == 30 and target_order == 40:
-            pass
+        return self._get_single_manager(qs, employee, parent_level)
 
-        else:
-            raise ManagerNotFoundError(f"{employee.full_name} için geçersiz yönetici zinciri.")
-
-        count = qs.count()
+    def _get_single_manager(self, queryset, employee, management_level):
+        count = queryset.count()
 
         if count == 0:
             raise ManagerNotFoundError(
-                f"{employee.full_name} için "
-                f"{target_management_level.name} bulunamadı."
+                f"{employee.full_name} için {management_level.name} bulunamadı."
             )
 
         if count > 1:
             raise MultipleManagersFoundError(
-                f"{employee.full_name} için "
-                f"birden fazla {target_management_level.name} bulundu."
+                f"{employee.full_name} için birden fazla {management_level.name} bulundu."
             )
 
-        return qs.first()
+        return queryset.first()

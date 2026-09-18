@@ -124,7 +124,7 @@ class EvaluationPeriodInitializer:
     def _employees(self):
         return (
             Employee.objects
-            .filter(is_active=True)
+            .filter(is_active=True, current_management_level__is_evaluated=True)
             .select_related("employment_type")
             .order_by(
                 "first_name",

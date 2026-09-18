@@ -36,23 +36,10 @@ class ReviewSubmissionService:
 
         for item in self._template_items():
             criterion = item.criterion
-
-            score_key = (
-                f"criterion_{criterion.pk}"
-            )
-
-            comment_key = (
-                f"comment_{criterion.pk}"
-            )
-
-            score = cleaned_data.get(
-                score_key
-            )
-
-            comment = cleaned_data.get(
-                comment_key,
-                "",
-            )
+            score_key = f"score_{criterion.pk}"
+            comment_key = f"comment_{criterion.pk}"
+            score = cleaned_data.get(score_key)
+            comment = cleaned_data.get(comment_key, "")
 
             if score is None:
                 continue
@@ -133,29 +120,9 @@ class ReviewSubmissionService:
         ]
 
     def _recalculate(self):
-        raw_score = (
-            ReviewerPerformanceCalculator(
-                self.reviewer
-            ).calculate()
-        )
-
-        weighted_score = (
-            WeightedReviewerScoreCalculator(
-                self.reviewer
-            ).calculate(
-                raw_score
-            )
-        )
+        raw_score, weighted_score = WeightedReviewerScoreCalculator(self.reviewer).calculate()
 
         self.reviewer.raw_score = raw_score
-        self.reviewer.weighted_score = (
-            weighted_score
-        )
+        self.reviewer.weighted_score = weighted_score
 
-        self.reviewer.save(
-            update_fields=[
-                "raw_score",
-                "weighted_score",
-                "updated_at",
-            ]
-        )
+        self.reviewer.save(update_fields=["raw_score", "weighted_score", "updated_at"])

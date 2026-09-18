@@ -1,5 +1,9 @@
 from decimal import Decimal
 
+from apps.performance.models import (
+    PerformanceCriterionScore,
+)
+
 
 class ReviewerPerformanceCalculator:
 
@@ -9,18 +13,25 @@ class ReviewerPerformanceCalculator:
     def calculate(self):
 
         scores = (
-            self.reviewer
-            .criterion_scores
-            .all()
+            PerformanceCriterionScore.objects
+            .filter(
+                reviewer=self.reviewer
+            )
         )
 
         total_score = sum(
-            (item.score for item in scores),
+            (
+                item.score
+                for item in scores
+            ),
             Decimal("0"),
         )
 
         total_max = sum(
-            (item.max_score for item in scores),
+            (
+                item.max_score
+                for item in scores
+            ),
             Decimal("0"),
         )
 
@@ -33,12 +44,24 @@ class ReviewerPerformanceCalculator:
             * Decimal("100")
         )
 
+
 class WeightedReviewerScoreCalculator:
 
     def __init__(self, reviewer):
         self.reviewer = reviewer
 
     def calculate(self):
-        raw_score = ReviewerPerformanceCalculator(self.reviewer).calculate()
-        weighted_score = (raw_score * self.reviewer.weight / Decimal("100"))
+
+        raw_score = (
+            ReviewerPerformanceCalculator(
+                self.reviewer
+            ).calculate()
+        )
+
+        weighted_score = (
+            raw_score
+            * self.reviewer.weight
+            / Decimal("100")
+        )
+
         return raw_score, weighted_score

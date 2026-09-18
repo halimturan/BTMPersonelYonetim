@@ -639,10 +639,7 @@
 
                         <td>
 
-                            <a
-                                href="{% url 'employees:detail' evaluation.employee.pk %}"
-                                class="text-decoration-none fw-semibold"
-                            >
+                            <a href="{% url 'employees:employee_detail' evaluation.employee.pk %}" class="text-decoration-none fw-semibold">
                                 {{ evaluation.employee.full_name }}
                             </a>
 

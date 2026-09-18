@@ -82,6 +82,7 @@ class ManagementLevel(TimeStampedModel):
     )
     visibility_scope = models.CharField(max_length=20, choices=VisibilityScope.choices,
         default=VisibilityScope.NONE, verbose_name="Personel Görüntüleme Kapsamı",)
+    is_evaluated = models.BooleanField(default=True, verbose_name="Performans Değerlendirmesine Dahil mi?")
     active = models.BooleanField(default=True, verbose_name="Aktif mi?")
 
     class Meta:
