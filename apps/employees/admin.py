@@ -76,6 +76,7 @@ class EmployeeAdmin(admin.ModelAdmin):
     search_fields = ("personnel_no", "first_name", "last_name")
     list_select_related = ("employment_type",)
     ordering = ("first_name", "last_name",)
+    list_per_page = 10
 
     inlines = (
         EmployeeEducationInline, EmployeeAssignmentHistoryInline, EmployeeTitleHistoryInline,
