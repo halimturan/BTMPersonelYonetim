@@ -103,9 +103,15 @@ Dashboard
 
 <div class="card border-0 shadow-sm mb-4">
 
-    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+    <div
+        class="card-header bg-white
+               d-flex
+               justify-content-between
+               align-items-center"
+    >
 
         <div>
+
             <strong>
                 Aktif Dönem
             </strong>
@@ -113,6 +119,7 @@ Dashboard
             <div class="small text-muted">
                 {{ active_period.name }}
             </div>
+
         </div>
 
         {% if perms.performance.view_evaluationperiod %}
@@ -128,29 +135,44 @@ Dashboard
 
     </div>
 
+
     <div class="card-body">
 
-        <div class="progress" style="height: 10px;">
+        <div
+            class="d-flex
+                   justify-content-between
+                   mb-2"
+        >
 
-            {% if active_period.evaluation_count %}
+            <span class="small text-muted">
+                Genel Tamamlanma
+            </span>
 
-                <div
-                    class="progress-bar"
-                    style="
-                        width:
-                        {% widthratio active_period.completed_count active_period.evaluation_count 100 %}%;
-                    "
-                ></div>
-
-            {% endif %}
+            <strong>
+                %{{ completion_rate }}
+            </strong>
 
         </div>
 
+
+        <div
+            class="progress"
+            style="height: 10px;"
+        >
+
+            <div
+                class="progress-bar"
+                style="width: {{ completion_rate }}%;"
+            ></div>
+
+        </div>
+
+
         <div class="small text-muted mt-2">
 
-            {{ active_period.completed_count }}
+            {{ completed_evaluations }}
             /
-            {{ active_period.evaluation_count }}
+            {{ total_evaluations }}
             değerlendirme tamamlandı
 
         </div>
@@ -163,18 +185,35 @@ Dashboard
 
 <div class="row g-4">
 
-    <div class="col-md-4">
+    <div class="col-xl-3 col-md-6">
 
-        <div class="card border-0 shadow-sm">
+        <div class="card border-0 shadow-sm h-100">
 
             <div class="card-body">
 
-                <div class="text-muted mb-2">
-                    Görüntüleyebildiğim Personel
-                </div>
+                <div
+                    class="d-flex
+                           justify-content-between"
+                >
 
-                <div class="display-6 fw-semibold">
-                    {{ visible_employee_count }}
+                    <div>
+
+                        <div class="text-muted mb-2">
+                            Görüntüleyebildiğim Personel
+                        </div>
+
+                        <div class="display-6 fw-semibold">
+                            {{ visible_employee_count }}
+                        </div>
+
+                    </div>
+
+                    <div class="fs-3 text-primary">
+
+                        <i class="bi bi-people"></i>
+
+                    </div>
+
                 </div>
 
             </div>
@@ -184,18 +223,121 @@ Dashboard
     </div>
 
 
-    <div class="col-md-4">
+    <div class="col-xl-3 col-md-6">
 
-        <div class="card border-0 shadow-sm">
+        <div class="card border-0 shadow-sm h-100">
 
             <div class="card-body">
 
-                <div class="text-muted mb-2">
-                    Bekleyen Değerlendirmeler
+                <div
+                    class="d-flex
+                           justify-content-between"
+                >
+
+                    <div>
+
+                        <div class="text-muted mb-2">
+                            Aktif Değerlendirme
+                        </div>
+
+                        <div class="display-6 fw-semibold">
+                            {{ total_evaluations }}
+                        </div>
+
+                    </div>
+
+                    <div class="fs-3 text-primary">
+
+                        <i class="bi bi-clipboard-data"></i>
+
+                    </div>
+
                 </div>
 
-                <div class="display-6 fw-semibold">
-                    {{ pending_review_count }}
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-xl-3 col-md-6">
+
+        <div class="card border-0 shadow-sm h-100">
+
+            <div class="card-body">
+
+                <div
+                    class="d-flex
+                           justify-content-between"
+                >
+
+                    <div>
+
+                        <div class="text-muted mb-2">
+                            Bekleyen Değerlendirmem
+                        </div>
+
+                        <div class="display-6 fw-semibold">
+                            {{ pending_review_count }}
+                        </div>
+
+                    </div>
+
+                    <div class="fs-3 text-warning">
+
+                        <i class="bi bi-hourglass-split"></i>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-xl-3 col-md-6">
+
+        <div class="card border-0 shadow-sm h-100">
+
+            <div class="card-body">
+
+                <div
+                    class="d-flex
+                           justify-content-between"
+                >
+
+                    <div>
+
+                        <div class="text-muted mb-2">
+                            Ortalama Performans
+                        </div>
+
+                        <div class="display-6 fw-semibold">
+
+                            {% if average_performance_score is not None %}
+
+                                {{ average_performance_score|floatformat:1 }}
+
+                            {% else %}
+
+                                -
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                    <div class="fs-3 text-success">
+
+                        <i class="bi bi-graph-up-arrow"></i>
+
+                    </div>
+
                 </div>
 
             </div>
@@ -205,7 +347,165 @@ Dashboard
     </div>
 
 </div>
+    
+{% if active_period %}
 
+<div class="card border-0 shadow-sm mt-4">
+
+    <div class="card-header bg-white">
+
+        <strong>
+            Değerlendirme İlerlemesi
+        </strong>
+
+        <div class="small text-muted">
+            {{ active_period.name }}
+        </div>
+
+    </div>
+
+
+    <div class="card-body p-0">
+
+        <div class="table-responsive">
+
+            <table
+                class="table
+                       table-hover
+                       align-middle
+                       mb-0"
+            >
+
+                <thead class="table-light">
+
+                    <tr>
+
+                        <th>
+                            Değerlendiren
+                        </th>
+
+                        <th>
+                            Toplam
+                        </th>
+
+                        <th>
+                            Tamamlanan
+                        </th>
+
+                        <th>
+                            Bekleyen
+                        </th>
+
+                        <th style="width: 30%;">
+                            İlerleme
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for item in reviewer_progress %}
+
+                        <tr>
+
+                            <td>
+                                <strong>
+                                    {{ item.name }}
+                                </strong>
+                            </td>
+
+                            <td>
+                                {{ item.total }}
+                            </td>
+
+                            <td>
+
+                                <span
+                                    class="badge
+                                           text-bg-success"
+                                >
+                                    {{ item.completed }}
+                                </span>
+
+                            </td>
+
+                            <td>
+
+                                {% if item.pending %}
+
+                                    <span
+                                        class="badge
+                                               text-bg-warning"
+                                    >
+                                        {{ item.pending }}
+                                    </span>
+
+                                {% else %}
+
+                                    <span
+                                        class="badge
+                                               text-bg-light"
+                                    >
+                                        0
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+                            <td>
+
+                                <div
+                                    class="d-flex
+                                           align-items-center
+                                           gap-2"
+                                >
+
+                                    <div
+                                        class="progress
+                                               flex-grow-1"
+                                        style="height: 8px;"
+                                    >
+
+                                        <div
+                                            class="progress-bar"
+                                            style="
+                                                width:
+                                                {{ item.rate }}%;
+                                            "
+                                        ></div>
+
+                                    </div>
+
+                                    <span
+                                        class="small
+                                               text-muted"
+                                    >
+                                        %{{ item.rate }}
+                                    </span>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endif %}
 
 <div class="card border-0 shadow-sm mt-4">
 
