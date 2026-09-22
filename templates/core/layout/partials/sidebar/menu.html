@@ -5,32 +5,35 @@
     <div id="kt_app_sidebar_menu_wrapper" class="app-sidebar-wrapper">
         <!--begin::Scroll wrapper-->
         <div id="kt_app_sidebar_menu_scroll" class="scroll-y my-5 mx-3" data-kt-scroll="true" data-kt-scroll-activate="true" data-kt-scroll-height="auto" data-kt-scroll-dependencies="#kt_app_sidebar_logo, #kt_app_sidebar_footer" data-kt-scroll-wrappers="#kt_app_sidebar_menu" data-kt-scroll-offset="5px" data-kt-scroll-save-state="true">
+            <!--begin::separator-->
+            <div class="separator my-1"></div>
+            <!--end::separator-->
             <!--begin::Menu-->
             <div class="menu menu-column menu-rounded menu-sub-indention fw-semibold fs-6" id="#kt_app_sidebar_menu" data-kt-menu="true" data-kt-menu-expand="false">
                 <!--begin:Menu item-->
-                <div  class="menu-item bg-hover-light-primary">
+                <div  class="menu-item bg-hover-light-primary my-1">
                     <!--begin:Menu link-->
-                    <a class="menu-link text-hover-primary" href="{% url 'dashboard:index' %}">
+                    <a class="menu-link text-hover-primary" id="dashboard-item" href="{% url 'dashboard:index' %}">
                         <span class="menu-icon">
-                            <i class="ki-duotone ki-element-11 fs-2">
+                            <i class="ki-duotone ki-element-11 fs-1">
                              <span class="path1"></span>
                              <span class="path2"></span>
                              <span class="path3"></span>
                              <span class="path4"></span>
                             </i>
                         </span>
-                        <span class="menu-title text-hover-primary">Dashboard</span>
+                        <span class="menu-title text-hover-primary fs-3">Dashboard</span>
                     </a>
                     <!--end:Menu link-->
                 </div>
                 <!--end:Menu item-->
                 {% if request.user.is_superuser or request.user.employee.current_management_level.can_manage_people %}
                     <!--begin:Menu item-->
-                    <div  class="menu-item bg-hover-light-primary">
+                    <div  class="menu-item bg-hover-light-primary my-1">
                         <!--begin:Menu link-->
                         <a class="menu-link text-hover-primary" href="{% url 'employees:employee_list' %}">
                             <span class="menu-icon">
-                                <i class="ki-duotone ki-people fs-2">
+                                <i class="ki-duotone ki-people fs-1">
                                     <span class="path1"></span>
                                      <span class="path2"></span>
                                      <span class="path3"></span>
@@ -38,23 +41,23 @@
                                      <span class="path5"></span>
                                 </i>
                             </span>
-                            <span class="menu-title text-hover-primary">Personeller</span>
+                            <span class="menu-title text-hover-primary fs-3">Personeller</span>
                         </a>
                         <!--end:Menu link-->
                     </div>
                     <!--end:Menu item-->
                 {% endif %}
                 <!--begin:Menu item-->
-                <div  class="menu-item bg-hover-light-primary">
+                <div  class="menu-item bg-hover-light-primary my-1">
                     <!--begin:Menu link-->
                     <a class="menu-link text-hover-primary" href="{% url 'performance:my_reviews' %}">
                         <span class="menu-icon">
-                            <i class="ki-duotone ki-folder-added fs-2">
+                            <i class="ki-duotone ki-folder-added fs-1">
                                 <span class="path1"></span>
                                 <span class="path2"></span>
                             </i>
                         </span>
-                        <span class="menu-title text-hover-primary">Değerlendirmelerim</span>
+                        <span class="menu-title text-hover-primary fs-3">Değerlendirmelerim</span>
                     </a>
                     <!--end:Menu link-->
                 </div>
@@ -62,16 +65,16 @@
             
                 {% if perms.performance.view_evaluationperiod %}
                     <!--begin:Menu item-->
-                    <div  class="menu-item bg-hover-light-primary">
+                    <div  class="menu-item bg-hover-light-primary my-1">
                         <!--begin:Menu link-->
                         <a class="menu-link text-hover-primary" href="{% url 'performance:period_list' %}">
                             <span class="menu-icon">
-                                <i class="ki-duotone ki-calendar fs-2">
+                                <i class="ki-duotone ki-calendar fs-1">
                                     <span class="path1"></span>
                                     <span class="path2"></span>
                                 </i>
                             </span>
-                            <span class="menu-title text-hover-primary">Dönem Yönetimi</span>
+                            <span class="menu-title text-hover-primary fs-3">Dönem Yönetimi</span>
                         </a>
                         <!--end:Menu link-->
                     </div>
@@ -80,16 +83,16 @@
             
                 {% if perms.performance.view_performanceevaluation %}
                     <!--begin:Menu item-->
-                    <div  class="menu-item bg-hover-light-primary">
+                    <div  class="menu-item bg-hover-light-primary my-1">
                         <!--begin:Menu link-->
                         <a class="menu-link text-hover-primary" href="{% url 'performance:evaluation_list' %}">
                             <span class="menu-icon">
-                                <i class="ki-questionnaire-tablet ki-duotone fs-2">
+                                <i class="ki-questionnaire-tablet ki-duotone fs-1">
                                     <span class="path1"></span>
                                     <span class="path2"></span>
                                 </i>
                             </span>
-                            <span class="menu-title text-hover-primary">Değerlendirmeler</span>
+                            <span class="menu-title text-hover-primary fs-3">Değerlendirmeler</span>
                         </a>
                         <!--end:Menu link-->
                     </div>

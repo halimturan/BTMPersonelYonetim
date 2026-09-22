@@ -81,7 +81,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             incomplete_evaluations = total_evaluations - completed_evaluations
 
             if total_evaluations:
-                completion_rate = round((completed_evaluations / total_evaluations) * 100, 1)
+                completion_rate = int(round((completed_evaluations / total_evaluations) * 100, 1))
 
             # ----------------------------------
             # Reviewer görevleri
@@ -143,7 +143,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
             alerts.append({
                 "type": "warning",
-                "icon": "clipboard-check",
+                "icon": "abstract-18",
                 "title": f"{pending_reviews.count()} bekleyen değerlendirmeniz var",
                 "message": "Size atanmış performans değerlendirmelerini tamamlayın.",
                 "url_name": "performance:my_reviews",
@@ -154,7 +154,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             if incomplete_evaluations > 0:
                 alerts.append({
                     "type": "info",
-                    "icon": "hourglass-split",
+                    "icon": "check-circle",
                     "title": f"{incomplete_evaluations} performans değerlendirmesi tamamlanmadı",
                     "message": active_period.name,
                     "period_id": active_period.pk,
