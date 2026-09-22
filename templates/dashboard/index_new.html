@@ -203,10 +203,10 @@ Dashboard
                         <span class="fs-5 fw-semibold text-gray-600 pb-5 d-block"><strong>{{ active_period.name }}</strong> performans dönemine ait ilerleme bilgileri</span>
                         <!--end::info-->
                         <!--begin::heading-->
-                        <div class="d-flex text-muted fw-bold fs-5 mb-3">
+                        <div class="d-flex text-muted fw-bold fs-5 mb-3 justify-content-center">
 {#                            <span class="flex-grow-1 text-gray-800">Genel Tamamlanma</span>#}
 {#                            <span class="text-gray-800">%{{ completion_rate }}</span>#}
-                            <div id="completion_graph" class="p-0 h-300px w-300px"></div>
+                            <div id="completion_graph" class="p-0 h-400px w-400px"></div>
                         </div>
                         <!--end::heading-->
                         <!--begin::progress-->
@@ -364,9 +364,9 @@ Dashboard
         document.getElementById('dashboard-item').classList.add('active');
         document.addEventListener("DOMContentLoaded", function () {
             var options = {
-                series: [83],
+                series: [{{ completion_rate }}],
                 chart: {
-                    height: 300,
+                    height: 350,
                     type: 'radialBar',
                 },
                 plotOptions: {
