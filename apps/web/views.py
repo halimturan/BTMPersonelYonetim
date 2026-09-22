@@ -123,7 +123,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                     "total": total,
                     "completed": completed,
                     "pending": pending,
-                    "rate": rate,
+                    "rate": int(rate),
                 })
 
             # ----------------------------------

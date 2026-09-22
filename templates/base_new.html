@@ -75,11 +75,8 @@
         <script src="{% static 'lib/metronic/assets/plugins/global/plugins.bundle.js' %}"></script>
         <script src="{% static 'lib/metronic/assets/js/scripts.bundle.js' %}"></script>
         <!--end::Global Javascript Bundle-->
-
-
-        <!--begin::Custom Javascript(used for this page only)-->
-        <script src="{% static 'lib/metronic/assets/js/custom/authentication/sign-in/general.js' %}"></script>
         <!--end::Custom Javascript-->
+        {% block extra_scripts %}{% endblock %}
         <!--end::Javascript-->
     </body>
     <!--end::Body-->

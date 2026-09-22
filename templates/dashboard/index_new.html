@@ -31,6 +31,104 @@ Dashboard
         <!--end::Toolbar container-->
     </div>
     <!--end::toolbar-->
+    
+    <!--begin::row-->
+    <div class="row g-4">
+        <!--begin::col-->
+        <div class="col-xl-3 col-md-6">
+            <!--begin::card-->
+            <div class="card card-xl-stretch mb-xl-8">
+                <!--begin::Body-->
+                <div class="card-body d-flex align-items-center pt-3 pb-0">
+                    <div class="d-flex flex-column flex-grow-1 me-2">
+                        <a href="#" class="fw-bold text-gray-600 fs-4 mb-2 text-hover-primary">Toplam Personel</a>
+                        <span class="text-gray-800 fs-2tx">{{ visible_employee_count }}</span>
+                    </div>
+
+                    <i class="ki-duotone ki-people align-self-end pt-5 fs-6tx h-100px w-100px text-dark">
+                     <span class="path1"></span>
+                     <span class="path2"></span>
+                     <span class="path3"></span>
+                     <span class="path4"></span>
+                     <span class="path5"></span>
+                    </i>
+                </div>
+                <!--end::Body-->
+            </div>
+            <!--end::card-->
+        </div>
+        <!--end::col-->
+        <!--begin::col-->
+        <div class="col-xl-3 col-md-6">
+             <!--begin::card-->
+            <div class="card card-xl-stretch mb-xl-8">
+                <!--begin::Body-->
+                <div class="card-body d-flex align-items-center pt-3 pb-0">
+                    <div class="d-flex flex-column flex-grow-1 me-2">
+                        <a href="#" class="fw-bold text-gray-600 fs-4 mb-2 text-hover-primary">Aktif Değerlendirme</a>
+                        <span class="text-gray-800 fs-2tx">{{ total_evaluations }}</span>
+                    </div>
+
+                    <i class="ki-duotone ki-double-check align-self-end pt-5 fs-6tx h-100px w-100px text-dark">
+                     <span class="path1"></span>
+                     <span class="path2"></span>
+                    </i>
+                </div>
+                <!--end::Body-->
+            </div>
+            <!--end::card-->
+        </div>
+        <!--end::col-->
+        <!--begin::col-->
+        <div class="col-xl-3 col-md-6">
+            <!--begin::card-->
+            <div class="card card-xl-stretch mb-xl-8">
+                <!--begin::Body-->
+                <div class="card-body d-flex align-items-center pt-3 pb-0">
+                    <div class="d-flex flex-column flex-grow-1 me-2">
+                        <a href="#" class="fw-bold text-gray-600 fs-4 mb-2 text-hover-primary">Bekleyen Değerlendirmem</a>
+                        <span class="text-gray-800 fs-2tx">{{ pending_review_count }}</span>
+                    </div>
+
+                    <i class="ki-duotone ki-watch align-self-end pt-5 fs-6tx h-100px w-100px text-dark">
+                     <span class="path1"></span>
+                     <span class="path2"></span>
+                    </i>
+                </div>
+                <!--end::Body-->
+            </div>
+            <!--end::card-->
+        </div>
+        <!--end::col-->
+        <!--begin::col-->
+        <div class="col-xl-3 col-md-6">
+            <!--begin::card-->
+            <div class="card card-xl-stretch mb-xl-8">
+                <!--begin::Body-->
+                <div class="card-body d-flex align-items-center pt-3 pb-0">
+                    <div class="d-flex flex-column flex-grow-1 me-2">
+                        <a href="#" class="fw-bold text-gray-600 fs-4 mb-2 text-hover-primary">Ortalama Performans</a>
+                        <span class="text-gray-800 fs-2tx">
+                            {% if average_performance_score is not None %}
+                                {{ average_performance_score|floatformat:1 }}
+                            {% else %}
+                                    -
+                            {% endif %}
+                        </span>
+                    </div>
+
+                    <i class="ki-duotone ki-chart-line-up align-self-end pt-5 fs-6tx h-100px w-100px text-dark">
+                     <span class="path1"></span>
+                     <span class="path2"></span>
+                    </i>
+                </div>
+                <!--end::Body-->
+            </div>
+            <!--end::card-->
+        </div>
+        <!--end::col-->
+    </div>
+    <!--end::row-->
 
     {% if alerts %}
         <div class="my-5">
@@ -76,389 +174,240 @@ Dashboard
             {% endfor %}
         </div>
         <!--end::row-->
-{% endif %}
+    {% endif %}
+    
+    {% if active_period %}
+        <!--begin::row-->
+        <div class="row">
+            <!--begin::col-->
+            <div class="col-xl-6">
+                <!--begin::card-->
+                <div class="card my-5">
+                    <!--begin::card-header-->
+                    <div class="card-header card-header-stretch">
+                        <!--begin::card-title-->
+                        <div class="card-title m-0">
+                            <h3 class="fw-bold m-0">Aktif Dönem</h3>
+                        </div>
+                        <!--end::card-title-->
+                        {% if perms.performance.view_evaluationperiod %}
+                            <a href="{% url 'performance:period_detail' active_period.pk %}" class="btn btn-sm btn-primary align-self-center">
+                                Döneme Git
+                            </a>
+                        {% endif %}
+                    </div>
+                    <!--end::card-header-->
+                    <!--begin::card-body-->
+                    <div class="card-body h-325px">
+                        <!--begin::info-->
+                        <span class="fs-5 fw-semibold text-gray-600 pb-5 d-block"><strong>{{ active_period.name }}</strong> performans dönemine ait ilerleme bilgileri</span>
+                        <!--end::info-->
+                        <!--begin::heading-->
+                        <div class="d-flex text-muted fw-bold fs-5 mb-3">
+{#                            <span class="flex-grow-1 text-gray-800">Genel Tamamlanma</span>#}
+{#                            <span class="text-gray-800">%{{ completion_rate }}</span>#}
+                            <div id="completion_graph" class="p-0 h-300px w-300px"></div>
+                        </div>
+                        <!--end::heading-->
+                        <!--begin::progress-->
+{#                        <div class="progress h-8px bg-light-primary mb-2">#}
+{#                            <div class="progress-bar bg-primary" role="progressbar" style="width: {{ completion_rate }}%" aria-valuenow="{{ completion_rate }}" aria-valuemin="0" aria-valuemax="100"></div>#}
+{#                        </div>#}
+                        <!--end::progress-->
+                        <!--begin::description-->
+                        <div class="fs-6 text-gray-600 fw-semibold mb-5">
+                            {{ completed_evaluations }} / {{ total_evaluations }} değerlendirme tamamlandı
+                        </div>
+                        <!--end::description-->
+                    </div>
+                    <!--end::card-body-->
+                </div>
+                <!--end::card-->
+            </div>
+            <!--end::col-->
+            <!--begin::col-->
+            <div class="col-xl-6">
+                <!--begin::card-->
+                <div class="card my-5">
+                    <!--begin::card-header-->
+                    <div class="card-header card-header-stretch">
+                        <!--begin::card-title-->
+                        <div class="card-title m-0">
+                            <h3 class="fw-bold m-0">Tüm Değerlendirme İlerlemesi</h3>
+                        </div>
+                        <!--end::card-title-->
+                    </div>
+                    <!--end::card-header-->
+                    <!--begin::card-body-->
+                    <div class="card-body">
+                        <!--begin::table--responsive-->
+                        <div class="table-responsive">
+                            <!--begin::table-->
+                            <table class="table gs-7 gy-7 gx-7">
+                                <!--begin::thead-->
+                                <thead>
+                                    <tr class="fw-semibold fs-6 text-gray-800 border-bottom border-gray-200">
+                                        <th>Değerlendiren</th>
+                                        <th>Toplam</th>
+                                        <th>Tamamlanan</th>
+                                        <th>Bekleyen</th>
+                                        <th>İlerleme</th>
+                                    </tr>
+                                </thead>
+                                <!--end::thead-->
+                                <!--begin::tbody-->
+                                <tbody>
+                                    {% for item in reviewer_progress %}
+                                        <tr>
+                                            <td>{{ item.name }}</td>
+                                            <td class="text-center">{{ item.total }}</td>
+                                            <td class="text-center">
+                                                <span class="text-success fw-bold text-center">
+                                                    {{ item.completed }}
+                                                </span>
+                                            </td>
+                                            <td class="text-center">
+                                                {% if item.pending %}
+                                                    <span class="fw-bold text-warning">{{ item.pending }}</span>
+                                                {% else %}
+                                                    <span class="fw-bold text-light">0</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <div class="progress flex-grow-1 h-10px">
+                                                        <div class="progress-bar" style="width: {{ item.rate }}%;"></div>
+                                                    </div>
+        
+                                                    <span class="small text-muted">
+                                                        %{{ item.rate }}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>        
+                                <!--end::tbody-->
+                            </table>
+                            <!--end::table-->
+                        </div>
+                        <!--end::table-responsive-->
+                    </div>
+                    <!--end::card-body-->
+                </div>
+                <!--end::card-->
+            </div>
+            <!--end::col-->
+        </div>
+        <!--end::row-->
+    {% endif %}
 
-{% if active_period %}
     <!--begin::card-->
-    <div class="card my-5">
+    <div class="card mb-5">
         <!--begin::card-header-->
         <div class="card-header card-header-stretch">
             <!--begin::card-title-->
             <div class="card-title m-0">
-                <h3 class="fw-bold m-0">Aktif Dönem</h3>
+                <h3 class="fw-bold m-0">Bekleyen Değerlendirmeler</h3>
             </div>
             <!--end::card-title-->
-            {% if perms.performance.view_evaluationperiod %}
-                <a href="{% url 'performance:period_detail' active_period.pk %}" class="btn btn-sm btn-primary align-self-center">
-                    Döneme Git
-                </a>
-            {% endif %}
         </div>
         <!--end::card-header-->
         <!--begin::card-body-->
         <div class="card-body">
-            <!--begin::info-->
-            <span class="fs-5 fw-semibold text-gray-600 pb-5 d-block"><strong>{{ active_period.name }}</strong> performans dönemine ait ilerleme bilgileri</span>
-            <!--end::info-->
-            <!--begin::heading-->
-            <div class="d-flex text-muted fw-bold fs-5 mb-3">
-                <span class="flex-grow-1 text-gray-800">Genel Tamamlanma</span>
-                <span class="text-gray-800">%{{ completion_rate }}</span>
-            </div>
-            <!--end::heading-->
-            <!--begin::progress-->
-            <div class="progress h-8px bg-light-primary mb-2">
-                <div class="progress-bar bg-primary" role="progressbar" style="width: {{ completion_rate }}%" aria-valuenow="{{ completion_rate }}" aria-valuemin="0" aria-valuemax="100"></div>
-            </div>
-            <!--end::progress-->
-            <!--begin::description-->
-            <div class="fs-6 text-gray-600 fw-semibold mb-5">
-                {{ completed_evaluations }} / {{ total_evaluations }} değerlendirme tamamlandı
-            </div>
-            <!--end::description-->
+            {% if pending_reviews %}
+                <!--begin::table-responsive-->
+                <div class="table-responsive">
+                    <!--begin::table-->
+                    <table class="table ">
+                        <!--begin::thead-->
+                        <thead>
+                            <tr class="fw-bold fs-6 text-gray-800">
+                                <th>Personel</th>
+                                <th>Dönem</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <!--end::thead-->
+                        <!--begin::tbody-->
+                        <tbody>
+                            {% for review in pending_reviews %}
+                                <tr>
+                                    <td>{{ review.evaluation.employee.full_name }}</td>
+                                    <td>{{ review.evaluation.period.name }}</td>
+                                    <td class="text-end">
+                                        <a href="{% url 'performance:my_review_detail' review.pk %}" class="btn btn-sm btn-primary">
+                                            Değerlendir
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                        <!--end::tbody-->
+                    </table>
+                    <!--end::table-->
+                </div>
+                <!--end::table-responsive-->
+            {% else %}
+                <div class="p-4 text-muted">
+                    Bekleyen değerlendirme bulunmuyor.
+                </div>
+            {% endif %}
         </div>
         <!--end::card-body-->
     </div>
-    <!--end::card-->
-{% endif %}
+    <!--end::card--->
+{% endblock %}
 
-    <!--begin::row-->
-    <div class="row g-4">
-        <!--begin::col-->
-        <div class="col-xl-3 col-md-6">
-            <!--begin::card-->
-            <div class="card card-xl-stretch mb-xl-8">
-                <!--begin::Body-->
-                <div class="card-body d-flex align-items-center pt-3 pb-0">
-                    <div class="d-flex flex-column flex-grow-1 me-2">
-                        <a href="#" class="fw-bold text-gray-600 fs-4 mb-2 text-hover-primary">Toplam Personel</a>
-                        <span class="text-gray-800 fs-2tx">{{ visible_employee_count }}</span>
-                    </div>
-
-                    <i class="ki-duotone ki-people align-self-end pt-5 fs-6tx h-100px w-100px">
-                     <span class="path1"></span>
-                     <span class="path2"></span>
-                     <span class="path3"></span>
-                     <span class="path4"></span>
-                     <span class="path5"></span>
-                    </i>
-                </div>
-                <!--end::Body-->
-            </div>
-            <!--end::card-->
-        </div>
-        <!--end::col-->
-        <!--begin::col-->
-        <div class="col-xl-3 col-md-6">
-             <!--begin::card-->
-            <div class="card card-xl-stretch mb-xl-8">
-                <!--begin::Body-->
-                <div class="card-body d-flex align-items-center pt-3 pb-0">
-                    <div class="d-flex flex-column flex-grow-1 me-2">
-                        <a href="#" class="fw-bold text-gray-600 fs-4 mb-2 text-hover-primary">Aktif Değerlendirme</a>
-                        <span class="text-gray-800 fs-2tx">{{ total_evaluations }}</span>
-                    </div>
-
-                    <i class="ki-duotone ki-double-check align-self-end pt-5 fs-6tx h-100px w-100px">
-                     <span class="path1"></span>
-                     <span class="path2"></span>
-                    </i>
-                </div>
-                <!--end::Body-->
-            </div>
-            <!--end::card-->
-        </div>
-        <!--end::col-->
-        <!--begin::col-->
-        <div class="col-xl-3 col-md-6">
-            <!--begin::card-->
-            <div class="card card-xl-stretch mb-xl-8">
-                <!--begin::Body-->
-                <div class="card-body d-flex align-items-center pt-3 pb-0">
-                    <div class="d-flex flex-column flex-grow-1 me-2">
-                        <a href="#" class="fw-bold text-gray-600 fs-4 mb-2 text-hover-primary">Bekleyen Değerlendirmem</a>
-                        <span class="text-gray-800 fs-2tx">{{ pending_review_count }}</span>
-                    </div>
-
-                    <i class="ki-duotone ki-watch align-self-end pt-5 fs-6tx h-100px w-100px">
-                     <span class="path1"></span>
-                     <span class="path2"></span>
-                    </i>
-                </div>
-                <!--end::Body-->
-            </div>
-            <!--end::card-->
-        </div>
-        <!--end::col-->
-        <!--begin::col-->
-        <div class="col-xl-3 col-md-6">
-            <!--begin::card-->
-            <div class="card card-xl-stretch mb-xl-8">
-                <!--begin::Body-->
-                <div class="card-body d-flex align-items-center pt-3 pb-0">
-                    <div class="d-flex flex-column flex-grow-1 me-2">
-                        <a href="#" class="fw-bold text-gray-600 fs-4 mb-2 text-hover-primary">Ortalama Performans</a>
-                        <span class="text-gray-800 fs-2tx">
-                            {% if average_performance_score is not None %}
-                                {{ average_performance_score|floatformat:1 }}
-                            {% else %}
-                                    -
-                            {% endif %}
-                        </span>
-                    </div>
-
-                    <i class="ki-duotone ki-chart-line-up align-self-end pt-5 fs-6tx h-100px w-100px">
-                     <span class="path1"></span>
-                     <span class="path2"></span>
-                    </i>
-                </div>
-                <!--end::Body-->
-            </div>
-            <!--end::card-->
-        </div>
-        <!--end::col-->
-    </div>
-    <!--end::row-->
-    
-{% if active_period %}
-
-<div class="card border-0 shadow-sm mt-4">
-
-    <div class="card-header bg-white">
-
-        <strong>
-            Değerlendirme İlerlemesi
-        </strong>
-
-        <div class="small text-muted">
-            {{ active_period.name }}
-        </div>
-
-    </div>
-
-
-    <div class="card-body p-0">
-
-        <div class="table-responsive">
-
-            <table
-                class="table
-                       table-hover
-                       align-middle
-                       mb-0"
-            >
-
-                <thead class="table-light">
-
-                    <tr>
-
-                        <th>
-                            Değerlendiren
-                        </th>
-
-                        <th>
-                            Toplam
-                        </th>
-
-                        <th>
-                            Tamamlanan
-                        </th>
-
-                        <th>
-                            Bekleyen
-                        </th>
-
-                        <th style="width: 30%;">
-                            İlerleme
-                        </th>
-
-                    </tr>
-
-                </thead>
-
-
-                <tbody>
-
-                    {% for item in reviewer_progress %}
-
-                        <tr>
-
-                            <td>
-                                <strong>
-                                    {{ item.name }}
-                                </strong>
-                            </td>
-
-                            <td>
-                                {{ item.total }}
-                            </td>
-
-                            <td>
-
-                                <span
-                                    class="badge
-                                           text-bg-success"
-                                >
-                                    {{ item.completed }}
-                                </span>
-
-                            </td>
-
-                            <td>
-
-                                {% if item.pending %}
-
-                                    <span
-                                        class="badge
-                                               text-bg-warning"
-                                    >
-                                        {{ item.pending }}
-                                    </span>
-
-                                {% else %}
-
-                                    <span
-                                        class="badge
-                                               text-bg-light"
-                                    >
-                                        0
-                                    </span>
-
-                                {% endif %}
-
-                            </td>
-
-                            <td>
-
-                                <div
-                                    class="d-flex
-                                           align-items-center
-                                           gap-2"
-                                >
-
-                                    <div
-                                        class="progress
-                                               flex-grow-1"
-                                        style="height: 8px;"
-                                    >
-
-                                        <div
-                                            class="progress-bar"
-                                            style="
-                                                width:
-                                                {{ item.rate }}%;
-                                            "
-                                        ></div>
-
-                                    </div>
-
-                                    <span
-                                        class="small
-                                               text-muted"
-                                    >
-                                        %{{ item.rate }}
-                                    </span>
-
-                                </div>
-
-                            </td>
-
-                        </tr>
-
-                    {% endfor %}
-
-                </tbody>
-
-            </table>
-
-        </div>
-
-    </div>
-
-</div>
-
-{% endif %}
-
-<div class="card border-0 shadow-sm mt-4">
-
-    <div class="card-header bg-white">
-        <strong>
-            Bekleyen Değerlendirmeler
-        </strong>
-    </div>
-
-    <div class="card-body p-0">
-
-        {% if pending_reviews %}
-
-            <div class="table-responsive">
-
-                <table class="table table-hover mb-0">
-
-                    <thead>
-
-                        <tr>
-                            <th>
-                                Personel
-                            </th>
-
-                            <th>
-                                Dönem
-                            </th>
-
-                            <th>
-                            </th>
-                        </tr>
-
-                    </thead>
-
-                    <tbody>
-
-                        {% for review in pending_reviews %}
-
-                            <tr>
-
-                                <td>
-                                    {{ review.evaluation.employee.full_name }}
-                                </td>
-
-                                <td>
-                                    {{ review.evaluation.period.name }}
-                                </td>
-
-                                <td class="text-end">
-
-                                    <a
-                                        href="{% url 'performance:my_review_detail' review.pk %}"
-                                        class="btn btn-sm btn-primary"
-                                    >
-                                        Değerlendir
-                                    </a>
-
-                                </td>
-
-                            </tr>
-
-                        {% endfor %}
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
-        {% else %}
-
-            <div class="p-4 text-muted">
-                Bekleyen değerlendirme bulunmuyor.
-            </div>
-
-        {% endif %}
-
-    </div>
-
-</div>
+{% block extra_scripts %}
     <script>
         document.getElementById('dashboard-item').classList.add('active');
+        document.addEventListener("DOMContentLoaded", function () {
+            var options = {
+                series: [83],
+                chart: {
+                    height: 300,
+                    type: 'radialBar',
+                },
+                plotOptions: {
+                    radialBar: {
+                        startAngle: -90,
+                        endAngle: 90,
+                        track: {
+                            background: '#e7e7e7',
+                            strokeWidth: '97%',
+                            margin: 5,
+                        },
+                        dataLabels: {
+                            name: {show: false},
+                            value: {
+                                offsetY: -2,
+                                fontSize: '32px',
+                                formatter: function (val) {
+                                    return val + '%'
+                                },
+                            },
+                        },
+                    },
+                },
+                fill: {
+                    type: 'gradient',
+                    gradient: {
+                        shade: 'light',
+                        shadeIntensity: 0.4,
+                        inverseColors: false,
+                        opacityFrom: 1,
+                        opacityTo: 1,
+                        stops: [0, 50, 53, 91],
+                    },
+                },
+                labels: ['Score'],
+            }
+            if (chart) {
+              chart.destroy();
+            }
+            var chart = new ApexCharts(document.querySelector('#completion_graph'), options)
+            chart.render();
+        });
     </script>
 {% endblock %}
