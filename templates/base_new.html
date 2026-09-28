@@ -3,7 +3,6 @@
 <html lang="tr" >
     <!--begin::Head-->
     <head>
-        <title>İBB - BTM Personel Değerlendirme</title>
         <meta charset="utf-8"/>
         <meta name="description" content="Bilgi Teknolojileri Müdürlüğü personel değerlendirme platformudur."/>
         <meta name="keywords" content="İBB, BTM, Personel değerlendirme, performans ölçme"/>
@@ -23,6 +22,10 @@
         <link href="{% static 'lib/metronic/assets/plugins/global/plugins.bundle.css' %}" rel="stylesheet" type="text/css"/>
         <link href="{% static 'lib/metronic/assets/css/style.bundle.css' %}" rel="stylesheet" type="text/css"/>
         <!--end::Global Stylesheets Bundle-->
+
+        <title>
+            {% block title %}{% endblock %} - BTM Personel Performans Yönetimi
+        </title>
 
         <script>
             // Frame-busting to prevent site from being loaded within a frame without permission (click-jacking)

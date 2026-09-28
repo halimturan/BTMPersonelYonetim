@@ -1,11 +1,12 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Avg
+from django.db.models import Avg, Count, Q
 from django.utils import timezone
 from django.views.generic import TemplateView
-
+from apps.employees.models import EmployeeEducation, EmployeeAssignmentHistory
 from apps.employees.services.visibility import EmployeeVisibilityService
 from apps.performance.models import EvaluationPeriod, PerformanceEvaluation, PerformanceEvaluationReviewer
 from apps.scoring.models import EmployeePeriodScore
+from apps.employees.models import EmployeeDepartmentHistory
 
 
 class DashboardView(LoginRequiredMixin, TemplateView):
@@ -23,8 +24,74 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         # ----------------------------------
 
         visible_employees = EmployeeVisibilityService(user).get_visible_employees()
-
         visible_employee_ids = visible_employees.values_list("pk", flat=True)
+
+        # ----------------------------------
+        # Cinsiyet dağılımı
+        # ----------------------------------
+        genders = {
+            "erkek": visible_employees.filter(gender="erkek").count(),
+            "kadin": visible_employees.filter(gender="kadin").count()
+        }
+
+        # ----------------------------------
+        # Şeflik dağılımı
+        # ----------------------------------
+        today = timezone.localdate()
+        unit_distribution_qs = (
+            EmployeeDepartmentHistory.objects
+            .filter(employee_id__in=visible_employee_ids, start_date__lte=today, unit__isnull=False)
+            .filter(Q(end_date__isnull=True) | Q(end_date__gte=today))
+            .values("unit_id", "unit__name", "unit__icon")
+            .annotate(count=Count("employee_id", distinct=True))
+            .order_by("-count", "unit__name",)
+        )
+
+        unit_distribution = []
+
+        for item in unit_distribution_qs:
+            chief = (
+                EmployeeDepartmentHistory.objects
+                .filter(
+                    unit_id=item["unit_id"], start_date__lte=today,
+                    employee__is_active=True, employee__current_management_level__order=20,
+                )
+                .filter(Q(end_date__isnull=True) | Q(end_date__gte=today))
+                .select_related("employee",)
+                .order_by("employee__first_name", "employee__last_name",)
+                .first()
+            )
+
+            unit_distribution.append({
+                "unit_id": item["unit_id"],
+                "unit_name": item["unit__name"],
+                "unit_icon": item["unit__icon"],
+                "count": item["count"],
+                "chief": chief.employee if chief else None,
+            })
+
+        # ----------------------------------
+        # Eğitim dağılımı
+        # ----------------------------------
+
+        education_distribution = (
+            EmployeeEducation.objects
+            .filter(employee_id__in=visible_employee_ids)
+            .values("education_level__name")
+            .annotate(count=Count("employee_id"))
+            .order_by("-count")
+        )
+
+        today = timezone.localdate()
+
+        job_role_distribution = (
+            EmployeeAssignmentHistory.objects
+            .filter(employee_id__in=visible_employee_ids, start_date__lte=today)
+            .filter(Q(end_date__isnull=True) | Q(end_date__gte=today))
+            .values("job_role__name")
+            .annotate(count=Count("employee_id"))
+            .order_by("-count")
+        )
 
         # ----------------------------------
         # Kullanıcının kendi değerlendirmeleri
@@ -69,15 +136,8 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             period_evaluations = (
                 PerformanceEvaluation.objects.filter(period=active_period, employee_id__in=visible_employee_ids)
             )
-
-            total_evaluations = (
-                period_evaluations.count()
-            )
-
-            completed_evaluations = (
-                period_evaluations.filter(completed_at__isnull=False).count()
-            )
-
+            total_evaluations = period_evaluations.count()
+            completed_evaluations = period_evaluations.filter(completed_at__isnull=False).count()
             incomplete_evaluations = total_evaluations - completed_evaluations
 
             if total_evaluations:
@@ -206,6 +266,10 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             "completion_rate": completion_rate,
             "reviewer_progress": reviewer_progress,
             "average_performance_score": average_performance_score,
+            "education_distribution": education_distribution,
+            "job_role_distribution":job_role_distribution,
+            "genders": genders,
+            "unit_distribution": unit_distribution,
         })
 
         return context

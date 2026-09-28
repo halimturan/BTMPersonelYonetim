@@ -29,6 +29,7 @@ class Unit(TimeStampedModel):
     department = models.ForeignKey(Department, on_delete=models.PROTECT, related_name="units", verbose_name="Müdür Yardımcılığı")
     name = models.CharField(max_length=150, verbose_name="İsim")
     code = models.CharField(max_length=50, unique=True, verbose_name="Kod")
+    icon = models.CharField(max_length=50, verbose_name="font awesome icon", blank=True, null=True)
     active = models.BooleanField(default=True, verbose_name="Aktif mi?")
 
     class Meta:
