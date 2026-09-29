@@ -42,37 +42,26 @@ Personeller
                 <div class="row g-2">
     
                     <div class="col-md-6 col-lg-4">
-    
                         <div class="input-group">
-    
                             <span class="input-group-text bg-white">
                                 <i class="bi bi-search"></i>
                             </span>
-    
                             <input type="text" name="q" class="form-control" value="{{ request.GET.q }}" placeholder="Ad, soyad veya personel no">
-    
                         </div>
-    
                     </div>
     
                     <div class="col-auto">
-    
                         <button type="submit" class="btn btn-primary">
                             Ara
                         </button>
-    
                     </div>
     
                     {% if request.GET.q %}
-    
                         <div class="col-auto">
-    
                             <a href="{% url 'employees:employee_list' %}" class="btn btn-outline-secondary">
                                 Temizle
                             </a>
-    
                         </div>
-    
                     {% endif %}
     
                 </div>
@@ -84,11 +73,11 @@ Personeller
     
         <div class="table-responsive">
             <!--begin::table-->
-            <table class="table table-hover align-middle mb-0">
+            <table class="table table-striped gy-7 gs-7">
                 <!--begin::thead-->
-                <thead class="table-light">
+                <thead>
                     <!--begin::tr-->
-                    <tr>
+                    <tr class="fw-semibold fs-6 text-gray-800 border-bottom border-gray-200">
                         <th>Personel</th>
                         <th>Personel No</th>
                         <th>Ünvan</th>
@@ -101,26 +90,27 @@ Personeller
                 </thead>
                 <!--end::thead-->
                 <!--begin::tbody-->
-                <tbody>
+                <tbody class="text-gray-600 fw-semibold">
                     {% for employee in employees %}
                         <!--begin::tr-->
                         <tr>
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    <div class="employee-avatar me-3">
-                                        {{ employee.first_name|first }}
-                                        {{ employee.last_name|first }}
-                                    </div>
-                                    <div>
-                                        <strong>
-                                            {{ employee.full_name }}
-                                        </strong>
-    
-                                        <div class="small text-muted">
-                                            {{ employee.employment_type }}
+                            <td class="d-flex align-items-center">
+                                <!--begin:: Avatar -->
+                                <div class="symbol symbol-circle symbol-50px overflow-hidden me-3">
+                                    <a href="/metronic8/demo1/?page=apps/user-management/users/view">
+                                        <div class="symbol-label fs-3 bg-light-primary text-primary">
+                                            {{ employee.first_name|first }}
+                                            {{ employee.last_name|first }}
                                         </div>
-                                    </div>
+                                    </a>
                                 </div>
+                                <!--end::Avatar-->
+                                <!--begin::User details-->
+                                <div class="d-flex flex-column">
+                                    <span class="text-gray-800 text-hover-primary mb-1">{{ employee.full_name }}</span>
+                                    <span>{{ employee.employment_type }}</span>
+                                </div>
+                                <!--begin::User details-->
                             </td>
                             <td>{{ employee.personnel_no }}</td>
                             <td>{{ employee.current_title|default:"-" }}</td>
@@ -128,7 +118,7 @@ Personeller
                             <td>{{ employee.current_unit|default:"-" }}</td>
                             <td>
                                 {% if employee.current_level_record %}
-                                    <span class="badge text-bg-light border">
+                                    <span class="badge badge-secondary">
                                         {{ employee.current_level_record.level }}
                                     </span>
                                 {% else %}
@@ -136,7 +126,7 @@ Personeller
                                 {% endif %}
                             </td>
                             <td class="text-end">
-                                <a href="{% url 'employees:employee_detail' employee.pk %}" class="btn btn-sm btn-outline-primary">
+                                <a href="{% url 'employees:employee_detail' employee.pk %}" class="btn btn-light-primary">
                                     Görüntüle
                                 </a>
                             </td>
@@ -165,28 +155,20 @@ Personeller
                 <!--begin::nav-->
                 <nav>
                     <!--begin::ul-->
-                    <ul class="pagination mb-0">
+                    <ul class="pagination pagination-circle">
                         {% if page_obj.has_previous %}
                             <!--begin::page-item-->
                             <li class="page-item">
-                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}&q={{ request.GET.q }}">
+                                <a class="page-link page-text" href="?page={{ page_obj.previous_page_number }}&q={{ request.GET.q }}">
                                     Önceki
                                 </a>
                             </li>
                             <!--end::page-item-->
                         {% endif %}
-    
-                        <!--begin::page-item-->
-                        <li class="page-item active">
-    
-                            <span class="page-link">
-                                {{ page_obj.number }}
-                                /
-                                {{ page_obj.paginator.num_pages }}
-                            </span>
-    
-                        </li>
-                        <!--end::page-item-->
+
+                        {% for i in  page_obj.paginator.page_range %}
+                            <li class="page-item {% if i == page_obj.number %}active{% endif %}"><a href="?page={{ i }}" class="page-link">{{ i }}</a></li>
+                        {% endfor %}
     
     
                         {% if page_obj.has_next %}

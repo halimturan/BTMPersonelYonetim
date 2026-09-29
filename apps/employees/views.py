@@ -12,10 +12,8 @@ class EmployeeListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     model = Employee
     template_name = "employees/employee_list.html"
     context_object_name = "employees"
-
     permission_required = "employees.view_employee"
-
-    paginate_by = 25
+    paginate_by = 5
 
     def get_queryset(self):
         queryset = (
