@@ -43,7 +43,7 @@ Personeller
     
                     <div class="col-md-6 col-lg-4">
                         <div class="input-group">
-                            <span class="input-group-text bg-white">
+                            <span class="input-group-text">
                                 <i class="bi bi-search"></i>
                             </span>
                             <input type="text" name="q" class="form-control" value="{{ request.GET.q }}" placeholder="Ad, soyad veya personel no">
@@ -126,7 +126,7 @@ Personeller
                                 {% endif %}
                             </td>
                             <td class="text-end">
-                                <a href="{% url 'employees:employee_detail' employee.pk %}" class="btn btn-light-primary">
+                                <a href="{% url 'employees:employee_detail' employee.pk %}" class="btn btn-sm btn-light-primary">
                                     Görüntüle
                                 </a>
                             </td>
@@ -151,7 +151,7 @@ Personeller
     
         {% if is_paginated %}
             <!--begin::card-footer-->
-            <div class="card-footer bg-white">
+            <div class="card-footer">
                 <!--begin::nav-->
                 <nav>
                     <!--begin::ul-->

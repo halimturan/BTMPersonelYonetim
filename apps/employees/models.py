@@ -15,7 +15,7 @@ class Employee(TimeStampedModel):
     personnel_no = models.CharField(max_length=50, unique=True, db_index=True, verbose_name="Sicil No", null=True, blank=True)
     first_name = models.CharField(max_length=100, verbose_name="Ad", null=True, blank=True)
     last_name = models.CharField(max_length=100, verbose_name="Soyad", null=True, blank=True)
-    gender = models.CharField(max_length=20, verbose_name="Cinsiyet")
+    gender = models.CharField(max_length=20, verbose_name="Cinsiyet", choices=gender_choices)
     employment_type = models.ForeignKey(EmploymentType, on_delete=models.PROTECT, related_name="employees", verbose_name="Personel Tipi")
     domain_name = models.CharField(max_length=100, verbose_name="Domain Adı", help_text="Ör: adem.karakaya")
     phone = models.BigIntegerField(verbose_name="Telefon", null=True, blank=True)
