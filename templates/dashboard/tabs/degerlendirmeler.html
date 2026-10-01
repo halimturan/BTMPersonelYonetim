@@ -101,7 +101,7 @@
         <h2 class="mb-5">Dikkat Gerektirenler</h2>
     </div>
     <!--begin::row-->
-    <div class="row">
+    <div class="row mb-5">
         {% for alert in alerts %}
             <!--begin::col-->
             <div class="col-xl-6 col-sm-12">
@@ -142,7 +142,7 @@
     <!--end::row-->
 {% endif %}
 
-{% if active_period %}
+{% if active_period and perms.performance.view_performanceevaluation %}
     <!--begin::row-->
     <div class="row">
         <!--begin::col-->

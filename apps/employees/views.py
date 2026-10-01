@@ -6,6 +6,7 @@ from django.views.generic import DetailView, ListView
 from apps.employees.models import Employee
 from apps.employees.services.visibility import EmployeeVisibilityService
 from apps.scoring.models import EmployeePeriodScore
+from apps.employees.services.experience import EmployeeExperienceService
 
 
 class EmployeeListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
@@ -54,6 +55,8 @@ class EmployeeDetailView(LoginRequiredMixin, PermissionRequiredMixin, DetailView
         context = super().get_context_data(**kwargs)
         employee = self.object
 
+        experience_service = EmployeeExperienceService(employee)
+
         context.update({
             "current_unit": employee.current_unit,
 
@@ -89,6 +92,10 @@ class EmployeeDetailView(LoginRequiredMixin, PermissionRequiredMixin, DetailView
                 .select_related("period", "formula")
                 .prefetch_related("components", "components__component")
                 .order_by("-period__start_date"),
+
+            "institution_experience": experience_service.get_institution(),
+            "professional_experience": experience_service.get_professional(),
+            "it_experience": experience_service.get_it(),
         })
 
         return context
