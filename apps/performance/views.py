@@ -25,7 +25,7 @@ from apps.performance.services.period_initializer import EvaluationPeriodInitial
 class MyReviewListView(LoginRequiredMixin, ListView):
     template_name = "performance/my_review_list.html"
     context_object_name = "reviews"
-    paginate_by = 7
+    paginate_by = 6
 
     def get_queryset(self):
         employee = getattr(self.request.user, "employee", None)
@@ -378,7 +378,7 @@ class EvaluationListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     template_name = "performance/evaluation_list.html"
     context_object_name = "evaluations"
     permission_required = "performance.view_performanceevaluation"
-    paginate_by = 25
+    paginate_by = 6
 
     def get_queryset(self):
         return (
