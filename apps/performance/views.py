@@ -381,8 +381,10 @@ class EvaluationListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     paginate_by = 6
 
     def get_queryset(self):
-        return (
-            PerformanceEvaluationVisibilityService(self.request.user)
+        queryset = (
+            PerformanceEvaluationVisibilityService(
+                self.request.user
+            )
             .get_visible_evaluations()
             .select_related(
                 "employee",
@@ -397,11 +399,27 @@ class EvaluationListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
                 "reviewers__reviewer_employee__current_management_level",
                 "reviewers__reviewer_role",
             )
-            .order_by(
-                "-period__start_date",
-                "employee__first_name",
-                "employee__last_name",
-            )
+        )
+
+        # ==================================
+        # Durum filtresi
+        # ==================================
+
+        status = self.request.GET.get("status", "").strip()
+
+        if status == "pending":
+            queryset = queryset.filter(completed_at__isnull=True)
+
+        elif status == "completed":
+            queryset = queryset.filter(completed_at__isnull=False)
+
+        # status yoksa:
+        # Tümü
+
+        return queryset.order_by(
+            "-period__start_date",
+            "employee__first_name",
+            "employee__last_name",
         )
 
     def get_context_data(self, **kwargs):
