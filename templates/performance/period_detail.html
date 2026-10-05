@@ -320,7 +320,7 @@
 
                 {% if score_result.valid %}
                     <!--begin::badge-->
-                    <span class="badge text-bg-success">
+                    <span class="badge badge-success p-4 rounded-4 fs-4">
                         Başarılı
                     </span>
                     <!--end::badge-->
@@ -430,34 +430,40 @@
     {% if validation %}
         <!--begin::card-->
         <div class="card mb-4">
-
-            <div class="card-header bg-white d-flex justify-content-between">
-
-                <strong>
-                    Ön Kontrol Sonucu
-                </strong>
+            <!--begin::card-header-->
+            <div class="card-header d-flex justify-content-between">
+                <!--begin::card-header-->
+                <div class="card-header card-header-stretch">
+                    <!--begin::card-title-->
+                    <div class="card-title m-0">
+                        <h3 class="fw-bold m-0">Ön Kontrol Sonucu</h3>
+                    </div>
+                    <!--end::card-title-->
+                </div>
+                <!--end::card-header-->
 
                 {% if validation.valid %}
-
-                    <span class="badge text-bg-success">
+                    <!--begin::badge-->
+                    <span class="badge badge-success p-4 rounded-4 fs-4">
                         Başarılı
                     </span>
-
+                    <!--end::badge-->
                 {% else %}
-
-                    <span class="badge text-bg-danger">
-                        Hata Var
-                    </span>
-
+                    <!--begin::badge-->
+                    <div class="my-auto">
+                        <span class="badge badge-warning p-4 rounded-4 fs-4">
+                            Eksikler Var
+                        </span>
+                    </div>
+                    <!--end::badge-->
                 {% endif %}
-
             </div>
-
-
+            <!--end::card-header-->
+            <!--begin::card-body-->
             <div class="card-body">
-
+                <!--begin::row-->
                 <div class="row g-3 mb-4">
-
+                    <!--begin::col-->
                     <div class="col-md-3">
                         <div class="validation-stat">
                             <small>Personel</small>
@@ -466,7 +472,8 @@
                             </strong>
                         </div>
                     </div>
-
+                    <!--end::col-->
+                    <!--begin::col-->
                     <div class="col-md-3">
                         <div class="validation-stat">
                             <small>Hazır</small>
@@ -475,7 +482,8 @@
                             </strong>
                         </div>
                     </div>
-
+                    <!--end::col-->
+                    <!--begin::col-->
                     <div class="col-md-3">
                         <div class="validation-stat">
                             <small>Hata</small>
@@ -484,7 +492,8 @@
                             </strong>
                         </div>
                     </div>
-
+                    <!--end::col-->
+                    <!--begin::col-->
                     <div class="col-md-3">
                         <div class="validation-stat">
                             <small>Uyarı</small>
@@ -493,100 +502,65 @@
                             </strong>
                         </div>
                     </div>
-
+                    <!--end::col-->
                 </div>
-
+                <!--end::row-->
 
                 {% if validation.issues %}
-
+                    <!--begin::table-responsive-->
                     <div class="table-responsive">
-
-                        <table class="table align-middle">
-
-                            <thead class="table-light">
-                                <tr>
+                        <!--begin::table-->
+                        <table class="table">
+                            <!--begin::thead-->
+                            <thead>
+                                <tr class="fw-bold fs-6 text-gray-800">
                                     <th>Personel No</th>
                                     <th>Personel</th>
                                     <th>Durum</th>
                                     <th>Açıklama</th>
                                 </tr>
                             </thead>
-
+                            <!--end::thead-->
+                            <!--begin::tbody-->
                             <tbody>
-
                                 {% for issue in validation.issues %}
-
                                     <tr>
-
+                                        <td>{{ issue.personnel_no }}</td>
                                         <td>
-                                            {{ issue.personnel_no }}
-                                        </td>
-
-                                        <td>
-
                                             {% if issue.employee_id %}
-
-                                                <a
-                                                    href="{% url 'employees:employee_detail' issue.employee_id %}"
-                                                >
+                                                <a href="{% url 'employees:employee_detail' issue.employee_id %}">
                                                     {{ issue.employee_name }}
                                                 </a>
-
                                             {% else %}
-
                                                 {{ issue.employee_name }}
-
                                             {% endif %}
-
                                         </td>
-
                                         <td>
-
                                             {% if issue.severity == "error" %}
-
-                                                <span class="badge text-bg-danger">
-                                                    Hata
-                                                </span>
-
+                                                <span class="badge badge-danger p-2">Hata</span>
                                             {% else %}
-
-                                                <span class="badge text-bg-warning">
-                                                    Uyarı
-                                                </span>
-
+                                                <span class="badge badge-warning p-2">Uyarı</span>
                                             {% endif %}
-
                                         </td>
-
-                                        <td>
-                                            {{ issue.message }}
-                                        </td>
-
+                                        <td>{{ issue.message }}</td>
                                     </tr>
-
                                 {% endfor %}
-
                             </tbody>
-
+                            <!--end::tbody-->
                         </table>
-
+                        <!--end::table-->
                     </div>
-
+                    <!--end::table-responsive-->
                 {% else %}
-
+                    <!--begin::alert-->
                     <div class="alert alert-success mb-0">
-
-                        <i class="bi bi-check-circle me-2"></i>
-
-                        Organizasyon, değerlendirme profilleri,
-                        kriterler ve değerlendirici atamaları hazır.
-
+                        <i class="ki-duotone ki-check-circle me-2"><span class="path1"></span><span class="path2"></span></i>
+                        Organizasyon, değerlendirme profilleri, kriterler ve değerlendirici atamaları hazır.
                     </div>
-
+                    <!--end::alert-->
                 {% endif %}
-
             </div>
-
+            <!--end::card-body-->
         </div>
         <!--end::card-->
     {% endif %}
@@ -664,23 +638,16 @@
                                             <span class="badge badge-success p-3 ">
                                                 Tamamlandı
                                             </span>
-
                                         {% else %}
-
                                             <span class="badge badge-warning p-3">
                                                 Devam Ediyor
                                             </span>
-
                                         {% endif %}
-
                                     </td>
-
                                 </tr>
-
                             {% endfor %}
-
                         </tbody>
-
+                        <!--end::tbody-->
                     </table>
                     <!--end::table-->
                 </div>

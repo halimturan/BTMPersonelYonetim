@@ -154,7 +154,7 @@
                         <!--begin::Progress-->
                         <div class="d-flex align-items-center w-200px w-sm-300px flex-column mt-3">
                             <div class="d-flex justify-content-between w-100 mt-auto mb-2">
-                                <span class="fw-semibold fs-6 text-gray-500">Son Performans Skoru</span>
+                                <span class="fw-semibold fs-6 text-gray-500">Son Değerlendirme Skoru</span>
                                 <span class="fw-bold fs-6">{{ period_scores.first.final_score|floatformat:2 }}</span>
                             </div>
     
@@ -472,7 +472,15 @@
                                             {% endif %}
                                         </td>
                                         <td>
-                                            {{ item.job_role }}
+                                            {% if item.type == "UPGRADE" %}
+                                                {{ item.from_job_role }}
+                                                <i class="ki-solid ki-arrow-right mx-1"></i>
+                                                <strong>
+                                                    {{ item.to_job_role }}
+                                                </strong>
+                                            {% else %}
+                                                {{ item.to_job_role }}
+                                            {% endif %}
                                         </td>
                                         <td>
                                             {% if item.type == "UPGRADE" %}
@@ -933,7 +941,8 @@
                             <thead>
                                 <tr class="fw-bold fs-6 text-gray-800">
                                     <th>Tarih</th>
-                                    <th>İş Kolu</th>
+                                    <th>Eski İş Kolu</th>
+                                    <th>Yeni İş Kolu</th>
                                     <th>Önceki Seviye</th>
                                     <th>Yeni Seviye</th>
                                     <th>Açıklama</th>
@@ -945,8 +954,13 @@
                                 {% for item in upgrades %}
                                     <tr>
                                         <td>{{ item.effective_date|date:"d.m.Y" }}</td>
-                                        <td>{{ item.job_role }}</td>
-                                        <td>{{ item.from_level|default:"-" }}</td>
+                                        <td>{{ item.from_job_role }}</td>
+                                        <td>{{ item.to_job_role }}</td>
+                                        <td>
+                                            <span class="badge badge-info p-2">
+                                                {{ item.from_level }}
+                                            </span>
+                                        </td>
                                         <td>
                                             <span class="badge badge-success p-2">
                                                 {{ item.to_level }}

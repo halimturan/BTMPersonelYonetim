@@ -180,8 +180,7 @@ def validate_history_overlap(model, employee, start_date, end_date, instance_pk=
 
     if qs.exists():
         raise ValidationError(
-            "Bu personel için tarih aralığı mevcut "
-            "bir kayıtla çakışıyor."
+            "Bu personel için tarih aralığı mevcut bir kayıtla çakışıyor."
         )
 
 
@@ -298,7 +297,8 @@ class EmployeeUpgrade(TimeStampedModel):
     Upgrade işlemleri
     """
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name="upgrades", verbose_name="Personel")
-    job_role = models.ForeignKey(JobRole, on_delete=models.PROTECT, verbose_name="İş Kolu")
+    from_job_role = models.ForeignKey(JobRole, on_delete=models.PROTECT, related_name="upgrades_from", verbose_name="Eski İş Kolu")
+    to_job_role = models.ForeignKey(JobRole, on_delete=models.PROTECT, related_name="upgrades_to", verbose_name="Yeni İş Kolu")
     from_level = models.ForeignKey(CareerLevel, on_delete=models.PROTECT, related_name="upgrades_from", verbose_name="Eski Seviye")
     to_level = models.ForeignKey(CareerLevel, on_delete=models.PROTECT, related_name="upgrades_to", verbose_name="Yeni Seviye")
     effective_date = models.DateField(verbose_name="Yürürlük Tarihi")
@@ -312,18 +312,10 @@ class EmployeeUpgrade(TimeStampedModel):
 
     def clean(self):
         if self.from_level_id == self.to_level_id:
-            raise ValidationError(
-                "Eski ve yeni seviye aynı olamaz."
-            )
+            raise ValidationError("Eski ve yeni seviye aynı olamaz.")
 
-        if (
-            self.from_level_id
-            and self.to_level_id
-            and self.to_level.order <= self.from_level.order
-        ):
-            raise ValidationError(
-                "Upgrade yeni seviyeyi daha yüksek bir seviyeye taşımalıdır."
-            )
+        if self.from_job_role_id == self.to_job_role_id and self.from_level_id == self.to_level_id:
+            raise ValidationError("İş kolu veya kariyer seviyesi değişmelidir.")
 
 
 class EmployeeExperience(TimeStampedModel):

@@ -1,5 +1,4 @@
 from django.utils import timezone
-
 from apps.employees.models import Employee
 from apps.employees.services.organization import EmployeeOrganizationService
 from apps.organization.models import ManagementLevel
@@ -10,15 +9,11 @@ class EmployeeVisibilityService:
         self.user = user
         self.reference_date = reference_date or timezone.localdate()
 
-        self.organization_service = EmployeeOrganizationService(
-            reference_date=self.reference_date
-        )
+        self.organization_service = EmployeeOrganizationService(reference_date=self.reference_date)
 
     def get_visible_employees(self):
         if self.user.is_superuser:
-            return Employee.objects.filter(
-                is_active=True
-            )
+            return Employee.objects.filter(is_active=True)
 
         employee = getattr(
             self.user,
@@ -29,9 +24,7 @@ class EmployeeVisibilityService:
         if not employee:
             return Employee.objects.none()
 
-        snapshot = self.organization_service.get_snapshot(
-            employee
-        )
+        snapshot = self.organization_service.get_snapshot(employee)
 
         management_level = snapshot.management_level
 
@@ -65,71 +58,56 @@ class EmployeeVisibilityService:
 
         return Employee.objects.none()
 
-    def _employees_in_same_unit(
-        self,
-        employee,
-        snapshot,
-    ):
+    def _employees_in_same_unit(self, employee, snapshot):
         if not snapshot.unit:
             return Employee.objects.none()
 
-        employee_ids = (
-            self.organization_service
-            .get_employee_ids_in_unit(
-                snapshot.unit
-            )
-        )
+        employee_ids = self.organization_service.get_employee_ids_in_unit(snapshot.unit)
 
         return (
             Employee.objects
             .filter(
                 pk__in=employee_ids,
                 is_active=True,
-                current_management_level__order__lt=
-                    snapshot.management_level.order,
+                current_management_level__order__lt=snapshot.management_level.order,
             )
             .exclude(pk=employee.pk)
-            .select_related(
-                "employment_type",
-                "current_management_level",
-            )
+            .select_related("employment_type", "current_management_level")
             .distinct()
         )
 
-    def _employees_in_same_department(
-        self,
-        employee,
-        snapshot,
-    ):
+    def _employees_in_same_department(self, employee, snapshot):
         if not snapshot.department:
             return Employee.objects.none()
 
-        employee_ids = (
-            self.organization_service
-            .get_employee_ids_in_department(
-                snapshot.department
-            )
-        )
+        employee_ids = self.organization_service.get_employee_ids_in_department(snapshot.department)
 
         return (
             Employee.objects
             .filter(
                 pk__in=employee_ids,
                 is_active=True,
-                current_management_level__order__lt=
-                    snapshot.management_level.order,
+                current_management_level__order__lt=snapshot.management_level.order,
             )
             .exclude(pk=employee.pk)
-            .select_related(
-                "employment_type",
-                "current_management_level",
-            )
+            .select_related("employment_type", "current_management_level")
             .distinct()
         )
 
     def can_view(self, employee):
-        return (
-            self.get_visible_employees()
-            .filter(pk=employee.pk)
-            .exists()
-        )
+        # Superuser her personeli görebilir
+        if self.user.is_superuser:
+            return True
+
+        current_employee = getattr(self.user, "employee", None)
+
+        if not current_employee:
+            return False
+
+        # Kullanıcı her zaman kendi profilini görebilir
+        if current_employee.pk == employee.pk:
+            return True
+
+        # Diğer personeller için normal
+        # organizasyon görünürlük kuralları geçerli
+        return self.get_visible_employees().filter(pk=employee.pk).exists()

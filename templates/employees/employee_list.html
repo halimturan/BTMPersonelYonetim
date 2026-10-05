@@ -83,7 +83,7 @@ Personeller
                         <th>Ünvan</th>
                         <th>İş Kolu</th>
                         <th>Birim</th>
-                        <th>Kariyer Seviyesi</th>
+                        <th class="text-center">Kariyer Seviyesi</th>
                         <th class="text-end"></th>
                     </tr>
                     <!--end::tr-->
@@ -116,9 +116,9 @@ Personeller
                             <td>{{ employee.current_title|default:"-" }}</td>
                             <td>{{ employee.current_job_role|default:"-" }}</td>
                             <td>{{ employee.current_unit|default:"-" }}</td>
-                            <td>
+                            <td class="text-center">
                                 {% if employee.current_level_record %}
-                                    <span class="badge badge-secondary">
+                                    <span class="badge badge-info badge-outline p-2">
                                         {{ employee.current_level_record.level }}
                                     </span>
                                 {% else %}

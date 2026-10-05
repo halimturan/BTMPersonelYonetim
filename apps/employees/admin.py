@@ -3,6 +3,9 @@ from apps.employees.models import (EducationLevel, Employee, EmployeeAssignmentH
     EmployeeEducation, EmployeeLevelHistory, EmployeeTitleHistory, EmployeeUpgrade, EmployeeExperience,
     EmployeeManagementLevelHistory
 )
+from apps.employees.services.upgrade import EmployeeUpgradeService
+from django.db import transaction
+from apps.employees.forms import EmployeeUpgradeAdminForm
 
 
 class EmployeeEducationInline(admin.TabularInline):
@@ -135,7 +138,131 @@ class EducationLevelAdmin(admin.ModelAdmin):
 
 @admin.register(EmployeeUpgrade)
 class EmployeeUpgradeAdmin(admin.ModelAdmin):
-    list_display = ("employee", "job_role", "from_level", "to_level", "effective_date",)
-    list_filter = ("job_role", "from_level", "to_level", "effective_date",)
-    search_fields = ("employee__personnel_no", "employee__first_name", "employee__last_name", "reason",)
-    date_hierarchy = "effective_date"
+
+    form = EmployeeUpgradeAdminForm
+
+    list_display = (
+        "employee",
+        "from_job_role",
+        "from_level",
+        "to_job_role",
+        "to_level",
+        "effective_date",
+    )
+
+    list_filter = (
+        "from_job_role",
+        "to_job_role",
+        "from_level",
+        "to_level",
+        "effective_date",
+    )
+
+    search_fields = (
+        "employee__personnel_no",
+        "employee__first_name",
+        "employee__last_name",
+    )
+
+    ordering = (
+        "-effective_date",
+        "-pk",
+    )
+
+    # ==========================================
+    # ADD / CHANGE EKRANLARI
+    # ==========================================
+
+    def get_fields(
+        self,
+        request,
+        obj=None,
+    ):
+
+        # Mevcut upgrade görüntülenirken
+        if obj:
+            return (
+                "employee",
+                "from_job_role",
+                "from_level",
+                "to_job_role",
+                "to_level",
+                "effective_date",
+                "reason",
+                "period_score",
+            )
+
+        # Yeni upgrade oluşturulurken
+        return (
+            "employee",
+            "to_job_role",
+            "to_level",
+            "effective_date",
+            "reason",
+            "period_score",
+        )
+
+    # ==========================================
+    # UYGULANMIŞ UPGRADE DEĞİŞTİRİLMESİN
+    # ==========================================
+
+    def get_readonly_fields(
+        self,
+        request,
+        obj=None,
+    ):
+
+        if obj:
+            return (
+                "employee",
+                "from_job_role",
+                "from_level",
+                "to_job_role",
+                "to_level",
+                "effective_date",
+                "period_score",
+            )
+
+        return ()
+
+    # ==========================================
+    # KAYDET
+    # ==========================================
+
+    def save_model(
+        self,
+        request,
+        obj,
+        form,
+        change,
+    ):
+
+        # Mevcut upgrade'da sadece
+        # reason gibi izin verilen alanlar
+        # değişebilir.
+        if change:
+            super().save_model(
+                request,
+                obj,
+                form,
+                change,
+            )
+            return
+
+        # Form.clean() burada:
+        #
+        # from_job_role
+        # from_level
+        #
+        # değerlerini obj üzerine zaten koydu.
+
+        super().save_model(
+            request,
+            obj,
+            form,
+            change,
+        )
+
+        EmployeeUpgradeService(
+            obj
+        ).apply()
