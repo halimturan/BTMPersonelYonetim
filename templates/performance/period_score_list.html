@@ -5,199 +5,129 @@
 {% endblock %}
 
 {% block content %}
-
-<div class="mb-5">
-
-    <div class="d-flex justify-content-between align-items-center">
-
-        <div>
-            <h1 class="fs-3 fw-bold mb-1">
-                Nihai Skorlar
-            </h1>
-
-            <div class="text-muted">
-                {{ period.name }}
-            </div>
-        </div>
-
-        <a
-            href="{% url 'performance:period_detail' period.pk %}"
-            class="btn btn-light"
-        >
+    <!--begin::back-button-->
+    <div class="my-5">
+        <a href="{% url 'performance:period_detail' period.pk %}" class="text-primary d-flex align-items-center">
+            <i class="ki-solid ki-arrow-left text-primary me-1 fs-3"></i>
             Döneme Dön
         </a>
-
     </div>
-
-</div>
-
-
-<div class="card">
-
-    <div class="card-body">
-
-        <div class="table-responsive">
-
-            <table
-                class="table
-                       table-row-bordered
-                       table-row-gray-200
-                       align-middle"
-            >
-
-                <thead>
-
-                    <tr class="fw-bold text-gray-800">
-
-                        <th>
-                            Personel
-                        </th>
-
-                        <th class="text-center">
-                            Eğitim
-                        </th>
-
-                        <th class="text-center">
-                            İş Kolu
-                        </th>
-
-                        <th class="text-center">
-                            Tecrübe
-                        </th>
-
-                        <th class="text-center">
-                            Performans
-                        </th>
-
-                        <th class="text-end">
-                            Nihai Skor
-                        </th>
-
-                    </tr>
-
-                </thead>
-
-                <tbody>
-
-                    {% for row in score_rows %}
-
-                        <tr>
-
-                            <td>
-
-                                <a
-                                    href="{% url 'employees:employee_detail' row.score.employee.pk %}"
-                                    class="text-gray-900 fw-bold text-hover-primary"
-                                >
-                                    {{ row.score.employee.full_name }}
-                                </a>
-
-                                <div class="text-muted fs-7">
-                                    {{ row.score.employee.personnel_no }}
-                                </div>
-
-                            </td>
-
-                            <td class="text-center">
-
-                                {% if row.education %}
-
-                                    {{ row.education.raw_score|floatformat:2 }}
-
-                                    <div class="text-muted fs-8">
-                                        %{{ row.education.weight|floatformat:0 }}
-                                    </div>
-
-                                {% else %}
-                                    -
-                                {% endif %}
-
-                            </td>
-
-                            <td class="text-center">
-
-                                {% if row.job_role %}
-
-                                    {{ row.job_role.raw_score|floatformat:2 }}
-
-                                    <div class="text-muted fs-8">
-                                        %{{ row.job_role.weight|floatformat:0 }}
-                                    </div>
-
-                                {% else %}
-                                    -
-                                {% endif %}
-
-                            </td>
-
-                            <td class="text-center">
-
-                                {% if row.experience %}
-
-                                    {{ row.experience.raw_score|floatformat:2 }}
-
-                                    <div class="text-muted fs-8">
-                                        %{{ row.experience.weight|floatformat:0 }}
-                                    </div>
-
-                                {% else %}
-                                    -
-                                {% endif %}
-
-                            </td>
-
-                            <td class="text-center">
-
-                                {% if row.performance %}
-
-                                    {{ row.performance.raw_score|floatformat:2 }}
-
-                                    <div class="text-muted fs-8">
-                                        %{{ row.performance.weight|floatformat:0 }}
-                                    </div>
-
-                                {% else %}
-                                    -
-                                {% endif %}
-
-                            </td>
-
-                            <td class="text-end">
-
-                                <span
-                                    class="badge badge-light-primary fs-6 fw-bold"
-                                >
-                                    {{ row.score.final_score|floatformat:2 }}
-                                </span>
-
-                            </td>
-
-                        </tr>
-
-                    {% empty %}
-
-                        <tr>
-
-                            <td
-                                colspan="6"
-                                class="text-center py-10 text-muted"
-                            >
-                                Bu dönem için hesaplanmış
-                                nihai skor bulunmuyor.
-                            </td>
-
-                        </tr>
-
-                    {% endfor %}
-
-                </tbody>
-
-            </table>
-
+    <!--end::back-button-->
+    
+    <!--begin::header-->
+    <div class="mb-5">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="fs-3 fw-bold mb-1">
+                    Nihai Skorlar
+                </h1>
+                <div class="text-muted">
+                    {{ period.name }}
+                </div>
+            </div>
         </div>
-
     </div>
+    <!--end::header-->
 
-</div>
+    <!--begin::card-->
+    <div class="card">
+        <!--begin::card-body-->
+        <div class="card-body">
+            <!--begin::table-responsive-->
+            <div class="table-responsive">
+                <!--begin::table-->
+                <table class="table gs-5 gy-5 gx-5">
+                    <!--begin::thead-->
+                    <thead>
+                        <tr class="fw-semibold fs-6 text-gray-800 border-bottom border-gray-200">
+                            <th>Personel</th>
+                            <th class="text-center">Eğitim</th>
+                            <th class="text-center">İş Kolu</th>
+                            <th class="text-center">Tecrübe</th>
+                            <th class="text-center">Performans</th>
+                            <th class="text-end">Nihai Skor</th>
+                        </tr>
+                    </thead>
+                    <!--end::thead-->
+                    <!--begin::tbody-->
+                    <tbody>
+                        {% for row in score_rows %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'employees:employee_detail' row.score.employee.pk %}" class="text-gray-900 fw-bold text-hover-primary">
+                                        {{ row.score.employee.full_name }}
+                                    </a>
+                                    <div class="text-muted fs-7">
+                                        {{ row.score.employee.personnel_no }}
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    {% if row.education %}
+                                        {{ row.education.raw_score|floatformat:2 }}
+                                        <div class="text-muted fs-8">
+                                            %{{ row.education.weight|floatformat:0 }}
+                                        </div>
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    {% if row.job_role %}
+                                        {{ row.job_role.raw_score|floatformat:2 }}
+                                        <div class="text-muted fs-8">
+                                            %{{ row.job_role.weight|floatformat:0 }}
+                                        </div>
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    {% if row.experience %}
+                                        {{ row.experience.raw_score|floatformat:2 }}
+                                        <div class="text-muted fs-8">
+                                            %{{ row.experience.weight|floatformat:0 }}
+                                        </div>
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    {% if row.performance %}
+                                        {{ row.performance.raw_score|floatformat:2 }}
+                                        <div class="text-muted fs-8">
+                                            %{{ row.performance.weight|floatformat:0 }}
+                                        </div>
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    <span class="badge badge-light-primary fs-6 fw-bold">
+                                        {{ row.score.final_score|floatformat:2 }}
+                                    </span>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center py-10 text-muted">
+                                    Bu dönem için hesaplanmış nihai skor bulunmuyor.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                    <!--end::tbody-->
+                </table>
+                <!--end::table-->
+            </div>
+            <!--end::table-responsive-->
+        </div>
+        <!--end::card-body-->
+    </div>
+    <!--end::card-->
+{% endblock %}
 
+{% block extra_scripts %}
+    <script>
+        document.getElementById('period-list-item').classList.add('active');
+    </script>
 {% endblock %}
