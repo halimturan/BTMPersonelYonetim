@@ -35,7 +35,14 @@
             Profilim
         </a>
     </div>
-    <!--end::Menu item-->    
+    <!--end::Menu item-->
+    <!--begin::Menu item-->
+    <div class="menu-item px-5">
+        <a href="{% url 'accounts:password_change' %}" class="menu-link px-5">
+            Parola değiştir
+        </a>
+    </div>
+    <!--end::Menu item-->
     <!--begin::Menu item-->
     <form method="post" action="{% url 'accounts:logout' %}" id="logoutForm">
         {% csrf_token %}

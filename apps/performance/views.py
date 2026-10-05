@@ -194,7 +194,6 @@ class EvaluationPeriodDetailView(LoginRequiredMixin, PermissionRequiredMixin, De
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
         period = self.object
 
         evaluations = (
@@ -328,6 +327,7 @@ class EvaluationPeriodLockView(LoginRequiredMixin, PermissionRequiredMixin, View
         messages.success(request,"Tüm değerlendirmeler ve nihai skorlar tamamlandı. Dönem kilitlendi.")
 
         return redirect("performance:period_detail", pk=period.pk)
+
 
 class EvaluationPeriodCalculateScoresView(LoginRequiredMixin, PermissionRequiredMixin, View):
     permission_required = "performance.change_evaluationperiod"

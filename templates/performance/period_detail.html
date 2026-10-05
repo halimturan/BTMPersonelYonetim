@@ -39,17 +39,17 @@
             <!--begin::actions-->
             <div class="d-flex align-items-center gap-2 gap-lg-3">
                 {% if period.is_locked %}
-                    <span class="badge badge-secondary fs-6">
+                    <span class="badge badge-secondary fs-6 rounded-4 p-3">
                         <i class="ki-solid ki-lock me-1"></i>
                         Kilitli
                     </span>
         
                 {% elif period.is_active %}
-                    <span class="badge badge-success fs-6">
+                    <span class="badge badge-success p-3 rounded-4 fs-6">
                         Aktif
                     </span>
                 {% else %}
-                    <span class="badge badge-warning fs-6">
+                    <span class="badge badge-warning p-3 rounded-4 fs-6">
                         Hazırlık
                     </span>
                 {% endif %}
@@ -173,522 +173,528 @@
     </div>
     <!--end::row-->
 
-{% if not period.is_locked %}
+    <!--begin::actions-->
+    {% if not period.is_locked %}
+        <!--begin::row-->
+        <div class="row">
+            <!--begin::col-->
+            <div class="col-xl-6">
+                {% if period.evaluation_count and not all_evaluations_completed %}
+                    <!--begin::Alert-->
+                    <div class="alert alert-warning d-flex align-items-center p-5">
+                        <!--begin::Icon-->
+                        <i class="ki-duotone ki-information-3 fs-2hx text-warning me-4"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i>
+                        <!--end::Icon-->
 
-<div class="card border-0 shadow-sm mb-4">
+                        <!--begin::Wrapper-->
+                        <div class="d-flex flex-column">
+                            <!--begin::Title-->
+                            <h4 class="mb-1 text-warning fw-bold">Uyarı</h4>
+                            <!--end::Title-->
 
-    <div class="card-header bg-white">
-        <strong>
-            Dönem İşlemleri
-        </strong>
-    </div>
+                            <!--begin::Content-->
+                            <span>Tüm performans değerlendirmeleri tamamlanmadığı için bazı personellerin nihai skoru hesaplanamayacaktır.</span>
+                            <!--end::Content-->
+                        </div>
+                        <!--end::Wrapper-->
 
-    <div class="card-body">
-
-        <div class="d-flex flex-wrap gap-2">
-
-            {% if period.evaluation_count and not all_evaluations_completed %}
-                <!--begin::alert-->
-                <div class="alert alert-warning mt-3 mb-0">
-                    <i class="bi bi-exclamation-triangle me-2"></i>
-
-                    Tüm performans değerlendirmeleri
-                    tamamlanmadığı için bazı personellerin
-                    nihai skoru hesaplanamayacaktır.
-                </div>
-                <!--end::alert-->
-            {% endif %}
-
-            {% if period.evaluation_count and not period.is_locked %}
-                <!--begin::form-->
-                <form method="post" action="{% url 'performance:period_calculate_scores' period.pk %}">
-                    {% csrf_token %}
-                    <!--begin::button-->
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-calculator me-1"></i>
-                        Skorları Hesapla
-                    </button>
-                    <!--end::button-->
-                </form>
-                <!--end::form-->
-            {% endif %}
-
-            {% if not period.evaluation_count %}
-
-                <form method="post" action="{% url 'performance:period_validate' period.pk %}">
-                    {% csrf_token %}
-
-                    <button type="submit" class="btn btn-outline-primary">
-                        <i class="bi bi-shield-check me-1"></i>
-                        Ön Kontrol Yap
-                    </button>
-
-                </form>
-
-
-                {% if validation and validation.valid %}
-
-                    <form method="post" action="{% url 'performance:period_initialize' period.pk %}">
-                        {% csrf_token %}
-
-                        <button type="submit" class="btn btn-success"
-                            onclick="
-                                return confirm(
-                                    'Tüm personel için değerlendirme kayıtları oluşturulacak. Devam edilsin mi?'
-                                );
-                            ">
-                            <i class="bi bi-play-fill me-1"></i>
-                            Değerlendirmeleri Oluştur
+                        <!--begin::Close-->
+                        <button type="button" class="position-absolute position-sm-relative m-2 m-sm-0 top-0 end-0 btn btn-icon ms-sm-auto" data-bs-dismiss="alert">
+                            <i class="ki-solid ki-cross fs-2hx text-warning"></i>
                         </button>
-                    </form>
+                        <!--end::Close-->
+                    </div>
+                    <!--end::Alert-->
                 {% endif %}
-            {% endif %}
-
-            {% if period.evaluation_count and not period.is_locked %}
-                {% if all_evaluations_completed and all_scores_calculated %}
-                    <!--begin::form-->
-                    <form method="post" action="{% url 'performance:period_lock' period.pk %}">
-                        {% csrf_token %}
-                        <!--begin::button-->
-                        <button type="submit" class="btn btn-outline-danger" onclick="return confirm('Dönem kilitlenecek. Devam edilsin mi?');">
-                            <i class="bi bi-lock me-1"></i>
-                            Dönemi Kilitle
-                        </button>
-                        <!--end::button-->
-                    </form>
-                    <!--end::form-->
-                {% else %}
-                    <!--begin::button-->
-                    <button type="button" class="btn btn-outline-secondary" disabled>
-                        <i class="bi bi-lock me-1"></i>
-                        Dönemi Kilitle
-                    </button>
-                    <!--end::button-->
-                {% endif %}
-            {% endif %}
-        </div>
-        <!--end::d-flex-->
-    </div>
-
-</div>
-
-{% endif %}
-
-{% if score_result %}
-
-<div class="card border-0 shadow-sm mb-4">
-
-    <div class="card-header bg-white d-flex justify-content-between">
-
-        <strong>
-            Skor Hesaplama Sonucu
-        </strong>
-
-        {% if score_result.valid %}
-
-            <span class="badge text-bg-success">
-                Başarılı
-            </span>
-
-        {% else %}
-
-            <span class="badge text-bg-warning">
-                Eksikler Var
-            </span>
-
-        {% endif %}
-
-    </div>
-
-
-    <div class="card-body">
-
-        <div class="row g-3 mb-4">
-
-            <div class="col-md-4">
-
-                <div class="validation-stat">
-
-                    <small>
-                        Toplam Personel
-                    </small>
-
-                    <strong>
-                        {{ score_result.employee_count }}
-                    </strong>
-
-                </div>
-
             </div>
+            <!--end::col-->
+            <!--begin::col-->
+            <div class="col-xl-6">
+                <!--begin::actions-->
+                <div class="d-flex flex-wrap gap-2 my-5 justify-content-end align-items-center">
+                    {% if period.evaluation_count and not period.is_locked %}
+                        <!--begin::form-->
+                        <form method="post" action="{% url 'performance:period_calculate_scores' period.pk %}">
+                            {% csrf_token %}
+                            <!--begin::button-->
+                            <button type="submit" class="btn btn-primary">
+                                <i class="ki-duotone ki-finance-calculator me-1 fs-1">
+                                 <span class="path1"></span>
+                                 <span class="path2"></span>
+                                 <span class="path3"></span>
+                                 <span class="path4"></span>
+                                 <span class="path5"></span>
+                                 <span class="path6"></span>
+                                 <span class="path7"></span>
+                                </i>
+                                Skorları Hesapla
+                            </button>
+                            <!--end::button-->
+                        </form>
+                        <!--end::form-->
+                    {% endif %}
+
+                    {% if not period.evaluation_count %}
+
+                        <form method="post" action="{% url 'performance:period_validate' period.pk %}">
+                            {% csrf_token %}
+
+                            <button type="submit" class="btn btn-light-primary">
+                                <i class="ki-duotone ki-shield-tick me-1 fs-1">
+                                 <span class="path1"></span>
+                                 <span class="path2"></span>
+                                </i>
+                                Ön Kontrol Yap
+                            </button>
+
+                        </form>
 
 
-            <div class="col-md-4">
+                        {% if validation and validation.valid %}
 
-                <div class="validation-stat">
+                            <form method="post" action="{% url 'performance:period_initialize' period.pk %}">
+                                {% csrf_token %}
 
-                    <small>
+                                <button type="submit" class="btn btn-success" onclick="return confirm('Tüm personel için değerlendirme kayıtları oluşturulacak. Devam edilsin mi?');">
+                                    <i class="bi bi-play-fill me-1"></i>
+                                    Değerlendirmeleri Oluştur
+                                </button>
+                            </form>
+                        {% endif %}
+                    {% endif %}
+
+                    {% if period.evaluation_count and not period.is_locked %}
+                        {% if all_evaluations_completed and all_scores_calculated %}
+                            <!--begin::form-->
+                            <form method="post" action="{% url 'performance:period_lock' period.pk %}">
+                                {% csrf_token %}
+                                <!--begin::button-->
+                                <button type="submit" class="btn btn-danger" onclick="return confirm('Dönem kilitlenecek. Devam edilsin mi?');">
+                                    <i class="ki-duotone ki-lock me-1 fs-1">
+                                     <span class="path1"></span>
+                                     <span class="path2"></span>
+                                     <span class="path3"></span>
+                                    </i>
+                                    Dönemi Kilitle
+                                </button>
+                                <!--end::button-->
+                            </form>
+                            <!--end::form-->
+                        {% else %}
+                            <!--begin::button-->
+                            <button type="button" class="btn btn-secondary" disabled>
+                                <i class="ki-duotone ki-lock me-1 fs-1">
+                                 <span class="path1"></span>
+                                 <span class="path2"></span>
+                                 <span class="path3"></span>
+                                </i>
+                                Dönemi Kilitle
+                            </button>
+                            <!--end::button-->
+                        {% endif %}
+                    {% endif %}
+                </div>
+                <!--end::actions-->
+            </div>
+            <!--end::col-->
+        </div>
+        <!--end::row-->
+    {% endif %}
+    <!--end::actions-->
+
+    <!--begin::skor hesaplama-->
+    {% if score_result %}
+        <!--begin::card-->
+        <div class="card mb-5">
+            <!--begin::card-header-->
+            <div class="card-header d-flex justify-content-between">
+                <!--begin::card-header-->
+                <div class="card-header card-header-stretch">
+                    <!--begin::card-title-->
+                    <div class="card-title m-0">
+                        <h3 class="fw-bold m-0">Skor Hesaplama Sonucu</h3>
+                    </div>
+                    <!--end::card-title-->
+                </div>
+                <!--end::card-header-->
+
+                {% if score_result.valid %}
+                    <!--begin::badge-->
+                    <span class="badge text-bg-success">
                         Başarılı
-                    </small>
-
-                    <strong>
-                        {{ score_result.success_count }}
-                    </strong>
-
+                    </span>
+                    <!--end::badge-->
+                {% else %}
+                    <!--begin::badge-->
+                    <div class="my-auto">
+                        <span class="badge badge-warning p-4 rounded-4 fs-4">
+                            Eksikler Var
+                        </span>
+                    </div>
+                    <!--end::badge-->
+                {% endif %}
+            </div>
+            <!--end::card-header-->
+            <!--begin::card-body-->
+            <div class="card-body">
+                <!--begin::row-->
+                <div class="row g-3 mb-4">
+                    <!--begin::col-->
+                    <div class="col-md-4">
+                        <div class="validation-stat">
+                            <small>Toplam Personel</small>
+                            <strong>{{ score_result.employee_count }}</strong>
+                        </div>
+                    </div>
+                    <!--end::col-->
+                    <!--begin::col-->
+                    <div class="col-md-4">
+                        <div class="validation-stat">
+                            <small>Başarılı</small>
+                            <strong>{{ score_result.success_count }}</strong>
+                        </div>
+                    </div>
+                    <!--end::col-->
+                    <!--begin::col-->
+                    <div class="col-md-4">
+                        <div class="validation-stat">
+                            <small>Hata</small>
+                            <strong>{{ score_result.error_count }}</strong>
+                        </div>
+                    </div>
+                    <!--end::col-->
                 </div>
+                {% if score_result.issues %}
+                    <!--begin::table-responsive-->
+                    <div class="table-responsive">
+                        <!--begin::table-->
+                        <table class="table">
+                            <!--begin::thead-->
+                            <thead>
+                                <tr class="fw-bold fs-6 text-gray-800">
+                                    <th>Personel No</th>
+                                    <th>Personel</th>
+                                    <th>Hata</th>
+                                </tr>
+                            </thead>
+                            <!--end::thead-->
+                            <!--begin::tbody-->
+                            <tbody>
+                                {% for issue in score_result.issues %}
+                                    <tr>
+                                        <td>{{ issue.personnel_no }}</td>
+                                        <td>
+                                            <a href="{% url 'employees:employee_detail' issue.employee_id %}" class="text-decoration-none">
+                                                {{ issue.employee_name }}
+                                            </a>
+                                        </td>
+                                        <td>{{ issue.message }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                            <!--end::tbody-->
+                        </table>
+                        <!--end::table-->
+                    </div>
+                    <!--end::table-responsive-->
+                {% else %}
+                    <!--begin::Alert-->
+                    <div class="alert alert-success d-flex align-items-center p-5">
+                        <!--begin::Icon-->
+                        <i class="ki-duotone ki-check-square fs-2hx text-success me-4"><span class="path1"></span><span class="path2"></span></i>
+                        <!--end::Icon-->
+
+                        <!--begin::Wrapper-->
+                        <div class="d-flex flex-column">
+                            <!--begin::Title-->
+                            <h4 class="mb-1 text-dark">Başarılı</h4>
+                            <!--end::Title-->
+
+                            <!--begin::Content-->
+                            <span>Tüm personellerin nihai skorları başarıyla hesaplandı.</span>
+                            <!--end::Content-->
+                        </div>
+                        <!--end::Wrapper-->
+                    </div>
+                    <!--end::Alert-->
+                {% endif %}
+
+            </div>
+            <!--end::card-body-->
+        </div>
+        <!--end::card-->
+    {% endif %}
+    <!--end::skor hesaplama-->
+
+    <!--begin::ön kontrol-->
+    {% if validation %}
+        <!--begin::card-->
+        <div class="card mb-4">
+
+            <div class="card-header bg-white d-flex justify-content-between">
+
+                <strong>
+                    Ön Kontrol Sonucu
+                </strong>
+
+                {% if validation.valid %}
+
+                    <span class="badge text-bg-success">
+                        Başarılı
+                    </span>
+
+                {% else %}
+
+                    <span class="badge text-bg-danger">
+                        Hata Var
+                    </span>
+
+                {% endif %}
 
             </div>
 
 
-            <div class="col-md-4">
+            <div class="card-body">
 
-                <div class="validation-stat">
+                <div class="row g-3 mb-4">
 
-                    <small>
-                        Hata
-                    </small>
+                    <div class="col-md-3">
+                        <div class="validation-stat">
+                            <small>Personel</small>
+                            <strong>
+                                {{ validation.employee_count }}
+                            </strong>
+                        </div>
+                    </div>
 
-                    <strong>
-                        {{ score_result.error_count }}
-                    </strong>
+                    <div class="col-md-3">
+                        <div class="validation-stat">
+                            <small>Hazır</small>
+                            <strong>
+                                {{ validation.ready_count }}
+                            </strong>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="validation-stat">
+                            <small>Hata</small>
+                            <strong>
+                                {{ validation.error_count }}
+                            </strong>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="validation-stat">
+                            <small>Uyarı</small>
+                            <strong>
+                                {{ validation.warning_count }}
+                            </strong>
+                        </div>
+                    </div>
 
                 </div>
+
+
+                {% if validation.issues %}
+
+                    <div class="table-responsive">
+
+                        <table class="table align-middle">
+
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Personel No</th>
+                                    <th>Personel</th>
+                                    <th>Durum</th>
+                                    <th>Açıklama</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                                {% for issue in validation.issues %}
+
+                                    <tr>
+
+                                        <td>
+                                            {{ issue.personnel_no }}
+                                        </td>
+
+                                        <td>
+
+                                            {% if issue.employee_id %}
+
+                                                <a
+                                                    href="{% url 'employees:employee_detail' issue.employee_id %}"
+                                                >
+                                                    {{ issue.employee_name }}
+                                                </a>
+
+                                            {% else %}
+
+                                                {{ issue.employee_name }}
+
+                                            {% endif %}
+
+                                        </td>
+
+                                        <td>
+
+                                            {% if issue.severity == "error" %}
+
+                                                <span class="badge text-bg-danger">
+                                                    Hata
+                                                </span>
+
+                                            {% else %}
+
+                                                <span class="badge text-bg-warning">
+                                                    Uyarı
+                                                </span>
+
+                                            {% endif %}
+
+                                        </td>
+
+                                        <td>
+                                            {{ issue.message }}
+                                        </td>
+
+                                    </tr>
+
+                                {% endfor %}
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                {% else %}
+
+                    <div class="alert alert-success mb-0">
+
+                        <i class="bi bi-check-circle me-2"></i>
+
+                        Organizasyon, değerlendirme profilleri,
+                        kriterler ve değerlendirici atamaları hazır.
+
+                    </div>
+
+                {% endif %}
 
             </div>
 
         </div>
+        <!--end::card-->
+    {% endif %}
+    <!--end::ön kontrol-->
 
-
-        {% if score_result.issues %}
-
-            <div class="table-responsive">
-
-                <table class="table align-middle mb-0">
-
-                    <thead class="table-light">
-
-                        <tr>
-                            <th>Personel No</th>
-                            <th>Personel</th>
-                            <th>Hata</th>
-                        </tr>
-
-                    </thead>
-
-                    <tbody>
-
-                        {% for issue in score_result.issues %}
-
-                            <tr>
-
-                                <td>
-                                    {{ issue.personnel_no }}
-                                </td>
-
-                                <td>
-
-                                    <a
-                                        href="{% url 'employees:employee_detail' issue.employee_id %}"
-                                        class="text-decoration-none"
-                                    >
-                                        {{ issue.employee_name }}
-                                    </a>
-
-                                </td>
-
-                                <td>
-                                    {{ issue.message }}
-                                </td>
-
+    <!--begin::personel değerlendirmeleri-->
+    {% if period.evaluation_count %}
+        <!--begin::card-->
+        <div class="card">
+            <!--begin::card-header-->
+            <div class="card-header card-header-stretch">
+                <!--begin::card-title-->
+                <div class="card-title m-0">
+                    <h3 class="fw-bold m-0">Personel Değerlendirmeleri</h3>
+                </div>
+                <!--end::card-title-->
+            </div>
+            <!--end::card-header-->
+            <!--begin::card-body-->
+            <div class="card-body">
+                <!--begin::table-responsive-->
+                <div class="table-responsive">
+                    <!--begin::table-->
+                    <table class="table table-row-dashed table-row-gray-300 gy-7">
+                        <!--begin::thead-->
+                        <thead>
+                            <!--begin::tr-->
+                            <tr class="fw-bold fs-6 text-gray-800">
+                                <th>Personel</th>
+                                <th>Şablon</th>
+                                <th>Değerlendirici</th>
+                                <th>Performans Skoru</th>
+                                <th>Durum</th>
                             </tr>
+                            <!--end::tr-->
+                        </thead>
+                        <!--end::thead-->
+                        <!--begin::tbody-->
+                        <tbody>
+                            {% for evaluation in evaluations %}
+                                <tr>
 
-                        {% endfor %}
+                                    <td class="d-flex align-items-center">
+                                        <!--begin:: Avatar -->
+                                        <div class="symbol symbol-circle symbol-50px overflow-hidden me-3">
+                                            <a href="{% url 'employees:employee_detail' evaluation.employee.pk %}">
+                                                <div class="symbol-label fs-3 bg-light-primary text-primary">
+                                                    {{ evaluation.employee.first_name|first }}
+                                                    {{ evaluation.employee.last_name|first }}
+                                                </div>
+                                            </a>
+                                        </div>
+                                        <!--end::Avatar-->
+                                        <!--begin::User details-->
+                                        <div class="d-flex flex-column">
+                                            <span class="text-gray-800 text-hover-primary mb-1">{{ evaluation.employee.full_name }}</span>
+                                            <span>{{ evaluation.employee.employment_type }}</span>
+                                        </div>
+                                        <!--begin::User details-->
+                                    </td>
 
-                    </tbody>
+                                    <td>{{ evaluation.template.name }}</td>
+                                    <td>{{ evaluation.reviewers.count }}</td>
+                                    <td>
+                                        {% if evaluation.final_performance_score is not None %}
+                                            <strong>
+                                                {{ evaluation.final_performance_score|floatformat:2 }}
+                                            </strong>
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if evaluation.completed_at %}
+                                            <span class="badge badge-success p-3 ">
+                                                Tamamlandı
+                                            </span>
 
-                </table>
+                                        {% else %}
 
-            </div>
+                                            <span class="badge badge-warning p-3">
+                                                Devam Ediyor
+                                            </span>
 
-        {% else %}
+                                        {% endif %}
 
-            <div class="alert alert-success mb-0">
+                                    </td>
 
-                <i class="bi bi-check-circle me-2"></i>
+                                </tr>
 
-                Tüm personellerin nihai skorları
-                başarıyla hesaplandı.
+                            {% endfor %}
 
-            </div>
+                        </tbody>
 
-        {% endif %}
-
-    </div>
-
-</div>
-
-{% endif %}
-
-{% if validation %}
-
-<div class="card border-0 shadow-sm mb-4">
-
-    <div class="card-header bg-white d-flex justify-content-between">
-
-        <strong>
-            Ön Kontrol Sonucu
-        </strong>
-
-        {% if validation.valid %}
-
-            <span class="badge text-bg-success">
-                Başarılı
-            </span>
-
-        {% else %}
-
-            <span class="badge text-bg-danger">
-                Hata Var
-            </span>
-
-        {% endif %}
-
-    </div>
-
-
-    <div class="card-body">
-
-        <div class="row g-3 mb-4">
-
-            <div class="col-md-3">
-                <div class="validation-stat">
-                    <small>Personel</small>
-                    <strong>
-                        {{ validation.employee_count }}
-                    </strong>
+                    </table>
+                    <!--end::table-->
                 </div>
+                <!--end::table-responsive-->
             </div>
-
-            <div class="col-md-3">
-                <div class="validation-stat">
-                    <small>Hazır</small>
-                    <strong>
-                        {{ validation.ready_count }}
-                    </strong>
-                </div>
-            </div>
-
-            <div class="col-md-3">
-                <div class="validation-stat">
-                    <small>Hata</small>
-                    <strong>
-                        {{ validation.error_count }}
-                    </strong>
-                </div>
-            </div>
-
-            <div class="col-md-3">
-                <div class="validation-stat">
-                    <small>Uyarı</small>
-                    <strong>
-                        {{ validation.warning_count }}
-                    </strong>
-                </div>
-            </div>
-
+            <!--end::card-body-->
         </div>
-
-
-        {% if validation.issues %}
-
-            <div class="table-responsive">
-
-                <table class="table align-middle">
-
-                    <thead class="table-light">
-                        <tr>
-                            <th>Personel No</th>
-                            <th>Personel</th>
-                            <th>Durum</th>
-                            <th>Açıklama</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-
-                        {% for issue in validation.issues %}
-
-                            <tr>
-
-                                <td>
-                                    {{ issue.personnel_no }}
-                                </td>
-
-                                <td>
-
-                                    {% if issue.employee_id %}
-
-                                        <a
-                                            href="{% url 'employees:employee_detail' issue.employee_id %}"
-                                        >
-                                            {{ issue.employee_name }}
-                                        </a>
-
-                                    {% else %}
-
-                                        {{ issue.employee_name }}
-
-                                    {% endif %}
-
-                                </td>
-
-                                <td>
-
-                                    {% if issue.severity == "error" %}
-
-                                        <span class="badge text-bg-danger">
-                                            Hata
-                                        </span>
-
-                                    {% else %}
-
-                                        <span class="badge text-bg-warning">
-                                            Uyarı
-                                        </span>
-
-                                    {% endif %}
-
-                                </td>
-
-                                <td>
-                                    {{ issue.message }}
-                                </td>
-
-                            </tr>
-
-                        {% endfor %}
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
-        {% else %}
-
-            <div class="alert alert-success mb-0">
-
-                <i class="bi bi-check-circle me-2"></i>
-
-                Organizasyon, değerlendirme profilleri,
-                kriterler ve değerlendirici atamaları hazır.
-
-            </div>
-
-        {% endif %}
-
-    </div>
-
-</div>
-
-{% endif %}
-
-
-{% if period.evaluation_count %}
-
-<div class="card border-0 shadow-sm">
-
-    <div class="card-header bg-white">
-        <strong>
-            Personel Değerlendirmeleri
-        </strong>
-    </div>
-
-    <div class="table-responsive">
-
-        <table class="table table-hover align-middle mb-0">
-
-            <thead class="table-light">
-
-                <tr>
-                    <th>Personel</th>
-                    <th>Şablon</th>
-                    <th>Değerlendirici</th>
-                    <th>Performans Skoru</th>
-                    <th>Durum</th>
-                </tr>
-
-            </thead>
-
-            <tbody>
-
-                {% for evaluation in evaluations %}
-
-                    <tr>
-
-                        <td>
-
-                            <a href="{% url 'employees:employee_detail' evaluation.employee.pk %}" class="text-decoration-none fw-semibold">
-                                {{ evaluation.employee.full_name }}
-                            </a>
-
-                            <div class="small text-muted">
-                                {{ evaluation.employee.personnel_no }}
-                            </div>
-
-                        </td>
-
-                        <td>
-                            {{ evaluation.template.name }}
-                        </td>
-
-                        <td>
-                            {{ evaluation.reviewers.count }}
-                        </td>
-
-                        <td>
-
-                            {% if evaluation.final_performance_score is not None %}
-
-                                <strong>
-                                    {{ evaluation.final_performance_score|floatformat:2 }}
-                                </strong>
-
-                            {% else %}
-                                -
-                            {% endif %}
-
-                        </td>
-
-                        <td>
-
-                            {% if evaluation.completed_at %}
-
-                                <span class="badge text-bg-success">
-                                    Tamamlandı
-                                </span>
-
-                            {% else %}
-
-                                <span class="badge text-bg-warning">
-                                    Devam Ediyor
-                                </span>
-
-                            {% endif %}
-
-                        </td>
-
-                    </tr>
-
-                {% endfor %}
-
-            </tbody>
-
-        </table>
-
-    </div>
-
-</div>
-
-{% endif %}
-
+        <!--end::card-->
+    {% endif %}
+    <!--end::personel değerlendirmeleri-->
+{% endblock %}
+
+{% block extra_scripts %}
+    <script>
+        document.getElementById('period-list-item').classList.add('active');
+    </script>
 {% endblock %}

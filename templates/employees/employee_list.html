@@ -38,9 +38,9 @@ Personeller
         <div class="card-body border-bottom">
             <!--begin::form-->
             <form method="get">
-    
+                <!--begin::row-->
                 <div class="row g-2">
-    
+                    <!--begin::col-->
                     <div class="col-md-6 col-lg-4">
                         <div class="input-group">
                             <span class="input-group-text">
@@ -49,7 +49,7 @@ Personeller
                             <input type="text" name="q" class="form-control" value="{{ request.GET.q }}" placeholder="Ad, soyad veya personel no">
                         </div>
                     </div>
-    
+                    <!--end::col-->
                     <div class="col-auto">
                         <button type="submit" class="btn btn-primary">
                             Ara
@@ -65,7 +65,7 @@ Personeller
                     {% endif %}
     
                 </div>
-    
+                <!--end::row-->
             </form>
             <!--end::form-->
         </div>
@@ -192,6 +192,7 @@ Personeller
     <!--end::card-->
 
 {% endblock %}
+
 {% block extra_scripts %}
     <script>
         document.getElementById('employees-item').classList.add('active');

@@ -143,11 +143,7 @@ class EmployeeEducation(TimeStampedModel):
     school_name = models.CharField(max_length=250, blank=True, verbose_name="Okul Adı")
     department_name = models.CharField(max_length=250, blank=True, verbose_name="Bölüm")
     graduation_date = models.DateField(null=True, blank=True, verbose_name="Mezuniyet Tarihi")
-    is_it_related = models.BooleanField(default=False)
-    is_engineering = models.BooleanField(default=False)
-    is_open_education = models.BooleanField(default=False)
-
-    is_primary_for_scoring = models.BooleanField(default=False)
+    is_primary_for_scoring = models.BooleanField(default=False, verbose_name="Hesaplamada kullanılsın mı?")
 
     class Meta:
         verbose_name_plural = "Personel - Mezuniyet"
@@ -301,14 +297,14 @@ class EmployeeUpgrade(TimeStampedModel):
     """
     Upgrade işlemleri
     """
-    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name="upgrades")
-    job_role = models.ForeignKey(JobRole, on_delete=models.PROTECT)
-    from_level = models.ForeignKey(CareerLevel, on_delete=models.PROTECT, related_name="upgrades_from")
-    to_level = models.ForeignKey(CareerLevel, on_delete=models.PROTECT, related_name="upgrades_to")
-    effective_date = models.DateField()
-    reason = models.TextField(blank=True)
-    period_score = models.ForeignKey(
-        "scoring.EmployeePeriodScore", null=True, blank=True, on_delete=models.PROTECT, related_name="upgrades"
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name="upgrades", verbose_name="Personel")
+    job_role = models.ForeignKey(JobRole, on_delete=models.PROTECT, verbose_name="İş Kolu")
+    from_level = models.ForeignKey(CareerLevel, on_delete=models.PROTECT, related_name="upgrades_from", verbose_name="Eski Seviye")
+    to_level = models.ForeignKey(CareerLevel, on_delete=models.PROTECT, related_name="upgrades_to", verbose_name="Yeni Seviye")
+    effective_date = models.DateField(verbose_name="Yürürlük Tarihi")
+    reason = models.TextField(blank=True, verbose_name="Sebep")
+    period_score = models.ForeignKey("scoring.EmployeePeriodScore", null=True, blank=True,
+                                     on_delete=models.PROTECT, related_name="upgrades"
     )
 
     class Meta:

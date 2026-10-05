@@ -66,11 +66,11 @@ Değerlendirmeler
                 <table class="table gs-5 gy-5 gx-5">
                     <!--begin::thead-->
                     <thead>
-                        <tr>
+                        <tr class="fw-bold fs-6 text-gray-800">
                             <th>Personel</th>
                             <th>Dönem</th>
                             <th>Yönetim Seviyesi</th>
-                            <th>Durum</th>
+                            <th class="text-center">Durum</th>
                             <th>Şef</th>
                             <th>Müdür Yrd.</th>
                             <th>Müdür</th>
@@ -112,7 +112,7 @@ Değerlendirmeler
                                         -
                                     {% endif %}
                                 </td>
-                                <td>
+                                <td class="text-center">
                                     {% if evaluation.completed_at %}
                                         <span class="badge badge-success p-2 rounded-4 fs-7">
                                             Tamamlandı

@@ -79,13 +79,49 @@ class ExperienceScoreRule(EffectiveDatedModel, TimeStampedModel):
             )
 
 
+class RateRevision(TimeStampedModel):
+    """
+    İş kolu ücret tarifelerine uygulanan
+    toplu ücret revizyonu.
+
+    Örnek:
+        2027 / 1. Dönem Genel Zam
+        01.01.2027
+        %15
+    """
+    name = models.CharField(max_length=150, verbose_name="Revizyon Adı")
+    effective_date = models.DateField(verbose_name="Geçerlilik Tarihi")
+    percentage = models.DecimalField(max_digits=7, decimal_places=2, verbose_name="Zam Oranı (%)")
+    applied_at = models.DateTimeField(null=True, blank=True, verbose_name="Uygulanma Tarihi")
+
+    class Meta:
+        verbose_name = "Ücret Revizyonu"
+        verbose_name_plural = "Ücret Revizyonları"
+        ordering = ["-effective_date", "-pk"]
+
+    def clean(self):
+        super().clean()
+
+        if self.percentage <= 0:
+            raise ValidationError({"percentage": "Zam oranı sıfırdan büyük olmalıdır."})
+
+    def __str__(self):
+        return f"{self.name} - %{self.percentage}"
+
+
 class JobLevelRate(EffectiveDatedModel, TimeStampedModel):
     """
-    Seviye tutarları
+    İş Kolu - Seviye ücretleri
     """
     job_role = models.ForeignKey(JobRole, on_delete=models.CASCADE, related_name="level_rates", verbose_name="İş Kolu")
     level = models.ForeignKey(CareerLevel, on_delete=models.PROTECT, verbose_name="Seviye")
     amount = models.DecimalField(max_digits=14, decimal_places=2, verbose_name="Tutar")
+    revision = models.ForeignKey(RateRevision, null=True, blank=True, on_delete=models.PROTECT,
+        related_name="rates", verbose_name="Ücret Revizyonu",
+    )
+
+    def __str__(self):
+        return f"{self.job_role} - {self.level} - {self.amount}₺"
 
     class Meta:
         verbose_name_plural = "İş Kolu Ücretleri"
@@ -168,6 +204,9 @@ class EmployeePeriodScore(TimeStampedModel):
     final_score = models.DecimalField(max_digits=8, decimal_places=4)
     locked = models.BooleanField(default=False)
     calculated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.employee} - {self.final_score}"
 
     class Meta:
         verbose_name_plural = "Personel Dönem Skorları"

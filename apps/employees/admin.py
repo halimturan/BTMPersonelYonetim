@@ -10,10 +10,7 @@ class EmployeeEducationInline(admin.TabularInline):
     verbose_name_plural = "Eğitimler"
     model = EmployeeEducation
     extra = 0
-    fields = (
-        "education_level", "school_name", "department_name", "graduation_date", "is_it_related", "is_engineering",
-        "is_open_education", "is_primary_for_scoring",
-    )
+    fields = ("education_level", "school_name", "department_name", "graduation_date", "is_primary_for_scoring")
 
 
 class EmployeeManagementLevelHistoryInline(admin.TabularInline):
@@ -141,5 +138,4 @@ class EmployeeUpgradeAdmin(admin.ModelAdmin):
     list_display = ("employee", "job_role", "from_level", "to_level", "effective_date",)
     list_filter = ("job_role", "from_level", "to_level", "effective_date",)
     search_fields = ("employee__personnel_no", "employee__first_name", "employee__last_name", "reason",)
-    autocomplete_fields = ("employee", "job_role", "from_level", "to_level", "period_score",)
     date_hierarchy = "effective_date"
