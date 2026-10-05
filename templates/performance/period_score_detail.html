@@ -1,0 +1,448 @@
+{% extends "base_new.html" %}
+
+{% block title %}
+Skor Detayı
+{% endblock %}
+
+
+{% block content %}
+    <!--begin::back-button-->
+    <div>
+        <a href="{% url 'performance:period_score_list' period.pk %}" class="text-primary">
+            <i class="bi bi-arrow-left me-1 text-primary"></i>
+            Skor Listesine Dön
+        </a>
+    </div>
+    <!--end::back-button-->
+    <!--begin::toolbar-->
+    <div id="kt_app_toolbar" class="app-toolbar py-3 py-lg-6">
+        <!--begin::container-->
+        <div id="kt_app_toolbar_container" class="d-flex flex-stack">
+            <!--begin::page-title-->
+            <div class="page-title d-flex flex-column justify-content-center flex-wrap me-3">
+
+                <h1 class="page-heading d-flex text-gray-900 fw-bold fs-3 flex-column justify-content-center my-0">
+                    Skor Detayı
+                </h1>
+
+                <ul class="breadcrumb breadcrumb-separatorless fw-semibold fs-7 my-0 pt-1">
+
+                    <li class="breadcrumb-item text-muted">
+                        {{ period.name }}
+                    </li>
+
+                    <li class="breadcrumb-item">
+                        <span class="bullet bg-gray-500 w-5px h-2px"></span>
+                    </li>
+
+                    <li class="breadcrumb-item text-muted">
+                        {{ employee.full_name }}
+                    </li>
+                </ul>
+
+            </div>
+            <!--end::page-title-->
+        </div>
+        <!--end::container-->
+    </div>
+    <!--end::toolbar-->
+
+    <!--begin::personel-->
+    <div class="card mb-5">
+        <!--begin::card-body-->
+        <div class="card-body">
+
+            <div class="d-flex align-items-center justify-content-between">
+
+                <div class="d-flex align-items-center">
+
+                    <div class="symbol symbol-60px symbol-circle me-4">
+
+                        <span class="symbol-label fs-2 fw-semibold text-primary bg-light-primary">
+                            {{ employee.first_name|first }}
+                            {{ employee.last_name|first }}
+                        </span>
+
+                    </div>
+
+                    <div>
+
+                        <a href="{% url 'employees:employee_detail' employee.pk %}" class="fs-4 fw-bold text-gray-900 text-hover-primary">
+                            {{ employee.full_name }}
+                        </a>
+
+                        <div class="text-muted fw-semibold mt-1">
+                            Sicil: {{ employee.personnel_no }}
+                        </div>
+
+                        <div class="text-muted fs-7 mt-1">
+                            {{ period.name }}
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+            <div class="text-end">
+
+                <div
+                    class="text-muted
+                           fw-semibold
+                           mb-1"
+                >
+                    Nihai Skor
+                </div>
+
+                <div
+                    class="fs-1
+                           fw-bold
+                           text-primary"
+                >
+                    {{ period_score.final_score|floatformat:2 }}
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+<!--end::personel-->
+
+
+<div class="row g-5">
+
+    <!--begin::components-->
+    <div class="col-xl-8">
+
+        <div class="card h-100">
+
+            <div class="card-header">
+
+                <div class="card-title">
+
+                    <h3 class="fw-bold m-0">
+                        Skor Bileşenleri
+                    </h3>
+
+                </div>
+
+            </div>
+
+
+            <div class="card-body">
+
+                <div class="table-responsive">
+
+                    <table
+                        class="table
+                               table-row-bordered
+                               table-row-gray-200
+                               align-middle"
+                    >
+
+                        <thead>
+
+                            <tr
+                                class="fw-bold
+                                       text-gray-800"
+                            >
+
+                                <th>
+                                    Bileşen
+                                </th>
+
+                                <th class="text-center">
+                                    Ham Puan
+                                </th>
+
+                                <th class="text-center">
+                                    Ağırlık
+                                </th>
+
+                                <th class="text-end">
+                                    Katkı
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            {% for item in score_components %}
+
+                                <tr>
+
+                                    <td>
+
+                                        <div class="fw-bold">
+                                            {{ item.component.name }}
+                                        </div>
+
+                                        <div
+                                            class="text-muted
+                                                   fs-8"
+                                        >
+                                            {{ item.component.code }}
+                                        </div>
+
+                                    </td>
+
+
+                                    <td class="text-center">
+
+                                        <span class="fw-semibold">
+                                            {{ item.raw_score|floatformat:2 }}
+                                        </span>
+
+                                    </td>
+
+
+                                    <td class="text-center">
+
+                                        <span
+                                            class="badge
+                                                   badge-light"
+                                        >
+                                            %{{ item.weight|floatformat:0 }}
+                                        </span>
+
+                                    </td>
+
+
+                                    <td class="text-end">
+
+                                        <strong>
+                                            {{ item.weighted_score|floatformat:2 }}
+                                        </strong>
+
+                                    </td>
+
+                                </tr>
+
+                            {% empty %}
+
+                                <tr>
+
+                                    <td
+                                        colspan="4"
+                                        class="text-center
+                                               text-muted
+                                               py-8"
+                                    >
+                                        Skor bileşeni bulunamadı.
+                                    </td>
+
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+
+                        <tfoot>
+
+                            <tr>
+
+                                <td
+                                    colspan="3"
+                                    class="text-end
+                                           fw-bold
+                                           fs-6"
+                                >
+                                    Nihai Skor
+                                </td>
+
+                                <td
+                                    class="text-end
+                                           fw-bold
+                                           fs-4
+                                           text-primary"
+                                >
+                                    {{ period_score.final_score|floatformat:2 }}
+                                </td>
+
+                            </tr>
+
+                        </tfoot>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+    <!--end::components-->
+
+
+    <!--begin::summary-->
+    <div class="col-xl-4">
+
+        <div class="card h-100">
+
+            <div class="card-header">
+
+                <div class="card-title">
+
+                    <h3 class="fw-bold m-0">
+                        Hesaplama Özeti
+                    </h3>
+
+                </div>
+
+            </div>
+
+
+            <div class="card-body">
+
+                <div class="mb-5">
+
+                    <div
+                        class="text-muted
+                               fs-7
+                               mb-1"
+                    >
+                        Dönem
+                    </div>
+
+                    <div class="fw-bold">
+                        {{ period.name }}
+                    </div>
+
+                </div>
+
+
+                <div class="separator my-4"></div>
+
+
+                <div class="mb-5">
+
+                    <div
+                        class="text-muted
+                               fs-7
+                               mb-1"
+                    >
+                        Kullanılan Formül
+                    </div>
+
+                    <div class="fw-bold">
+
+                        {% if period_score.formula %}
+                            {{ period_score.formula }}
+                        {% else %}
+                            -
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+
+                <div class="separator my-4"></div>
+
+
+                <div>
+
+                    <div
+                        class="text-muted
+                               fs-7
+                               mb-2"
+                    >
+                        Hesaplama
+                    </div>
+
+                    {% for item in score_components %}
+
+                        <div
+                            class="d-flex
+                                   justify-content-between
+                                   mb-2"
+                        >
+
+                            <span class="text-muted">
+                                {{ item.component.name }}
+                            </span>
+
+                            <span class="fw-semibold">
+                                {{ item.weighted_score|floatformat:2 }}
+                            </span>
+
+                        </div>
+
+                    {% endfor %}
+
+
+                    <div class="separator my-4"></div>
+
+
+                    <div
+                        class="d-flex
+                               justify-content-between
+                               align-items-center"
+                    >
+
+                        <strong>
+                            Toplam
+                        </strong>
+
+                        <span
+                            class="fs-3
+                                   fw-bold
+                                   text-primary"
+                        >
+                            {{ period_score.final_score|floatformat:2 }}
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+    <!--end::summary-->
+
+</div>
+
+    <!--begin::Alert-->
+    <div class="alert alert-primary d-flex align-items-center p-5 mt-5">
+        <!--begin::Icon-->
+        <i class="ki-duotone ki-finance-calculator fs-2hx text-primary me-4">
+         <span class="path1"></span>
+         <span class="path2"></span>
+         <span class="path3"></span>
+         <span class="path4"></span>
+         <span class="path5"></span>
+         <span class="path6"></span>
+         <span class="path7"></span>
+        </i>
+        <!--end::Icon-->
+
+        <!--begin::Wrapper-->
+        <div class="d-flex flex-column">
+            <!--begin::Title-->
+            <h4 class="mb-1 text-primary">Nihai skor nasıl hesaplanıyor?</h4>
+            <!--end::Title-->
+
+            <!--begin::Content-->
+            <span>Her bileşenin ham puanı, tanımlı ağırlığı ile çarpılır. Bileşenlerden elde edilen ağırlıklı puanların toplamı nihai skoru oluşturur.</span>
+            <!--end::Content-->
+        </div>
+        <!--end::Wrapper-->
+    </div>
+    <!--end::Alert-->
+{% endblock %}
+
+{% block extra_scripts %}
+    <script>
+        document.getElementById('period-list-item').classList.add('active');
+    </script>
+{% endblock %}

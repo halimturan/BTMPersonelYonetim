@@ -1,25 +1,23 @@
-from django.shortcuts import get_object_or_404
-
 from apps.performance.forms import PerformanceReviewForm
 from apps.performance.models import PerformanceEvaluationReviewer
 from apps.performance.services.submission import ReviewSubmissionError, ReviewSubmissionService
 from apps.scoring.services.period_score_calculator import PeriodScoreCalculator
-from apps.scoring.models import EmployeePeriodScore
-
 from apps.performance.models import PerformanceEvaluation
 from apps.performance.services.visibility import PerformanceEvaluationVisibilityService
-
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.db.models import Count, Q
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import CreateView, DetailView, ListView
-
 from apps.performance.forms import EvaluationPeriodForm
-from apps.performance.models import EvaluationPeriod
 from apps.performance.services.period_initializer import EvaluationPeriodInitializer, PeriodInitializationError
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.shortcuts import get_object_or_404
+from apps.performance.models import EvaluationPeriod
+from apps.employees.services.visibility import EmployeeVisibilityService
+from apps.scoring.models import EmployeePeriodScore
+from django.http import Http404
 
 
 class MyReviewListView(LoginRequiredMixin, ListView):
@@ -464,19 +462,6 @@ class EvaluationListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
 
         return context
 
-from django.contrib.auth.mixins import (
-    LoginRequiredMixin,
-    PermissionRequiredMixin,
-)
-from django.shortcuts import get_object_or_404
-from django.views.generic import ListView
-
-from apps.performance.models import EvaluationPeriod
-from apps.employees.services.visibility import (
-    EmployeeVisibilityService,
-)
-from apps.scoring.models import EmployeePeriodScore
-
 
 class PeriodScoreListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     model = EmployeePeriodScore
@@ -526,6 +511,51 @@ class PeriodScoreListView(LoginRequiredMixin, PermissionRequiredMixin, ListView)
 
         context.update({
             "period": self.period, "score_rows": rows
+        })
+
+        return context
+
+
+class PeriodScoreDetailView(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
+    model = EmployeePeriodScore
+    template_name = "performance/period_score_detail.html"
+    context_object_name = "period_score"
+    permission_required = "scoring.view_employeeperiodscore"
+
+    def get_queryset(self):
+
+        visible_employee_ids = (
+            EmployeeVisibilityService(self.request.user)
+            .get_visible_employees()
+            .values_list("pk", flat=True)
+        )
+
+        return (
+            EmployeePeriodScore.objects
+            .filter(employee_id__in=visible_employee_ids)
+            .select_related("employee", "period", "formula")
+            .prefetch_related("components", "components__component")
+        )
+
+    def get_object(self, queryset=None):
+        period_score = super().get_object(queryset)
+
+        # URL'deki dönem ile skorun dönemi
+        # aynı olmak zorunda.
+        if period_score.period_id != self.kwargs["period_pk"]:
+            raise Http404("Skor bulunamadı.")
+        return period_score
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        period_score = self.object
+
+        components = period_score.components.select_related("component").order_by("component__name")
+
+        context.update({
+            "period":period_score.period,
+            "employee":period_score.employee,
+            "score_components":components,
         })
 
         return context

@@ -46,6 +46,7 @@
                             <th class="text-center">Tecrübe</th>
                             <th class="text-center">Performans</th>
                             <th class="text-end">Nihai Skor</th>
+                            <th class="text-end">İşlem</th>
                         </tr>
                     </thead>
                     <!--end::thead-->
@@ -106,10 +107,16 @@
                                         {{ row.score.final_score|floatformat:2 }}
                                     </span>
                                 </td>
+                                <td class="text-end">
+                                    <a href="{% url 'performance:period_score_detail' period.pk row.score.pk %}" class="btn btn-sm btn-light-primary">
+                                        <i class="bi bi-eye me-1"></i>
+                                        Detay
+                                    </a>
+                                </td>
                             </tr>
                         {% empty %}
                             <tr>
-                                <td colspan="6" class="text-center py-10 text-muted">
+                                <td colspan="7" class="text-center py-10 text-muted">
                                     Bu dönem için hesaplanmış nihai skor bulunmuyor.
                                 </td>
                             </tr>
