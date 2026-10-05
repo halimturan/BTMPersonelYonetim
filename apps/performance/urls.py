@@ -10,7 +10,8 @@ from apps.performance.views import (
     MyReviewDetailView,
     MyReviewListView,
     EvaluationPeriodCalculateScoresView,
-    EvaluationListView
+    EvaluationListView,
+    PeriodScoreListView,
 )
 
 app_name = "performance"
@@ -72,5 +73,10 @@ urlpatterns = [
         "evaluations/",
         EvaluationListView.as_view(),
         name="evaluation_list",
+    ),
+    path(
+        "periods/<int:period_pk>/scores/",
+        PeriodScoreListView.as_view(),
+        name="period_score_list",
     ),
 ]
