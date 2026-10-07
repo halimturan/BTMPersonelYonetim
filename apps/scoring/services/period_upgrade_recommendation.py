@@ -57,42 +57,140 @@ class PeriodUpgradeRecommendationService:
             "generated": 0,
             "skipped": 0,
             "failed": 0,
+
+            "skip_counts": {
+                "MAX_LEVEL": 0,
+            },
+
             "status_counts": {
                 "INSUFFICIENT_DATA": 0,
                 "WATCH": 0,
                 "CANDIDATE": 0,
                 "STRONG": 0,
             },
+
             "recommendations": [],
+            "skipped_items": [],
             "errors": [],
         }
 
         for period_score in self.get_period_scores():
+
             results["total"] += 1
+
             employee = period_score.employee
 
             try:
-                recommendation = self.generate_for_employee(employee)
+                service = (
+                    UpgradeRecommendationService(
+                        employee=employee,
+                        period=self.period,
+                        rule=self.rule,
+                    )
+                )
 
-                # En yüksek seviyedeki personelde
-                # service.generate() None dönebilir.
+                analysis = service.analyze()
+
+                # ==========================================
+                # Analiz dışı
+                # ==========================================
+
+                if not analysis["eligible"]:
+
+                    results["skipped"] += 1
+
+                    reason_code = (
+                            analysis.get("reason_code")
+                            or "UNKNOWN"
+                    )
+
+                    if (
+                            reason_code
+                            not in results["skip_counts"]
+                    ):
+                        results["skip_counts"][
+                            reason_code
+                        ] = 0
+
+                    results["skip_counts"][
+                        reason_code
+                    ] += 1
+
+                    results["skipped_items"].append({
+                        "employee_id":
+                            employee.pk,
+
+                        "employee":
+                            str(employee),
+
+                        "reason_code":
+                            reason_code,
+
+                        "reason":
+                            analysis.get(
+                                "reason",
+                                "Analiz dışı.",
+                            ),
+                    })
+
+                    continue
+
+                # ==========================================
+                # Öneriyi kaydet
+                # ==========================================
+
+                recommendation = (
+                    service.generate(
+                        analysis=analysis,
+                    )
+                )
+
                 if recommendation is None:
                     results["skipped"] += 1
+
+                    results["skipped_items"].append({
+                        "employee_id":
+                            employee.pk,
+
+                        "employee":
+                            str(employee),
+
+                        "reason_code":
+                            "UNKNOWN",
+
+                        "reason":
+                            "Öneri oluşturulamadı.",
+                    })
+
                     continue
 
                 results["generated"] += 1
 
-                if recommendation.status in results["status_counts"]:
-                    results["status_counts"][recommendation.status] += 1
+                if (
+                        recommendation.status
+                        in results["status_counts"]
+                ):
+                    results["status_counts"][
+                        recommendation.status
+                    ] += 1
 
-                results["recommendations"].append(recommendation)
+                results["recommendations"].append(
+                    recommendation
+                )
 
             except UpgradeRecommendationError as exc:
+
                 results["failed"] += 1
+
                 results["errors"].append({
-                    "employee_id": employee.pk,
-                    "employee": str(employee),
-                    "error": str(exc),
+                    "employee_id":
+                        employee.pk,
+
+                    "employee":
+                        str(employee),
+
+                    "error":
+                        str(exc),
                 })
 
         return results

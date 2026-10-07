@@ -651,7 +651,17 @@ class UpgradeRecommendationService:
         if not next_level:
             return {
                 "eligible": False,
-                "reason": "Personel zaten en yüksek kariyer seviyesinde.",
+
+                "reason_code":
+                    "MAX_LEVEL",
+
+                "reason": (
+                    "Personel zaten en yüksek "
+                    "kariyer seviyesinde."
+                ),
+
+                "current_record":
+                    current_record,
             }
 
         performance = self.get_performance_analysis()
@@ -676,13 +686,19 @@ class UpgradeRecommendationService:
     # =========================================================
 
     @transaction.atomic
-    def generate(self):
-        analysis = self.analyze()
+    def generate(
+            self,
+            analysis=None,
+    ):
+        if analysis is None:
+            analysis = self.analyze()
 
         if not analysis["eligible"]:
             return None
 
-        current_record = analysis["current_record"]
+        current_record = (
+            analysis["current_record"]
+        )
 
         recommendation, created = (
             EmployeeUpgradeRecommendation
@@ -692,12 +708,25 @@ class UpgradeRecommendationService:
                 period=self.period,
                 rule=self.rule,
                 defaults={
-                    "job_role": current_record.job_role,
-                    "current_level": current_record.level,
-                    "recommended_level": analysis["next_level"],
-                    "recommendation_score": analysis["recommendation_score"],
-                    "status": analysis["status"],
-                    "explanation": analysis["explanation"],
+                    "job_role":
+                        current_record.job_role,
+
+                    "current_level":
+                        current_record.level,
+
+                    "recommended_level":
+                        analysis["next_level"],
+
+                    "recommendation_score":
+                        analysis[
+                            "recommendation_score"
+                        ],
+
+                    "status":
+                        analysis["status"],
+
+                    "explanation":
+                        analysis["explanation"],
                 },
             )
         )
