@@ -127,6 +127,45 @@
                 <!--end::table-->
             </div>
             <!--end::table-responsive-->
+            {% if is_paginated %}
+            <!--begin::card-footer-->
+            <div class="card-footer">
+                <!--begin::nav-->
+                <nav>
+                    <!--begin::ul-->
+                    <ul class="pagination pagination-circle">
+                        {% if page_obj.has_previous %}
+                            <!--begin::page-item-->
+                            <li class="page-item">
+                                <a class="page-link page-text" href="?page={{ page_obj.previous_page_number }}&q={{ request.GET.q }}">
+                                    Önceki
+                                </a>
+                            </li>
+                            <!--end::page-item-->
+                        {% endif %}
+
+                        {% for i in  page_obj.paginator.page_range %}
+                            <li class="page-item {% if i == page_obj.number %}active{% endif %}"><a href="?page={{ i }}" class="page-link">{{ i }}</a></li>
+                        {% endfor %}
+
+
+                        {% if page_obj.has_next %}
+                            <!--begin::page-item-->
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}&q={{ request.GET.q }}">
+                                    Sonraki
+                                </a>
+                            </li>
+                            <!--end::page-item-->
+                        {% endif %}
+
+                    </ul>
+                    <!--end::ul-->
+                </nav>
+                <!--end::nav-->
+            </div>
+            <!--end::card-footer-->
+        {% endif %}
         </div>
         <!--end::card-body-->
     </div>

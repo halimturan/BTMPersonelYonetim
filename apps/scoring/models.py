@@ -233,3 +233,92 @@ class EmployeePeriodScoreComponent(TimeStampedModel):
                 name="unique_period_score_component",
             ),
         ]
+
+
+class UpgradeRecommendationRule(TimeStampedModel):
+    """
+    Upgrade öneri motorunda kullanılacak kurallar.
+
+    İlk sürümde tek aktif kural seti kullanılabilir.
+    Daha sonra dönem veya tarih bazlı kural setlerine
+    geçebilmek için ayrı model olarak tutuluyor.
+    """
+
+    name = models.CharField(max_length=150, verbose_name="Kural Seti")
+    min_period_count = models.PositiveSmallIntegerField(default=3, verbose_name="Minimum Dönem Sayısı")
+    min_average_score = models.DecimalField(max_digits=6, decimal_places=2, default=85,
+        verbose_name="Minimum Ortalama Nihai Skor",
+    )
+    min_period_score = models.DecimalField(max_digits=6, decimal_places=2, default=75,
+        verbose_name="Minimum Tek Dönem Skoru",
+    )
+    experience_tolerance_years = models.DecimalField(max_digits=4, decimal_places=1, default=2,
+        verbose_name="Tecrübe Karşılaştırma Toleransı",
+        help_text="Benzer personel belirlenirken kullanılacak ± yıl toleransı.",
+    )
+    min_peer_count = models.PositiveSmallIntegerField(default=3, verbose_name="Minimum Benzer Personel Sayısı")
+    candidate_peer_ratio = models.DecimalField(max_digits=5, decimal_places=2, default=60,
+        verbose_name="Adaylık İçin Üst Seviye Oranı (%)",
+    )
+    strong_peer_ratio = models.DecimalField(max_digits=5, decimal_places=2, default=75,
+        verbose_name="Güçlü Adaylık İçin Üst Seviye Oranı (%)",
+    )
+    active = models.BooleanField(default=True, verbose_name="Aktif")
+
+    class Meta:
+        verbose_name = "Upgrade Öneri Kuralı"
+        verbose_name_plural = "Upgrade Öneri Kuralları"
+
+    def __str__(self):
+        return self.name
+
+
+class EmployeeUpgradeRecommendation(TimeStampedModel):
+
+    class Status(models.TextChoices):
+        WATCH = "WATCH", "İzlenmeli"
+        CANDIDATE = "CANDIDATE", "Upgrade Adayı"
+        STRONG = "STRONG", "Güçlü Upgrade Adayı"
+        APPROVED = "APPROVED", "Onaylandı"
+        REJECTED = "REJECTED", "Uygun Görülmedi"
+
+    employee = models.ForeignKey("employees.Employee", on_delete=models.CASCADE,
+        related_name="upgrade_recommendations", verbose_name="Personel"
+    )
+    period = models.ForeignKey("performance.EvaluationPeriod",on_delete=models.PROTECT,
+        related_name="upgrade_recommendations", verbose_name="Dönem",
+    )
+    rule = models.ForeignKey(UpgradeRecommendationRule, on_delete=models.PROTECT, related_name="recommendations",
+        verbose_name="Kural Seti",
+    )
+    job_role = models.ForeignKey("organization.JobRole", on_delete=models.PROTECT, verbose_name="İş Kolu",
+        related_name="upgrade_recommendations",
+    )
+    current_level = models.ForeignKey("organization.CareerLevel", on_delete=models.PROTECT, related_name="+",
+        verbose_name="Mevcut Seviye",
+    )
+    recommended_level = models.ForeignKey("organization.CareerLevel", on_delete=models.PROTECT,
+        related_name="+", verbose_name="Önerilen Seviye",
+    )
+    recommendation_score = models.DecimalField(max_digits=6, decimal_places=2, verbose_name="Öneri Puanı")
+    status = models.CharField(max_length=20, choices=Status.choices, verbose_name="Durum")
+    explanation = models.JSONField(default=dict, blank=True, verbose_name="Öneri Açıklaması")
+    reviewed_at = models.DateTimeField(null=True, blank=True, verbose_name="İncelenme Tarihi")
+    review_note = models.TextField(blank=True, verbose_name="Yönetici Notu")
+
+    class Meta:
+        verbose_name = "Upgrade Önerisi"
+        verbose_name_plural = "Upgrade Önerileri"
+
+        constraints = [
+            models.UniqueConstraint(
+                fields=["employee", "period", "rule"],
+                name=(
+                    "unique_employee_upgrade_"
+                    "recommendation"
+                ),
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.employee} - {self.current_level} → {self.recommended_level}"

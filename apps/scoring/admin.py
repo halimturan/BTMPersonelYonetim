@@ -4,7 +4,8 @@ from django.core.exceptions import ValidationError
 from django.forms.models import BaseInlineFormSet
 from apps.scoring.models import (EducationScoreRule, EmployeePeriodScore, EmployeePeriodScoreComponent,
                                  ExperienceScoreRule, ExperienceSource, JobLevelRate, JobRoleScoreRule, ScoreComponent,
-                                 ScoreFormula, ScoreFormulaComponent, RateRevision)
+                                 ScoreFormula, ScoreFormulaComponent, RateRevision, UpgradeRecommendationRule,
+                                 EmployeeUpgradeRecommendation,)
 from apps.scoring.services.rate_revision import RateRevisionService, RateRevisionError
 
 
@@ -166,3 +167,26 @@ class RateRevisionAdmin(admin.ModelAdmin):
             f"{revision.name} uygulandı. {len(created_rates)} yeni ücret tarifesi oluşturuldu.",
             level=messages.SUCCESS,
         )
+
+
+@admin.register(UpgradeRecommendationRule)
+class UpgradeRecommendationRuleAdmin(admin.ModelAdmin):
+    list_display = (
+        "name", "min_period_count", "min_average_score", "min_period_score", "experience_tolerance_years",
+        "min_peer_count", "candidate_peer_ratio", "strong_peer_ratio", "active",
+    )
+    list_filter = ("active",)
+    search_fields = ("name",)
+
+
+@admin.register(EmployeeUpgradeRecommendation)
+class EmployeeUpgradeRecommendationAdmin(admin.ModelAdmin):
+    list_display = (
+        "employee", "period", "job_role", "current_level", "recommended_level", "recommendation_score", "status"
+    )
+    list_filter = ("period", "status", "job_role", "current_level", "recommended_level")
+    search_fields = ("employee__first_name", "employee__last_name", "employee__personnel_no")
+    readonly_fields = (
+        "employee", "period", "rule", "job_role", "current_level", "recommended_level", "recommendation_score",
+        "status", "explanation",
+    )

@@ -78,15 +78,15 @@ Dönem Yönetimi
                             <td>{{ period.completed_count }}</td>
                             <td class="text-center">
                                 {% if period.is_locked %}
-                                    <span class="badge badge-secondary p-2 rounded-4 fs-7">
+                                    <span class="badge badge-secondary px-4 py-3 rounded-4 fs-7">
                                         Kilitli
                                     </span>
                                 {% elif period.is_active %}
-                                    <span class="badge badge-success p-2 rounded-4 fs-7">
+                                    <span class="badge badge-success px-4 py-3 rounded-4 fs-7">
                                         Aktif
                                     </span>
                                 {% else %}
-                                    <span class="badge badge-warning p-2 rounded-4 fs-7">
+                                    <span class="badge badge-warning px-4 py-3 rounded-4 fs-7">
                                         Hazırlık
                                     </span>
                                 {% endif %}
