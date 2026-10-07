@@ -1,0 +1,452 @@
+{% extends "base_new.html" %}
+
+{% block title %}
+{{ period.name }} - Upgrade Önerileri
+{% endblock %}
+
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-5">
+
+    <div>
+
+        <h1 class="fs-3 fw-bold mb-1">
+            Upgrade Önerileri
+        </h1>
+
+        <div class="text-muted">
+            {{ period.name }}
+        </div>
+
+    </div>
+
+    <a
+        href="{% url 'performance:period_detail' period.pk %}"
+        class="btn btn-light"
+    >
+        <i class="bi bi-arrow-left me-1"></i>
+        Döneme Dön
+    </a>
+
+</div>
+
+
+<!-- Özet -->
+
+<div class="row g-5 mb-5">
+
+    <div class="col-md-6 col-xl">
+
+        <a
+            href="{% url 'performance:period_upgrade_recommendation_list' period.pk %}"
+            class="card h-100 text-decoration-none"
+        >
+
+            <div class="card-body">
+
+                <div class="text-muted">
+                    Toplam
+                </div>
+
+                <div class="fs-2 fw-bold mt-2">
+                    {{ total_count }}
+                </div>
+
+            </div>
+
+        </a>
+
+    </div>
+
+
+    <div class="col-md-6 col-xl">
+
+        <a
+            href="?status=INSUFFICIENT_DATA"
+            class="card h-100 text-decoration-none"
+        >
+
+            <div class="card-body">
+
+                <div class="text-muted">
+                    Yetersiz Veri
+                </div>
+
+                <div class="fs-2 fw-bold mt-2">
+                    {{ insufficient_count }}
+                </div>
+
+            </div>
+
+        </a>
+
+    </div>
+
+
+    <div class="col-md-6 col-xl">
+
+        <a
+            href="?status=WATCH"
+            class="card h-100 text-decoration-none"
+        >
+
+            <div class="card-body">
+
+                <div class="text-muted">
+                    İzlenmeli
+                </div>
+
+                <div class="fs-2 fw-bold mt-2">
+                    {{ watch_count }}
+                </div>
+
+            </div>
+
+        </a>
+
+    </div>
+
+
+    <div class="col-md-6 col-xl">
+
+        <a
+            href="?status=CANDIDATE"
+            class="card h-100 text-decoration-none"
+        >
+
+            <div class="card-body">
+
+                <div class="text-muted">
+                    Upgrade Adayı
+                </div>
+
+                <div class="fs-2 fw-bold mt-2">
+                    {{ candidate_count }}
+                </div>
+
+            </div>
+
+        </a>
+
+    </div>
+
+
+    <div class="col-md-6 col-xl">
+
+        <a
+            href="?status=STRONG"
+            class="card h-100 text-decoration-none"
+        >
+
+            <div class="card-body">
+
+                <div class="text-muted">
+                    Güçlü Aday
+                </div>
+
+                <div class="fs-2 fw-bold mt-2">
+                    {{ strong_count }}
+                </div>
+
+            </div>
+
+        </a>
+
+    </div>
+
+</div>
+
+
+<div class="card">
+
+    <div class="card-header">
+
+        <div class="card-title">
+
+            <h3 class="fw-bold m-0">
+                Personel Önerileri
+            </h3>
+
+        </div>
+
+    </div>
+
+
+    <div class="card-body">
+
+        <div class="table-responsive">
+
+            <table
+                class="table
+                       table-row-bordered
+                       table-row-gray-200
+                       align-middle"
+            >
+
+                <thead>
+
+                    <tr class="fw-bold text-gray-800">
+
+                        <th>
+                            Personel
+                        </th>
+
+                        <th>
+                            İş Kolu
+                        </th>
+
+                        <th class="text-center">
+                            Mevcut
+                        </th>
+
+                        <th class="text-center">
+                            Önerilen
+                        </th>
+
+                        <th class="text-center">
+                            Dönem
+                        </th>
+
+                        <th class="text-center">
+                            Ortalama
+                        </th>
+
+                        <th class="text-center">
+                            Benzer
+                        </th>
+
+                        <th class="text-center">
+                            Öneri Puanı
+                        </th>
+
+                        <th class="text-center">
+                            Durum
+                        </th>
+
+                        <th class="text-end">
+                            İşlem
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for recommendation in recommendations %}
+
+                        <tr>
+
+                            <td>
+
+                                <a
+                                    href="{% url 'employees:employee_detail' recommendation.employee.pk %}"
+                                    class="fw-bold text-gray-900 text-hover-primary"
+                                >
+                                    {{ recommendation.employee.full_name }}
+                                </a>
+
+                                <div class="text-muted fs-8">
+                                    {{ recommendation.employee.personnel_no }}
+                                </div>
+
+                            </td>
+
+
+                            <td>
+                                {{ recommendation.job_role.name }}
+                            </td>
+
+
+                            <td class="text-center">
+                                {{ recommendation.current_level.name }}
+                            </td>
+
+
+                            <td class="text-center">
+
+                                <span class="fw-bold text-primary">
+                                    {{ recommendation.recommended_level.name }}
+                                </span>
+
+                            </td>
+
+
+                            <td class="text-center">
+
+                                {{ recommendation.explanation.period_count|default:0 }}
+                                /
+                                {{ recommendation.rule.min_period_count }}
+
+                            </td>
+
+
+                            <td class="text-center">
+
+                                {% if recommendation.explanation.average_score != None %}
+
+                                    {{ recommendation.explanation.average_score|floatformat:2 }}
+
+                                {% else %}
+                                    -
+                                {% endif %}
+
+                            </td>
+
+
+                            <td class="text-center">
+
+                                {{ recommendation.explanation.peer_count|default:0 }}
+                                /
+                                {{ recommendation.rule.min_peer_count }}
+
+                            </td>
+
+
+                            <td class="text-center">
+
+                                <strong>
+                                    {{ recommendation.recommendation_score|floatformat:2 }}
+                                </strong>
+
+                            </td>
+
+
+                            <td class="text-center">
+
+                                {% if recommendation.status == "STRONG" %}
+
+                                    <span class="badge badge-light-success">
+                                        Güçlü Aday
+                                    </span>
+
+                                {% elif recommendation.status == "CANDIDATE" %}
+
+                                    <span class="badge badge-light-primary">
+                                        Upgrade Adayı
+                                    </span>
+
+                                {% elif recommendation.status == "WATCH" %}
+
+                                    <span class="badge badge-light-warning">
+                                        İzlenmeli
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="badge badge-light-danger">
+                                        Yetersiz Veri
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <td class="text-end">
+
+                                <a
+                                    href="{% url 'performance:period_upgrade_recommendation_detail' period.pk recommendation.pk %}"
+                                    class="btn btn-sm btn-light-primary"
+                                >
+                                    Detay
+                                </a>
+
+                            </td>
+
+                        </tr>
+
+                    {% empty %}
+
+                        <tr>
+
+                            <td
+                                colspan="10"
+                                class="text-center text-muted py-10"
+                            >
+                                Bu dönem için upgrade önerisi
+                                henüz oluşturulmamış.
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+{% if is_paginated %}
+
+<div class="d-flex justify-content-center mt-5">
+
+    <ul class="pagination">
+
+        {% if page_obj.has_previous %}
+
+            <li class="page-item">
+
+                <a
+                    class="page-link"
+                    href="?page={{ page_obj.previous_page_number }}&status={{ request.GET.status }}"
+                >
+                    Önceki
+                </a>
+
+            </li>
+
+        {% endif %}
+
+
+        {% for i in paginator.page_range %}
+
+            <li
+                class="page-item
+                {% if page_obj.number == i %}
+                    active
+                {% endif %}"
+            >
+
+                <a
+                    class="page-link"
+                    href="?page={{ i }}&status={{ request.GET.status }}"
+                >
+                    {{ i }}
+                </a>
+
+            </li>
+
+        {% endfor %}
+
+
+        {% if page_obj.has_next %}
+
+            <li class="page-item">
+
+                <a
+                    class="page-link"
+                    href="?page={{ page_obj.next_page_number }}&status={{ request.GET.status }}"
+                >
+                    Sonraki
+                </a>
+
+            </li>
+
+        {% endif %}
+
+    </ul>
+
+</div>
+
+{% endif %}
+
+{% endblock %}

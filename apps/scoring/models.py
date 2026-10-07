@@ -276,6 +276,7 @@ class UpgradeRecommendationRule(TimeStampedModel):
 class EmployeeUpgradeRecommendation(TimeStampedModel):
 
     class Status(models.TextChoices):
+        INSUFFICIENT_DATA = "INSUFFICIENT_DATA", "Yetersiz Veri"
         WATCH = "WATCH", "İzlenmeli"
         CANDIDATE = "CANDIDATE", "Upgrade Adayı"
         STRONG = "STRONG", "Güçlü Upgrade Adayı"

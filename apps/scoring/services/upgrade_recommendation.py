@@ -537,76 +537,48 @@ class UpgradeRecommendationService:
     # STATÜ
     # =========================================================
 
-    def determine_status(
-        self,
-        performance,
-        peer_analysis,
-    ):
-        # Performans temel şartlarını sağlamıyorsa
-        # upgrade adayı değildir.
+    def determine_status(self, performance, peer_analysis):
+        # ---------------------------------
+        # Performans verisi yetersiz
+        # ---------------------------------
 
-        if not performance["passed"]:
-            return (
-                EmployeeUpgradeRecommendation
-                .Status.WATCH
-            )
+        if not performance["enough_periods"]:
+            return EmployeeUpgradeRecommendation.Status.INSUFFICIENT_DATA
 
-        # Yeterli akran yoksa güçlü bir
-        # karşılaştırma yapamayız.
+        # ---------------------------------
+        # Performans geçmişi yeterli fakat
+        # eşiklerin altında
+        # ---------------------------------
+
+        if not performance["average_passed"] and performance["minimum_passed"]:
+            return EmployeeUpgradeRecommendation.Status.WATCH
+
+        # ---------------------------------
+        # Performans uygun fakat sağlıklı
+        # akran karşılaştırması yapacak
+        # kadar benzer personel yok
+        # ---------------------------------
 
         if not peer_analysis["enough_peers"]:
-            return (
-                EmployeeUpgradeRecommendation
-                .Status.WATCH
-            )
+            return EmployeeUpgradeRecommendation.Status.INSUFFICIENT_DATA
 
-        ratio = (
-            peer_analysis[
-                "higher_level_peer_ratio"
-            ]
-        )
+        ratio = peer_analysis["higher_level_peer_ratio"]
 
-        if (
-            ratio
-            >= self.rule.strong_peer_ratio
-        ):
-            return (
-                EmployeeUpgradeRecommendation
-                .Status.STRONG
-            )
+        if ratio >= self.rule.strong_peer_ratio:
+            return EmployeeUpgradeRecommendation.Status.STRONG
 
-        if (
-            ratio
-            >= self.rule.candidate_peer_ratio
-        ):
-            return (
-                EmployeeUpgradeRecommendation
-                .Status.CANDIDATE
-            )
+        if ratio >= self.rule.candidate_peer_ratio:
+            return EmployeeUpgradeRecommendation.Status.CANDIDATE
 
-        return (
-            EmployeeUpgradeRecommendation
-            .Status.WATCH
-        )
+        return EmployeeUpgradeRecommendation.Status.WATCH
 
     # =========================================================
     # AÇIKLAMA
     # =========================================================
 
-    def build_explanation(
-        self,
-        current_record,
-        next_level,
-        performance,
-        peer_analysis,
-    ):
-        education = (
-            self.get_primary_education()
-        )
-
-        experience_years = (
-            self.get_experience_years()
-        )
+    def build_explanation(self, current_record, next_level, performance, peer_analysis):
+        education = self.get_primary_education()
+        experience_years = self.get_experience_years()
 
         peers = []
 
@@ -641,77 +613,24 @@ class UpgradeRecommendationService:
                         2,
                     ),
 
-                "latest_score": (
-                    float(
-                        latest_score.final_score
-                    )
-                    if latest_score
-                    else None
-                ),
+                "latest_score": float(latest_score.final_score) if latest_score else None,
             })
 
         return {
-            "current_job_role":
-                current_record.job_role.name,
-
-            "current_level":
-                current_record.level.name,
-
-            "recommended_level":
-                next_level.name,
-
-            "period_count":
-                performance["period_count"],
-
-            "average_score": (
-                float(
-                    performance[
-                        "average_score"
-                    ]
-                )
-                if performance[
-                    "average_score"
-                ] is not None
-                else None
-            ),
-
-            "minimum_score": (
-                float(
-                    performance[
-                        "minimum_score"
-                    ]
-                )
-                if performance[
-                    "minimum_score"
-                ] is not None
-                else None
-            ),
-
-            "performance_passed":
-                performance["passed"],
-
-            "education": (
-                education.education_level.name
-                if education
-                else None
-            ),
-
-            "professional_years": (
-                round(
-                    float(experience_years),
-                    2,
-                )
-                if experience_years
-                is not None
-                else None
-            ),
-
+            "current_job_role": current_record.job_role.name,
+            "current_level": current_record.level.name,
+            "recommended_level": next_level.name,
+            "period_count": performance["period_count"],
+            "average_score": float(performance["average_score"]) if performance["average_score"] is not None else None,
+            "minimum_score": float(performance["minimum_score"]) if performance["minimum_score"] is not None else None,
+            "performance_passed": performance["passed"],
+            "education": education.education_level.name if education else None,
+            "professional_years": round(float(experience_years), 2) if experience_years is not None else None,
             "peer_count": peer_analysis["peer_count"],
             "higher_level_peer_count": peer_analysis["higher_level_peer_count"],
             "higher_level_peer_ratio": float(peer_analysis["higher_level_peer_ratio"]),
             "peer_average_score": (
-                float(peer_analysis["peer_average_score"])
-                if peer_analysis[ "peer_average_score"] is not None else None
+                float(peer_analysis["peer_average_score"]) if peer_analysis[ "peer_average_score"] is not None else None
             ),
             "periods": performance["periods"],
             "peers": peers,

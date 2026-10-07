@@ -13,6 +13,8 @@ from apps.performance.views import (
     EvaluationListView,
     PeriodScoreListView,
     PeriodScoreDetailView,
+    PeriodUpgradeRecommendationListView,
+    PeriodUpgradeRecommendationDetailView,
 )
 
 
@@ -31,4 +33,6 @@ urlpatterns = [
     path("evaluations/", EvaluationListView.as_view(), name="evaluation_list"),
     path("periods/<int:period_pk>/scores/", PeriodScoreListView.as_view(), name="period_score_list"),
     path("periods/<int:period_pk>/scores/<int:pk>/", PeriodScoreDetailView.as_view(), name="period_score_detail"),
+    path("periods/<int:period_pk>/upgrade-recommendations/", PeriodUpgradeRecommendationListView.as_view(), name="period_upgrade_recommendation_list"),
+    path("periods/<int:period_pk>/upgrade-recommendations/<int:pk>/", PeriodUpgradeRecommendationDetailView.as_view(), name="period_upgrade_recommendation_detail"),
 ]

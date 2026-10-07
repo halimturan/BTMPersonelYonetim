@@ -1,0 +1,517 @@
+{% extends "base_new.html" %}
+
+{% block title %}
+Upgrade Önerisi - {{ employee.full_name }}
+{% endblock %}
+
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-5">
+
+    <div>
+
+        <h1 class="fs-3 fw-bold mb-1">
+            Upgrade Önerisi
+        </h1>
+
+        <div class="text-muted">
+            {{ period.name }}
+        </div>
+
+    </div>
+
+    <a
+        href="{% url 'performance:period_upgrade_recommendation_list' period.pk %}"
+        class="btn btn-light"
+    >
+        <i class="bi bi-arrow-left me-1"></i>
+        Önerilere Dön
+    </a>
+
+</div>
+
+
+<!-- Personel / karar -->
+
+<div class="card mb-5">
+
+    <div class="card-body">
+
+        <div class="d-flex justify-content-between align-items-center">
+
+            <div>
+
+                <a
+                    href="{% url 'employees:employee_detail' employee.pk %}"
+                    class="fs-3 fw-bold text-gray-900 text-hover-primary"
+                >
+                    {{ employee.full_name }}
+                </a>
+
+                <div class="text-muted mt-1">
+                    {{ recommendation.job_role.name }}
+                </div>
+
+            </div>
+
+
+            <div class="text-end">
+
+                {% if recommendation.status == "STRONG" %}
+
+                    <span class="badge badge-light-success fs-6">
+                        Güçlü Upgrade Adayı
+                    </span>
+
+                {% elif recommendation.status == "CANDIDATE" %}
+
+                    <span class="badge badge-light-primary fs-6">
+                        Upgrade Adayı
+                    </span>
+
+                {% elif recommendation.status == "WATCH" %}
+
+                    <span class="badge badge-light-warning fs-6">
+                        İzlenmeli
+                    </span>
+
+                {% else %}
+
+                    <span class="badge badge-light-danger fs-6">
+                        Yetersiz Veri
+                    </span>
+
+                {% endif %}
+
+
+                <div class="fs-2 fw-bold mt-3">
+                    {{ recommendation.current_level.name }}
+
+                    <i class="bi bi-arrow-right mx-2"></i>
+
+                    <span class="text-primary">
+                        {{ recommendation.recommended_level.name }}
+                    </span>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<div class="row g-5 mb-5">
+
+    <div class="col-md-6 col-xl-3">
+
+        <div class="card h-100">
+
+            <div class="card-body">
+
+                <div class="text-muted">
+                    Son Dönem Sayısı
+                </div>
+
+                <div class="fs-2 fw-bold mt-2">
+                    {{ explanation.period_count|default:0 }}
+                    /
+                    {{ recommendation.rule.min_period_count }}
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-md-6 col-xl-3">
+
+        <div class="card h-100">
+
+            <div class="card-body">
+
+                <div class="text-muted">
+                    Ortalama Skor
+                </div>
+
+                <div class="fs-2 fw-bold mt-2">
+
+                    {% if explanation.average_score != None %}
+                        {{ explanation.average_score|floatformat:2 }}
+                    {% else %}
+                        -
+                    {% endif %}
+
+                </div>
+
+                <div class="text-muted fs-8 mt-1">
+                    Gerekli:
+                    {{ recommendation.rule.min_average_score }}
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-md-6 col-xl-3">
+
+        <div class="card h-100">
+
+            <div class="card-body">
+
+                <div class="text-muted">
+                    Benzer Personel
+                </div>
+
+                <div class="fs-2 fw-bold mt-2">
+                    {{ explanation.peer_count|default:0 }}
+                </div>
+
+                <div class="text-muted fs-8 mt-1">
+                    Minimum:
+                    {{ recommendation.rule.min_peer_count }}
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-md-6 col-xl-3">
+
+        <div class="card h-100">
+
+            <div class="card-body">
+
+                <div class="text-muted">
+                    Öneri Puanı
+                </div>
+
+                <div class="fs-2 fw-bold text-primary mt-2">
+                    {{ recommendation.recommendation_score|floatformat:2 }}
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- Neden? -->
+
+<div class="card mb-5">
+
+    <div class="card-header">
+
+        <div class="card-title">
+            <h3 class="fw-bold m-0">
+                Öneri Gerekçesi
+            </h3>
+        </div>
+
+    </div>
+
+
+    <div class="card-body">
+
+        <div class="d-flex justify-content-between py-3 border-bottom">
+
+            <span>
+                Yeterli dönem geçmişi
+            </span>
+
+            {% if explanation.period_count >= recommendation.rule.min_period_count %}
+                <span class="badge badge-light-success">Uygun</span>
+            {% else %}
+                <span class="badge badge-light-danger">Yetersiz</span>
+            {% endif %}
+
+        </div>
+
+
+        <div class="d-flex justify-content-between py-3 border-bottom">
+
+            <span>
+                Ortalama performans
+            </span>
+
+            {% if explanation.performance_passed %}
+                <span class="badge badge-light-success">Uygun</span>
+            {% else %}
+                <span class="badge badge-light-warning">Uygun Değil</span>
+            {% endif %}
+
+        </div>
+
+
+        <div class="d-flex justify-content-between py-3 border-bottom">
+
+            <span>
+                Eğitim
+            </span>
+
+            <strong>
+                {{ explanation.education|default:"-" }}
+            </strong>
+
+        </div>
+
+
+        <div class="d-flex justify-content-between py-3 border-bottom">
+
+            <span>
+                Profesyonel Tecrübe
+            </span>
+
+            <strong>
+
+                {% if explanation.professional_years != None %}
+                    {{ explanation.professional_years|floatformat:1 }} yıl
+                {% else %}
+                    -
+                {% endif %}
+
+            </strong>
+
+        </div>
+
+
+        <div class="d-flex justify-content-between py-3 border-bottom">
+
+            <span>
+                Üst seviyedeki benzer personel
+            </span>
+
+            <strong>
+                {{ explanation.higher_level_peer_count|default:0 }}
+                /
+                {{ explanation.peer_count|default:0 }}
+            </strong>
+
+        </div>
+
+
+        <div class="d-flex justify-content-between py-3">
+
+            <span>
+                Benzerlerin üst seviyede olma oranı
+            </span>
+
+            <strong>
+
+                {% if explanation.higher_level_peer_ratio != None %}
+                    %{{ explanation.higher_level_peer_ratio|floatformat:1 }}
+                {% else %}
+                    -
+                {% endif %}
+
+            </strong>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- Geçmiş skorlar -->
+
+<div class="card mb-5">
+
+    <div class="card-header">
+
+        <div class="card-title">
+
+            <h3 class="fw-bold m-0">
+                Performans Geçmişi
+            </h3>
+
+        </div>
+
+    </div>
+
+
+    <div class="card-body">
+
+        <div class="table-responsive">
+
+            <table class="table table-row-bordered align-middle">
+
+                <thead>
+
+                    <tr class="fw-bold">
+
+                        <th>
+                            Dönem
+                        </th>
+
+                        <th class="text-end">
+                            Nihai Skor
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for item in score_periods %}
+
+                        <tr>
+
+                            <td>
+                                {{ item.period }}
+                            </td>
+
+                            <td class="text-end fw-bold">
+                                {{ item.score|floatformat:2 }}
+                            </td>
+
+                        </tr>
+
+                    {% empty %}
+
+                        <tr>
+
+                            <td
+                                colspan="2"
+                                class="text-center text-muted py-5"
+                            >
+                                Yeterli dönem verisi bulunmuyor.
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- Akranlar -->
+
+<div class="card">
+
+    <div class="card-header">
+
+        <div class="card-title">
+
+            <h3 class="fw-bold m-0">
+                Benzer Personel Karşılaştırması
+            </h3>
+
+        </div>
+
+    </div>
+
+
+    <div class="card-body">
+
+        <div class="table-responsive">
+
+            <table class="table table-row-bordered align-middle">
+
+                <thead>
+
+                    <tr class="fw-bold">
+
+                        <th>
+                            Personel
+                        </th>
+
+                        <th class="text-center">
+                            Seviye
+                        </th>
+
+                        <th class="text-center">
+                            Tecrübe
+                        </th>
+
+                        <th class="text-end">
+                            Son Skor
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for peer in peers %}
+
+                        <tr>
+
+                            <td>
+                                {{ peer.employee_name }}
+                            </td>
+
+                            <td class="text-center">
+                                {{ peer.level }}
+                            </td>
+
+                            <td class="text-center">
+                                {{ peer.experience_years|floatformat:1 }}
+                                yıl
+                            </td>
+
+                            <td class="text-end">
+
+                                {% if peer.latest_score != None %}
+                                    {{ peer.latest_score|floatformat:2 }}
+                                {% else %}
+                                    -
+                                {% endif %}
+
+                            </td>
+
+                        </tr>
+
+                    {% empty %}
+
+                        <tr>
+
+                            <td
+                                colspan="4"
+                                class="text-center text-muted py-5"
+                            >
+                                Karşılaştırmaya uygun benzer
+                                personel bulunamadı.
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
