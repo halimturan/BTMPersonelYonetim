@@ -14,9 +14,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
         user = self.request.user
-
         employee = getattr(user, "employee", None)
 
         # ----------------------------------
@@ -241,7 +239,6 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             today = timezone.localdate()
 
             if active_period.evaluation_end_date and active_period.evaluation_end_date >= today:
-
                 days_left = (active_period.evaluation_end_date - today).days
 
                 if days_left <= 7:

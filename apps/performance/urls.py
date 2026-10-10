@@ -1,5 +1,4 @@
 from django.urls import path
-
 from apps.performance.views import (
     EvaluationPeriodCreateView,
     EvaluationPeriodDetailView,

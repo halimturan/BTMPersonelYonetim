@@ -79,7 +79,7 @@ Personeller
                     <!--begin::tr-->
                     <tr class="fw-semibold fs-6 text-gray-800 border-bottom border-gray-200">
                         <th>Personel</th>
-                        <th>Personel No</th>
+                        <th>Sicil No</th>
                         <th>Ünvan</th>
                         <th>İş Kolu</th>
                         <th>Birim</th>
@@ -98,7 +98,7 @@ Personeller
                                 <!--begin:: Avatar -->
                                 <div class="symbol symbol-circle symbol-50px overflow-hidden me-3">
                                     <a href="/metronic8/demo1/?page=apps/user-management/users/view">
-                                        <div class="symbol-label fs-3 bg-light-primary text-primary">
+                                        <div class="symbol-label fs-3 {% if employee.gender == 'erkek' %} bg-light-primary text-primary {% else %} bg-light-danger text-danger {% endif %}">
                                             {{ employee.first_name|first }}
                                             {{ employee.last_name|first }}
                                         </div>
