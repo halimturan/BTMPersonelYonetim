@@ -10,9 +10,7 @@ from apps.performance.models import (EvaluationPeriod, EvaluationProfile, Evalua
 )
 
 
-class PerformanceTemplateCriterionInlineFormSet(
-    BaseInlineFormSet
-):
+class PerformanceTemplateCriterionInlineFormSet(BaseInlineFormSet):
     def clean(self):
         super().clean()
 
@@ -147,97 +145,32 @@ class PerformanceEvaluationReviewerInline(admin.TabularInline):
 @admin.register(PerformanceEvaluation)
 class PerformanceEvaluationAdmin(admin.ModelAdmin):
     list_display = (
-        "employee",
-        "period",
-        "template",
-        "reviewer_scheme",
-        "status",
-        "final_performance_score",
-        "completed_at",
+        "employee", "period", "template", "reviewer_scheme", "status", "final_performance_score", "completed_at",
     )
+    list_filter = ("period", "status", "template",)
+    search_fields = ("employee__personnel_no", "employee__first_name", "employee__last_name",)
+    readonly_fields = ("final_performance_score", "completed_at", "created_at", "updated_at")
 
-    list_filter = (
-        "period",
-        "status",
-        "template",
-    )
-
-    search_fields = (
-        "employee__personnel_no",
-        "employee__first_name",
-        "employee__last_name",
-    )
-
-    readonly_fields = (
-        "final_performance_score",
-        "completed_at",
-        "created_at",
-        "updated_at",
-    )
-
-    inlines = (
-        PerformanceEvaluationReviewerInline,
-    )
+    inlines = (PerformanceEvaluationReviewerInline,)
 
 
-class PerformanceCriterionScoreInline(
-    admin.TabularInline
-):
+class PerformanceCriterionScoreInline(admin.TabularInline):
     model = PerformanceCriterionScore
     extra = 0
-
-    autocomplete_fields = (
-        "criterion",
-    )
-
-    fields = (
-        "criterion",
-        "score",
-        "max_score",
-        "comment",
-    )
+    fields = ("criterion", "score", "max_score", "comment")
 
 
 @admin.register(PerformanceEvaluationReviewer)
-class PerformanceEvaluationReviewerAdmin(
-    admin.ModelAdmin
-):
+class PerformanceEvaluationReviewerAdmin(admin.ModelAdmin):
     list_display = (
-        "evaluation",
-        "reviewer_employee",
-        "reviewer_role",
-        "weight",
-        "raw_score",
-        "weighted_score",
-        "submitted_at",
+        "evaluation", "reviewer_employee", "reviewer_role", "weight", "raw_score", "weighted_score", "submitted_at",
     )
-
-    list_filter = (
-        "reviewer_role",
-        "submitted_at",
-    )
-
+    list_filter = ("reviewer_role", "submitted_at")
     search_fields = (
         "evaluation__employee__first_name",
         "evaluation__employee__last_name",
         "reviewer_employee__first_name",
         "reviewer_employee__last_name",
     )
-
-    autocomplete_fields = (
-        "evaluation",
-        "reviewer_employee",
-        "reviewer_role",
-    )
-
-    readonly_fields = (
-        "raw_score",
-        "weighted_score",
-        "submitted_at",
-        "created_at",
-        "updated_at",
-    )
-
-    inlines = (
-        PerformanceCriterionScoreInline,
-    )
+    readonly_fields = ("raw_score", "weighted_score", "submitted_at", "created_at", "updated_at")
+    inlines = (PerformanceCriterionScoreInline,)
