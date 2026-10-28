@@ -1,7 +1,4 @@
-from django.contrib.auth.mixins import (
-    LoginRequiredMixin,
-    PermissionRequiredMixin,
-)
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.db.models import Q
 from django.http import Http404
 from django.utils import timezone
@@ -51,7 +48,6 @@ class EmployeeDetailView(LoginRequiredMixin, PermissionRequiredMixin, DetailView
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
         employee = self.object
 
         # ==================================
@@ -63,7 +59,6 @@ class EmployeeDetailView(LoginRequiredMixin, PermissionRequiredMixin, DetailView
         # ==================================
         # Güncel organizasyon / görev
         # ==================================
-
         current_unit = employee.current_unit
         current_title = employee.current_title
         current_management_level = employee.current_management_level
@@ -74,7 +69,6 @@ class EmployeeDetailView(LoginRequiredMixin, PermissionRequiredMixin, DetailView
         # ==================================
         # Güncel günlük ücret
         # ==================================
-
         current_daily_rate = None
 
         if current_job_role and current_level:
@@ -82,49 +76,25 @@ class EmployeeDetailView(LoginRequiredMixin, PermissionRequiredMixin, DetailView
 
             current_daily_rate = (
                 JobLevelRate.objects
-                .filter(
-                    job_role=current_job_role,
-                    level=current_level,
-                    active=True,
-                    valid_from__lte=today,
-                )
-                .filter(
-                    Q(valid_to__isnull=True)
-                    | Q(
-                        valid_to__gte=today
-                    )
-                )
-                .order_by(
-                    "-valid_from",
-                    "-pk",
-                )
+                .filter(job_role=current_job_role, level=current_level, active=True, valid_from__lte=today)
+                .filter(Q(valid_to__isnull=True) | Q(valid_to__gte=today))
+                .order_by("-valid_from", "-pk")
                 .first()
             )
 
         # ==================================
         # Son upgrade
         # ==================================
-
         last_upgrade = (
             employee.upgrades
-            .select_related(
-                "from_job_role",
-                "to_job_role",
-                "from_level",
-                "to_level",
-                "period_score",
-            )
-            .order_by(
-                "-effective_date",
-                "-pk",
-            )
+            .select_related("from_job_role", "to_job_role", "from_level", "to_level", "period_score")
+            .order_by("-effective_date", "-pk")
             .first()
         )
 
         # ==================================
         # Upgrade geçmişi
         # ==================================
-
         upgrades = (
             employee.upgrades
             .select_related("from_job_role", "to_job_role", "from_level", "to_level", "period_score")
@@ -134,7 +104,6 @@ class EmployeeDetailView(LoginRequiredMixin, PermissionRequiredMixin, DetailView
         # ==================================
         # Context
         # ==================================
-
         context.update({
 
             # ------------------------------

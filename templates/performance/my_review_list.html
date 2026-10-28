@@ -86,7 +86,7 @@ Değerlendirmelerim
                                 <td>
                                     <div class="d-flex align-items-center">
                                         <div class="symbol symbol-40px symbol-circle me-2">
-                                            <span class="symbol-label fs-5 fw-semibold text-primary bg-light-primary">
+                                            <span class="symbol-label fs-5 fw-semibold {% if review.evaluation.employee.gender == 'erkek' %} bg-light-primary text-primary {% else %} bg-light-danger text-danger {% endif %}">
                                                 {{ review.evaluation.employee.first_name|first }}
                                                 {{ review.evaluation.employee.last_name|first }}
                                             </span>

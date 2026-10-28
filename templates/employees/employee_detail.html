@@ -818,6 +818,12 @@
                             {% endfor %}
                         </div>
                         <!--end::row-->
+                        <div class="d-flex justify-content-end mt-5">
+                            <a href="{% url 'performance:period_score_detail' score.id score.period.id %}" class="d-flex align-items-center">
+                                Detaya git
+                                <i class="ki-duotone ki-black-right ms-1 fs-4 text-primary"></i>
+                            </a>
+                        </div>
                     </div>
                     <!--end::row-->
                 </div>
