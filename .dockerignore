@@ -1,0 +1,12 @@
+venv/
+.venv/
+__pycache__/
+*.pyc
+.env
+.git/
+.idea/
+db_new.sqlite3
+*.sqlite3
+migration_data.json
+staticfiles/
+media/

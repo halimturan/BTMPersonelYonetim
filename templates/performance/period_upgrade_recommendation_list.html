@@ -7,155 +7,136 @@
 
 {% block content %}
 
-<div class="d-flex justify-content-between align-items-center mb-5">
-
-    <div>
-
-        <h1 class="fs-3 fw-bold mb-1">
-            Upgrade Önerileri
-        </h1>
-
-        <div class="text-muted">
-            {{ period.name }}
+    <div class="d-flex justify-content-between align-items-center mb-5">
+    
+        <div>
+    
+            <h1 class="fs-3 fw-bold mb-1">
+                Upgrade Önerileri
+            </h1>
+    
+            <div class="text-muted">
+                {{ period.name }}
+            </div>
+    
         </div>
-
-    </div>
-
-    <a
-        href="{% url 'performance:period_detail' period.pk %}"
-        class="btn btn-light"
-    >
-        <i class="bi bi-arrow-left me-1"></i>
-        Döneme Dön
-    </a>
-
-</div>
-
-
-<!-- Özet -->
-
-<div class="row g-5 mb-5">
-
-    <div class="col-md-6 col-xl">
-
-        <a
-            href="{% url 'performance:period_upgrade_recommendation_list' period.pk %}"
-            class="card h-100 text-decoration-none"
-        >
-
-            <div class="card-body">
-
-                <div class="text-muted">
-                    Toplam
-                </div>
-
-                <div class="fs-2 fw-bold mt-2">
-                    {{ total_count }}
-                </div>
-
-            </div>
-
+    
+        <a href="{% url 'performance:period_detail' period.pk %}" class="btn btn-light">
+            <i class="bi bi-arrow-left me-1"></i>
+            Döneme Dön
         </a>
-
+    
     </div>
 
 
-    <div class="col-md-6 col-xl">
-
-        <a
-            href="?status=INSUFFICIENT_DATA"
-            class="card h-100 text-decoration-none"
-        >
-
-            <div class="card-body">
-
-                <div class="text-muted">
-                    Yetersiz Veri
+    <!-- Özet -->
+    <div class="row g-5 mb-5">
+    
+        <div class="col-md-6 col-xl">
+    
+            <a href="{% url 'performance:period_upgrade_recommendation_list' period.pk %}" class="card h-100 text-decoration-none">
+    
+                <div class="card-body">
+    
+                    <div class="text-muted">
+                        Toplam
+                    </div>
+    
+                    <div class="fs-2 fw-bold mt-2">
+                        {{ total_count }}
+                    </div>
+    
                 </div>
-
-                <div class="fs-2 fw-bold mt-2">
-                    {{ insufficient_count }}
+    
+            </a>
+    
+        </div>
+    
+    
+        <div class="col-md-6 col-xl">
+    
+            <a href="?status=INSUFFICIENT_DATA" class="card h-100 text-decoration-none">
+    
+                <div class="card-body">
+    
+                    <div class="text-muted">
+                        Yetersiz Veri
+                    </div>
+    
+                    <div class="fs-2 fw-bold mt-2">
+                        {{ insufficient_count }}
+                    </div>
+    
                 </div>
-
-            </div>
-
-        </a>
-
+    
+            </a>
+    
+        </div>
+    
+    
+        <div class="col-md-6 col-xl">
+    
+            <a href="?status=WATCH" class="card h-100 text-decoration-none">
+    
+                <div class="card-body">
+    
+                    <div class="text-muted">
+                        İzlenmeli
+                    </div>
+    
+                    <div class="fs-2 fw-bold mt-2">
+                        {{ watch_count }}
+                    </div>
+    
+                </div>
+    
+            </a>
+    
+        </div>
+    
+    
+        <div class="col-md-6 col-xl">
+    
+            <a href="?status=CANDIDATE" class="card h-100 text-decoration-none">
+    
+                <div class="card-body">
+    
+                    <div class="text-muted">
+                        Upgrade Adayı
+                    </div>
+    
+                    <div class="fs-2 fw-bold mt-2">
+                        {{ candidate_count }}
+                    </div>
+    
+                </div>
+    
+            </a>
+    
+        </div>
+    
+    
+        <div class="col-md-6 col-xl">
+    
+            <a href="?status=STRONG" class="card h-100 text-decoration-none">
+    
+                <div class="card-body">
+    
+                    <div class="text-muted">
+                        Güçlü Aday
+                    </div>
+    
+                    <div class="fs-2 fw-bold mt-2">
+                        {{ strong_count }}
+                    </div>
+    
+                </div>
+    
+            </a>
+    
+        </div>
+    
     </div>
-
-
-    <div class="col-md-6 col-xl">
-
-        <a
-            href="?status=WATCH"
-            class="card h-100 text-decoration-none"
-        >
-
-            <div class="card-body">
-
-                <div class="text-muted">
-                    İzlenmeli
-                </div>
-
-                <div class="fs-2 fw-bold mt-2">
-                    {{ watch_count }}
-                </div>
-
-            </div>
-
-        </a>
-
-    </div>
-
-
-    <div class="col-md-6 col-xl">
-
-        <a
-            href="?status=CANDIDATE"
-            class="card h-100 text-decoration-none"
-        >
-
-            <div class="card-body">
-
-                <div class="text-muted">
-                    Upgrade Adayı
-                </div>
-
-                <div class="fs-2 fw-bold mt-2">
-                    {{ candidate_count }}
-                </div>
-
-            </div>
-
-        </a>
-
-    </div>
-
-
-    <div class="col-md-6 col-xl">
-
-        <a
-            href="?status=STRONG"
-            class="card h-100 text-decoration-none"
-        >
-
-            <div class="card-body">
-
-                <div class="text-muted">
-                    Güçlü Aday
-                </div>
-
-                <div class="fs-2 fw-bold mt-2">
-                    {{ strong_count }}
-                </div>
-
-            </div>
-
-        </a>
-
-    </div>
-
-</div>
 
 <div class="card mb-5">
 
@@ -178,13 +159,7 @@
 
             <div class="col-md-4">
 
-                <div
-                    class="border
-                           border-gray-300
-                           rounded
-                           p-5
-                           h-100"
-                >
+                <div class="border border-gray-300 rounded p-5 h-100">
 
                     <div class="text-muted">
                         Skoru Hesaplanan
@@ -206,30 +181,18 @@
 
             <div class="col-md-4">
 
-                <div
-                    class="border
-                           border-gray-300
-                           rounded
-                           p-5
-                           h-100"
-                >
+                <div class="border border-gray-300 rounded p-5 h-100">
 
                     <div class="text-muted">
                         Analiz Edilen
                     </div>
 
-                    <div
-                        class="fs-2
-                               fw-bold
-                               text-primary
-                               mt-2"
-                    >
+                    <div class="fs-2 fw-bold text-primary mt-2">
                         {{ analyzed_count }}
                     </div>
 
                     <div class="text-muted fs-8 mt-2">
-                        Upgrade değerlendirmesine
-                        alınan personel
+                        Upgrade değerlendirmesine alınan personel
                     </div>
 
                 </div>
@@ -239,23 +202,13 @@
 
             <div class="col-md-4">
 
-                <div
-                    class="border
-                           border-gray-300
-                           rounded
-                           p-5
-                           h-100"
-                >
+                <div class="border border-gray-300 rounded p-5 h-100">
 
                     <div class="text-muted">
                         Analiz Dışı
                     </div>
 
-                    <div
-                        class="fs-2
-                               fw-bold
-                               mt-2"
-                    >
+                    <div class="fs-2 fw-bold mt-2">
                         {{ skipped_count }}
                     </div>
 
@@ -263,10 +216,7 @@
 
                         {% if max_level_count %}
 
-                            {{ max_level_count }}
-                            personel zaten
-
-                            {% if max_level %}
+                            {{ max_level_count }} personel zaten {% if max_level %}
                                 {{ max_level.name }}
                             {% endif %}
 
@@ -275,11 +225,7 @@
                         {% endif %}
 
                         {% if other_skipped_count %}
-
-                            {{ other_skipped_count }}
-                            personel başka bir nedenle
-                            analiz dışı.
-
+                            {{ other_skipped_count }} personel başka bir nedenle analiz dışı.
                         {% endif %}
 
                     </div>
@@ -314,32 +260,16 @@
 
         <div class="table-responsive">
 
-            <table
-                class="table
-                       table-row-bordered
-                       table-row-gray-200
-                       align-middle"
-            >
+            <table class="table table-row-bordered table-row-gray-200 align-middle">
 
                 <thead>
 
                     <tr class="fw-bold text-gray-800">
 
-                        <th>
-                            Personel
-                        </th>
-
-                        <th>
-                            İş Kolu
-                        </th>
-
-                        <th class="text-center">
-                            Mevcut
-                        </th>
-
-                        <th class="text-center">
-                            Önerilen
-                        </th>
+                        <th>Personel</th>
+                        <th>İş Kolu</th>
+                        <th class="text-center">Mevcut</th>
+                        <th class="text-center">Önerilen</th>
 
                         <th class="text-center">
                             Dönem
@@ -378,10 +308,7 @@
 
                             <td>
 
-                                <a
-                                    href="{% url 'employees:employee_detail' recommendation.employee.pk %}"
-                                    class="fw-bold text-gray-900 text-hover-primary"
-                                >
+                                <a href="{% url 'employees:employee_detail' recommendation.employee.pk %}" class="fw-bold text-gray-900 text-hover-primary">
                                     {{ recommendation.employee.full_name }}
                                 </a>
 
@@ -484,10 +411,7 @@
 
                             <td class="text-end">
 
-                                <a
-                                    href="{% url 'performance:period_upgrade_recommendation_detail' period.pk recommendation.pk %}"
-                                    class="btn btn-sm btn-light-primary"
-                                >
+                                <a href="{% url 'performance:period_upgrade_recommendation_detail' period.pk recommendation.pk %}" class="btn btn-sm btn-light-primary">
                                     Detay
                                 </a>
 
@@ -499,12 +423,8 @@
 
                         <tr>
 
-                            <td
-                                colspan="10"
-                                class="text-center text-muted py-10"
-                            >
-                                Bu dönem için upgrade önerisi
-                                henüz oluşturulmamış.
+                            <td colspan="10" class="text-center text-muted py-10">
+                                Bu dönem için upgrade önerisi henüz oluşturulmamış.
                             </td>
 
                         </tr>
@@ -532,10 +452,7 @@
 
             <li class="page-item">
 
-                <a
-                    class="page-link"
-                    href="?page={{ page_obj.previous_page_number }}&status={{ request.GET.status }}"
-                >
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}&status={{ request.GET.status }}">
                     Önceki
                 </a>
 
@@ -546,17 +463,9 @@
 
         {% for i in paginator.page_range %}
 
-            <li
-                class="page-item
-                {% if page_obj.number == i %}
-                    active
-                {% endif %}"
-            >
+            <li class="page-item {% if page_obj.number == i %} active {% endif %}">
 
-                <a
-                    class="page-link"
-                    href="?page={{ i }}&status={{ request.GET.status }}"
-                >
+                <a class="page-link" href="?page={{ i }}&status={{ request.GET.status }}">
                     {{ i }}
                 </a>
 
@@ -569,10 +478,7 @@
 
             <li class="page-item">
 
-                <a
-                    class="page-link"
-                    href="?page={{ page_obj.next_page_number }}&status={{ request.GET.status }}"
-                >
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}&status={{ request.GET.status }}">
                     Sonraki
                 </a>
 
