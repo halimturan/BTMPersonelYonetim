@@ -16,7 +16,12 @@ services:
       retries: 10
 
   web:
-    build: .
+    build:
+      context: .
+      args:
+        HTTP_PROXY: http://proxy3.ibb.gov.tr:8080
+        HTTPS_PROXY: http://proxy3.ibb.gov.tr:8080
+        NO_PROXY: localhost,127.0.0.1,db,web,nginx
     restart: unless-stopped
     env_file:
       - .env
